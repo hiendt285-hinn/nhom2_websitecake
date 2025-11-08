@@ -12,7 +12,7 @@ if (!isset($_SESSION)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Savor Cake - BST Women's Day</title> <!-- Title từ HTML, có thể thay đổi động nếu cần -->
-    <link rel="stylesheet" href="style.css"> <!-- Link CSS từ HTML -->
+    <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>"> <!-- Link CSS với cache-busting -->
 </head>
 <body>
 
