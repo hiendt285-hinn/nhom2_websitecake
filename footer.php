@@ -26,9 +26,6 @@
     </div>
 </footer>
 
-<footer>
-    <p>© <?php echo date("Y"); ?> Sweet Cake | Thiết kế bởi bạn 🍰</p> <!-- Sử dụng date("Y") cho năm động -->
-</footer>
 
 <!-- Link đến file JS nếu cần -->
 <script src="assets/script.js"></script> <!-- Nếu có JS, thêm vào đây -->

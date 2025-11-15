@@ -65,10 +65,10 @@ include 'header.php';
       <h4>Tiramisu Matcha 250g</h4>
       <p>Bánh Tiramisu Matcha, bản giao hưởng tinh tế giữa lớp bánh lady finger nhúng nước trà xanh đậm vị kết hợp cùng rượu dark rum Captain Morgan, xen kẽ với lớp kem tiramisu mượt mà, phô mai mascarpone, phía trên phủ lớp bột matcha Haru Nhật Bản, mang đến hậu vị thanh mát, nhẹ nhàng nhưng đầy lôi cuốn</p>
       <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-      <p class="price">Giá: <strong>189.000 ₫</strong></p>
+      <p class="price">189.000₫</p>
       <div class="actions">
-        <button class="btn-order">Đặt ngay</button>
-        <button class="btn-cart">🛒</button>
+        <button class="btn-order">Xem chi tiết</button>
+        <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
       </div>
     </div>
 
@@ -77,10 +77,10 @@ include 'header.php';
       <h4>Tiramisu Classic 250g</h4>
       <p>Bánh Tiramisu Classic là sự kết hợp hài hòa giữa lớp bánh lady finger thấm đẫm cà phê và rượu dark rum Captain Morgan, xen kẽ với lớp kem tiramisu mượt mà làm từ trứng gà, phô mai mascarpone chuẩn Ý</p>
       <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-      <p class="price">Giá: <strong>169.000 ₫</strong></p>
+      <p class="price">169.000₫</p>
       <div class="actions">
         <button class="btn-order">Đặt ngay</button>
-        <button class="btn-cart">🛒</button>
+        <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
       </div>
     </div>
 
@@ -89,10 +89,10 @@ include 'header.php';
       <h4>Choco Dream Cake 315g</h4>
       <p>Choco Dream Cake là bản hòa tấu ngọt ngào của 5 tầng hương vị: cốt bánh chocolate ẩm mịn thấm đẫm nước cacao và rượu dark rum Captain Morgan, xen kẽ lớp caramel giòn cùng hạt óc chó và hạnh nhân, mousse chocolate mượt mà và ganache đậm vị. Phía trên là lớp chocolate nguyên chất phủ nhẹ bột cacao cao cấp – dùng thìa đập vỡ và xắn một miếng từ đáy lên để cảm nhận sự bùng nổ của từng tầng hương vị</p>
       <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
-      <p class="price">Giá: <strong>259.000 ₫</strong></p>
+      <p class="price">259.000₫</p>
       <div class="actions">
         <button class="btn-order">Đặt ngay</button>
-        <button class="btn-cart">🛒</button>
+        <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
       </div>
     </div>
 
@@ -104,7 +104,7 @@ include 'header.php';
       <p class="price">Giá: <strong>259.000 ₫</strong></p>
       <div class="actions">
         <button class="btn-order">Đặt ngay</button>
-        <button class="btn-cart">🛒</button>
+        <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
       </div>
     </div>
   </div>
@@ -132,7 +132,7 @@ include 'header.php';
     <h4>Bánh red velvet sữa chua việt quất</h4>
     <p>Bánh kem cốt red velvet tròn, kem sữa chua, bên trên trang trí 3 quả việt quất.</p>
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-    <p class="price">Giá: <strong>189.000 ₫</strong></p>
+    <p class="price">189.000₫</p>
     <div class="actions">
       <button class="btn-order">Đặt ngay</button>
       <button class="btn-cart">🛒</button>
@@ -144,7 +144,7 @@ include 'header.php';
     <h4>Bánh kem bơ xoài việt quất</h4>
     <p>Cốt vani và kem bơ, trang trí thêm hoa quả tươi mát gồm xoài và việt quất trên mặt bánh, xen kẽ các bông kem bơ béo ngậy.</p>
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-    <p class="price">Giá: <strong>169.000 ₫</strong></p>
+    <p class="price">169.000₫</p>
     <div class="actions">
       <button class="btn-order">Đặt ngay</button>
       <button class="btn-cart">🛒</button>
@@ -156,7 +156,7 @@ include 'header.php';
     <h4>Triple choco cake</h4>
     <p>Bánh 3 lần vị socola: cốt bánh socola, kem tươi vị socola, trang trí socola chip.</p>
     <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
-    <p class="price">Giá: <strong>150.000 ₫</strong></p>
+    <p class="price">150.000₫</p>
     <div class="actions">
       <button class="btn-order">Đặt ngay</button>
       <button class="btn-cart">🛒</button>
@@ -186,14 +186,13 @@ include 'header.php';
 </section>
 
 <h3 class="box-subtitle">| Bánh lạnh Mousse</h3>
-
 <div class="product-grid">
   <div class="product-card">
     <img src="images/mousse-sua-chua-viet-quat.webp" alt="Mousse sữa chua việt quất">
     <h4>Mousse sữa chua việt quất</h4>
     <p>Cốt vani xen kẽ các tầng bánh. Tầng dưới cùng là lớp mousse việt quất, tiếp theo là tầng mousse sữa chua và trên cùng là lớp thạch gelatin việt quất. Trang trí bằng việt quất, dâu tươi Đà Lạt, socola trắng và lá hương thảo</p>
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-    <p class="price">Giá: <strong>220.000 ₫</strong></p>
+    <p class="price">220.000₫</p>
     <div class="actions">
       <button class="btn-order">Đặt ngay</button>
       <button class="btn-cart">🛒</button>
@@ -217,7 +216,7 @@ include 'header.php';
     <h4>Mousse bơ sữa dừa</h4>
     <p>Chất bánh mousse mềm, mịn, ngọt bùi, kết hợp với 2 lớp mousse thơm ngậy của bơ và sữa dừa, bồng bềnh nhẹ nhàng như tan trong miệng. Trang trí thêm hoa quả bên trên, cùng một bông hoa nhỏ xinh ở giữa.</p>
     <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
-    <p class="price">Giá: <strong>230.000 ₫</strong></p>
+    <p class="price">230.000₫</p>
     <div class="actions">
       <button class="btn-order">Đặt ngay</button>
       <button class="btn-cart">🛒</button>

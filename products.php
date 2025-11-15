@@ -101,7 +101,7 @@ $cat_result = $conn->query($cat_sql);
             flex-wrap: wrap;
             gap: 15px;
             margin-bottom: 30px;
-            align-items: center;
+            align-items: end;
             background: #f8f5f0;
             padding: 15px;
             border-radius: 12px;
@@ -112,13 +112,17 @@ $cat_result = $conn->query($cat_sql);
             display: flex;
             flex-direction: column;
             gap: 6px;
-            min-width: 180px;
+            flex: 1;
+            min-width: 200px;
         }
 
         .filter-group label {
             font-weight: 600;
             color: #5D4037;
             font-size: 14px;
+            height: 20px;
+            display: flex;
+            align-items: center;
         }
 
         .filter-group select,
@@ -135,7 +139,7 @@ $cat_result = $conn->query($cat_sql);
         }
 
         .btn-search {
-            background: #5D4037;
+            background: #388e3c;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -146,6 +150,9 @@ $cat_result = $conn->query($cat_sql);
             align-items: center;
             gap: 8px;
             transition: 0.3s;
+            height: 40px;
+            min-width: 120px;
+            justify-content: center;
         }
 
         .btn-search:hover {
@@ -154,102 +161,127 @@ $cat_result = $conn->query($cat_sql);
 
         /* === GRID SẢN PHẨM === */
         .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            display: flex;
+            background: #fffaf0;
+            flex-wrap: wrap;
             gap: 25px;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 15px;
             margin-bottom: 40px;
         }
 
         .product-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            text-align: center;
-            position: relative;
+            width: 220px;
+            background-color: #fffaf0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            padding: 12px;
+            text-align: left;
+            transition: box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
         }
 
         .product-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            border-color: #d0d0d0;
         }
 
         .product-card img {
             width: 100%;
-            height: 200px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: block;
             object-fit: cover;
-            transition: 0.3s;
-        }
-
-        .product-card:hover img {
-            transform: scale(1.05);
+            height: 180px;
         }
 
         .product-info {
-            padding: 15px;
+            padding: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .product-info h3 {
-            font-size: 16px;
-            color: #333;
-            margin: 8px 0;
+            font-size: 15px;
             font-weight: 600;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            color: #222;
+            margin: 6px 0 4px;
+            line-height: 1.3;
+        }
+
+        .product-info h3 a {
+            color: inherit;
+            text-decoration: none;
         }
 
         .product-category {
-            font-size: 13px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .product-price {
             font-size: 18px;
-            color: #FFCA28;
-            font-weight: bold;
-            margin: 8px 0;
+            font-weight: 700;
+            color: #2e7d32;
+            margin: 8px 0 0;
+            flex-grow: 1;
         }
 
         .product-actions {
             display: flex;
+            justify-content: center;
+            align-items: center;
             gap: 8px;
             margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
         }
 
         .btn-view {
+            background: #4caf50;
+            color: #fff;
+            padding: 0 20px;
             flex: 1;
-            background: #5D4037;
-            color: white;
+            min-width: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+            font-size: 13px;
+            font-weight: 600;
             border: none;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: background-color 0.2s ease;
+            text-decoration: none;
         }
 
         .btn-view:hover {
-            background: #4E342E;
+            background: #388e3c;
         }
 
         .btn-cart {
             background: #FFCA28;
             color: #5D4037;
-            border: none;
             width: 40px;
             height: 40px;
-            border-radius: 8px;
+            padding: 0;
             font-size: 18px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background-color 0.2s ease;
         }
 
         .btn-cart:hover {
@@ -306,8 +338,11 @@ $cat_result = $conn->query($cat_sql);
                 min-width: 100%;
             }
             .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: 20px;
+                flex-direction: column;
+                align-items: center;
+            }
+            .product-card {
+                width: 90%;
             }
         }
     </style>
@@ -373,8 +408,8 @@ $cat_result = $conn->query($cat_sql);
                             <?php echo number_format($row['price'], 0, ',', '.'); ?>₫
                         </div>
                         <div class="product-actions">
-                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                                Xem chi tiết
+                            <a href="checkout.php" class="btn-view">
+                                Đặt hàng
                             </a>
                             <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
                                 <i class="fas fa-cart-plus"></i>
