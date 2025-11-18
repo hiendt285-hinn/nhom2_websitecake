@@ -3,23 +3,30 @@ session_start();
 require_once 'connect.php';
 
 // Kiểm tra đăng nhập
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
 
-$order_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$order_id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
 $user_id = (int)$_SESSION['user_id'];
 
-// Lấy thông tin đơn hàng (mysqli)
+if ($order_id <= 0) {
+    die('ID đơn hàng không hợp lệ.');
+}
+
+// Lấy thông tin đơn hàng
 $order = null;
 $orderSql = "SELECT o.*, u.username FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ? AND o.user_id = ? LIMIT 1";
 if ($stmt = $conn->prepare($orderSql)) {
     $stmt->bind_param('ii', $order_id, $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $order = $result ? $result->fetch_assoc() : null;
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $order = $result ? $result->fetch_assoc() : null;
+    }
     $stmt->close();
+} else {
+    die('Lỗi truy vấn đơn hàng.');
 }
 
 if (!$order) {
@@ -34,15 +41,18 @@ $detailSql = "SELECT oi.product_id, oi.size, oi.flavor, oi.quantity, oi.unit_pri
               WHERE oi.order_id = ?";
 if ($stmt = $conn->prepare($detailSql)) {
     $stmt->bind_param('i', $order_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $items[] = $row;
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        // Ensure fetch_assoc is used correctly and not looping infinitely
+        while ($row = $result->fetch_assoc()) {
+            $items[] = $row;
+        }
     }
     $stmt->close();
+} else {
+    die('Lỗi truy vấn chi tiết đơn hàng.');
 }
 
-// Map trạng thái theo schema csdl.sql: pending, confirmed, shipping, delivered, cancelled
 function status_text($status) {
     $map = [
         'pending' => 'Chờ xử lý',
@@ -51,7 +61,7 @@ function status_text($status) {
         'delivered' => 'Đã giao',
         'cancelled' => 'Đã hủy',
     ];
-    return $map[$status] ?? $status;
+    return $map[$status] ?? htmlspecialchars($status);
 }
 
 function status_color($status) {
@@ -69,26 +79,92 @@ function status_color($status) {
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Chi tiết đơn hàng #<?php echo $order_id; ?></title>
+    <title>Chi tiết đơn hàng #<?php echo htmlspecialchars($order_id); ?></title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f7f7f7; }
-        .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h1 { color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
-        .info { display: flex; justify-content: space-between; margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 6px; }
-        .info div { flex: 1; }
-        .info strong { color: #555; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #4CAF50; color: white; }
-        .muted { color: #666; font-size: 12px; }
-        .total { font-weight: bold; font-size: 18px; text-align: right; color: #2e7d32; }
-        .back-btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #2196F3; color: white; text-decoration: none; border-radius: 4px; }
-        .back-btn:hover { background: #1976D2; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 32px 24px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 24px;
+            color: #1976D2;
+        }
+        .info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .info div {
+            min-width: 220px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+        th, td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: left;
+        }
+        th {
+            background: #f0f4fa;
+            color: #1976D2;
+            font-weight: 600;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .muted {
+            color: #888;
+            font-size: 0.95em;
+        }
+        .total {
+            font-size: 1.2em;
+            text-align: right;
+            margin-bottom: 24px;
+        }
+        .back-btn {
+            display: inline-block;
+            padding: 10px 18px;
+            background: #1976D2;
+            color: #fff;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: #1565c0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px 6px;
+            }
+            .info {
+                flex-direction: column;
+            }
+            table, th, td {
+                font-size: 0.95em;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Chi tiết đơn hàng #<?php echo $order['id']; ?></h1>
+    <h1>Chi tiết đơn hàng #<?php echo htmlspecialchars($order['id']); ?></h1>
 
     <div class="info">
         <div>
