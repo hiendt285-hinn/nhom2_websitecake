@@ -61,7 +61,7 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
     <!-- NAVBAR -->
     <nav class="navbar">
         <div class="logo">
-            <a href="index.php"><img src="images/35-mau-thiet-ke-logo-tiem-banh-dep-5-removebg-preview.png" alt="Logo"></a>
+            <a href="index.php"><img src="../images/35-mau-thiet-ke-logo-tiem-banh-dep-5-removebg-preview.png" alt="Logo"></a>
         </div>
         <ul>
             <li><a href="products.php">Sản phẩm</a></li>

@@ -394,7 +394,7 @@ $cat_result = $conn->query($cat_sql);
             <?php while ($row = $result->fetch_assoc()): ?>
                 <div class="product-card">
                     <a href="product-detail.php?id=<?php echo $row['id']; ?>">
-                        <img src="images/products/<?php echo htmlspecialchars($row['image']); ?>" 
+                        <img src="../images/products/<?php echo htmlspecialchars($row['image']); ?>" 
                              alt="<?php echo htmlspecialchars($row['name']); ?>">
                     </a>
                     <div class="product-info">

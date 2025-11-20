@@ -11,6 +11,7 @@ body {
   background: #fffaf0;
   color: #333;
   overflow-x: hidden;
+  padding-top: 80px;
 }
 
 /* Container */
@@ -86,13 +87,16 @@ body {
   background: #fffaf0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border-radius: 0 0 25px 25px;
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  display: flex; /* Sử dụng flex để sắp xếp ngang hàng */
+  justify-content: space-between; /* Logo + menu bên trái, tìm kiếm bên phải */
+  align-items: center; /* Căn giữa theo chiều dọc */
   
 }
 .navbar {
-  padding: 15px 20px;
+  padding: 15px 40px;
   display: flex;
   gap: 25px;
   align-items: center;
@@ -110,7 +114,7 @@ body {
   color: #ff5f9e;
   font-weight: 600;
   font-size: 16px;
-  transition: 0.3s ease;
+  transition: 0.3s ease;stagewise logout
 }
 .navbar ul li a:hover {
   color: #ff90c2;
@@ -132,7 +136,6 @@ body {
 .search-bar form {
   display: flex;
   gap: 10px;
-  width: min(360px, 100%);
 }
 .search-bar input {
   padding: 8px 15px;
@@ -143,7 +146,7 @@ body {
 }
 .search-bar button {
   background: #ff5f9e;
-  color: #fff;
+  color: white;
   border: none;
   padding: 8px 20px;
   border-radius: 20px;
@@ -507,11 +510,9 @@ body {
 
 .ship-gallery {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   justify-items: center;
-  max-width: 1000px;
-  margin: 0 auto;
 }
 
 .ship-gallery img {
@@ -523,13 +524,6 @@ body {
 
 .ship-gallery img:hover {
   transform: scale(1.03);
-}
-
-/* Responsive cho ship-gallery */
-@media (max-width: 768px) {
-  .ship-gallery {
-    grid-template-columns: 1fr;
-  }
 }
 
 .box-subtitle {

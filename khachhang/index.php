@@ -20,7 +20,7 @@ include 'header.php';
     <a href="products.php" class="btn">Xem BST ngay</a> <!-- Link đến products.php theo gợi ý -->
   </div>
   <div class="hero-imgs">
-    <img src="images/AE2CDC01-6F2C-4BE5-AF72-3C24605224B9.png" alt="Bánh">
+    <img src="../images/AE2CDC01-6F2C-4BE5-AF72-3C24605224B9.png" alt="Bánh">
   </div>
 </section>
 
@@ -61,19 +61,19 @@ include 'header.php';
 
   <div class="product-grid">
     <div class="product-card">
-      <img src="images/tiramisu-matcha-250g.webp" alt="Tiramisu Matcha">
+      <img src="../images/tiramisu-matcha-250g.webp" alt="Tiramisu Matcha">
       <h4>Tiramisu Matcha 250g</h4>
       <p>Bánh Tiramisu Matcha, bản giao hưởng tinh tế giữa lớp bánh lady finger nhúng nước trà xanh đậm vị kết hợp cùng rượu dark rum Captain Morgan, xen kẽ với lớp kem tiramisu mượt mà, phô mai mascarpone, phía trên phủ lớp bột matcha Haru Nhật Bản, mang đến hậu vị thanh mát, nhẹ nhàng nhưng đầy lôi cuốn</p>
       <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
       <p class="price">189.000₫</p>
       <div class="actions">
-        <button class="btn-order">Xem chi tiết</button>
+        <button class="btn-order">Đặt ngay</button>
         <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
       </div>
     </div>
 
     <div class="product-card">
-      <img src="images/tiramisu-classic-250g.webp" alt="Tiramisu Classic">
+      <img src="../images/tiramisu-classic-250g.webp" alt="Tiramisu Classic">
       <h4>Tiramisu Classic 250g</h4>
       <p>Bánh Tiramisu Classic là sự kết hợp hài hòa giữa lớp bánh lady finger thấm đẫm cà phê và rượu dark rum Captain Morgan, xen kẽ với lớp kem tiramisu mượt mà làm từ trứng gà, phô mai mascarpone chuẩn Ý</p>
       <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
@@ -85,7 +85,7 @@ include 'header.php';
     </div>
 
     <div class="product-card">
-      <img src="images/choco-dream-cake.webp" alt="Choco Dream Cake">
+      <img src="../images/choco-dream-cake.webp" alt="Choco Dream Cake">
       <h4>Choco Dream Cake 315g</h4>
       <p>Choco Dream Cake là bản hòa tấu ngọt ngào của 5 tầng hương vị: cốt bánh chocolate ẩm mịn thấm đẫm nước cacao và rượu dark rum Captain Morgan, xen kẽ lớp caramel giòn cùng hạt óc chó và hạnh nhân, mousse chocolate mượt mà và ganache đậm vị. Phía trên là lớp chocolate nguyên chất phủ nhẹ bột cacao cao cấp – dùng thìa đập vỡ và xắn một miếng từ đáy lên để cảm nhận sự bùng nổ của từng tầng hương vị</p>
       <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
@@ -97,7 +97,7 @@ include 'header.php';
     </div>
 
     <div class="product-card">
-      <img src="images/berry-lover-cake-500g-no-cherry.webp" alt="Berry Love">
+      <img src="../images/berry-lover-cake-500g-no-cherry.webp" alt="Berry Love">
       <h4>Berry Love 400g</h4>
       <p>Chiếc bánh là bản tình ca mùa hè gửi đến những tâm hồn yêu trái cây đỏ mọng. Với 5 tầng hương vị đan xen, Berry Lover Cake chinh phục vị giác bằng sự cân bằng tinh tế giữa vị ngọt, vị chua dịu và độ béo mịn hoàn hảo</p>
       <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
@@ -118,9 +118,10 @@ include 'header.php';
   </p>
 
   <div class="ship-gallery">
-    <img src="images/shipperRow1.webp" alt="Shipper giao bánh">
-    <img src="images/shipperCol.webp" alt="Nhân viên giao hàng">
-    <img src="images/shipperRow4.webp" alt="Shipper tại tiệm bánh">
+    <img src="../images/shipperRow1.webp" alt="Shipper giao bánh">
+    <img src="../images/shipperRow4.webp" alt="Shipper tại tiệm bánh">
+    <img src="../images/shipperRow3.webp" alt="Shipper tại tiệm bánh">
+    <img src="../images/shipperRow2 (1).webp" alt="Shipper giao bánh cho khách">
   </div>
 </section>
 
@@ -128,7 +129,7 @@ include 'header.php';
 
 <div class="product-grid">
   <div class="product-card">
-    <img src="images/banh-red-velvet-sua-chua-viet-quat-201023.webp" alt="Bánh red velvet sữa chua việt quất">
+    <img src="../images/banh-red-velvet-sua-chua-viet-quat-201023.webp" alt="Bánh red velvet sữa chua việt quất">
     <h4>Bánh red velvet sữa chua việt quất</h4>
     <p>Bánh kem cốt red velvet tròn, kem sữa chua, bên trên trang trí 3 quả việt quất.</p>
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
@@ -140,7 +141,7 @@ include 'header.php';
   </div>
 
   <div class="product-card">
-    <img src="images/banh-kem-bo-xoai-viet-quat.webp" alt="Bánh kem bơ xoài việt quất">
+    <img src="../images/banh-kem-bo-xoai-viet-quat.webp" alt="Bánh kem bơ xoài việt quất">
     <h4>Bánh kem bơ xoài việt quất</h4>
     <p>Cốt vani và kem bơ, trang trí thêm hoa quả tươi mát gồm xoài và việt quất trên mặt bánh, xen kẽ các bông kem bơ béo ngậy.</p>
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
@@ -152,7 +153,7 @@ include 'header.php';
   </div>
 
   <div class="product-card">
-    <img src="images/banh-kem-triple-choco.webp" alt="Triple choco cake">
+    <img src="../images/banh-kem-triple-choco.webp" alt="Triple choco cake">
     <h4>Triple choco cake</h4>
     <p>Bánh 3 lần vị socola: cốt bánh socola, kem tươi vị socola, trang trí socola chip.</p>
     <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
@@ -168,7 +169,7 @@ include 'header.php';
   <div class="mousse-container">
     <div class="mousse-images">
       <div class="green-circle"></div>
-      <img src="images/z7140806120150_8c57454f6c66ebc70683090fb1ada3d2.jpg" alt="Bánh mousse vàng" class="cake cake3">
+      <img src="../images/z7140806120150_8c57454f6c66ebc70683090fb1ada3d2.jpg" alt="Bánh mousse vàng" class="cake cake3">
     </div>
 
     <div class="mousse-content">
@@ -188,7 +189,7 @@ include 'header.php';
 <h3 class="box-subtitle">| Bánh lạnh Mousse</h3>
 <div class="product-grid">
   <div class="product-card">
-    <img src="images/mousse-sua-chua-viet-quat.webp" alt="Mousse sữa chua việt quất">
+    <img src="../images/mousse-sua-chua-viet-quat.webp" alt="Mousse sữa chua việt quất">
     <h4>Mousse sữa chua việt quất</h4>
     <p>Cốt vani xen kẽ các tầng bánh. Tầng dưới cùng là lớp mousse việt quất, tiếp theo là tầng mousse sữa chua và trên cùng là lớp thạch gelatin việt quất. Trang trí bằng việt quất, dâu tươi Đà Lạt, socola trắng và lá hương thảo</p>
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
@@ -200,7 +201,7 @@ include 'header.php';
   </div>
 
   <div class="product-card">
-    <img src="images/mousse-xoai-original.webp" alt="Mousse Xoài">
+    <img src="../images/mousse-xoai-original.webp" alt="Mousse Xoài">
     <h4>Mousse Xoài</h4>
     <p>Bánh mousse mang đậm hương vị xoài ngọt mát dễ chịu, kem tươi whipping cream kết hợp cùng sữa chua cốt vani, trang trí thêm xoài trên mặt bánh để thêm đậm vị cùng socola</p>
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
@@ -212,7 +213,7 @@ include 'header.php';
   </div>
 
   <div class="product-card">
-    <img src="images/mousse-bo-sua-dua.webp" alt="Mousse bơ sữa dừa">
+    <img src="../images/mousse-bo-sua-dua.webp" alt="Mousse bơ sữa dừa">
     <h4>Mousse bơ sữa dừa</h4>
     <p>Chất bánh mousse mềm, mịn, ngọt bùi, kết hợp với 2 lớp mousse thơm ngậy của bơ và sữa dừa, bồng bềnh nhẹ nhàng như tan trong miệng. Trang trí thêm hoa quả bên trên, cùng một bông hoa nhỏ xinh ở giữa.</p>
     <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
@@ -243,8 +244,8 @@ include 'header.php';
     </div>
 
     <div class="intro-images">
-      <img src="images/B42A1653-CA9F-4F0F-8883-A926AA4EFC7B.png" alt="Cửa hàng Sweet Cake bên ngoài">
-      <img src="images/87576454-E314-493D-A5C4-B98D9CE04B92.png" alt="Không gian bên trong cửa hàng">
+      <img src="../images/B42A1653-CA9F-4F0F-8883-A926AA4EFC7B.png" alt="Cửa hàng Sweet Cake bên ngoài">
+      <img src="../images/87576454-E314-493D-A5C4-B98D9CE04B92.png" alt="Không gian bên trong cửa hàng">
     </div>
   </div>
 </section>
@@ -255,9 +256,9 @@ include 'header.php';
   <h2>Thêm nhân hoa quả</h2>
 
   <div class="fruit-images">
-    <img src="images/nhan_xoai_dua2.webp" alt="Nhân xoài dứa">
-    <img src="images/nhan_xoai_dua3.webp" alt="Bánh nhân hoa quả">
-    <img src="images/nhan_xoai_dua1.webp" alt="Cắt bánh hoa quả">
+    <img src="../images/nhan_xoai_dua2.webp" alt="Nhân xoài dứa">
+    <img src="../images/nhan_xoai_dua3.webp" alt="Bánh nhân hoa quả">
+    <img src="../images/nhan_xoai_dua1.webp" alt="Cắt bánh hoa quả">
   </div>
 
   <div class="fruit-text">
@@ -284,12 +285,12 @@ include 'header.php';
   <h2>Lựa chọn kiểu bánh</h2>
   <div class="cake-type">
     <div class="type-card">
-      <img src="images/quoc-te-gia-dinh-1 (1).webp" alt="Bánh Vẽ">
+      <img src="../images/quoc-te-gia-dinh-1 (1).webp" alt="Bánh Vẽ">
       <p class="type-number">01</p>
       <h3>Bánh Vẽ</h3>
     </div>
     <div class="type-card">
-      <img src="images/quoc-te-gia-dinh-2.webp" alt="Bánh Order">
+      <img src="../images/quoc-te-gia-dinh-2.webp" alt="Bánh Order">
       <p class="type-number">02</p>
       <h3>Bánh Order</h3>
     </div>
@@ -325,15 +326,15 @@ include 'header.php';
   <h2>Lựa chọn size bánh</h2>
   <div class="sizes">
     <div class="size-card">
-      <img src="images/mini-sz.webp" alt="Size mini">
+      <img src="../images/mini-sz.webp" alt="Size mini">
       <p><strong>SIZE MINI</strong><br>13cm x 6cm</p>
     </div>
     <div class="size-card">
-      <img src="images/nho-sz.webp" alt="Size nhỏ">
+      <img src="../images/nho-sz.webp" alt="Size nhỏ">
       <p><strong>SIZE NHỎ</strong><br>17cm x 8cm</p>
     </div>
     <div class="size-card">
-      <img src="images/vua-sz.webp" alt="Size vừa">
+      <img src="../images/vua-sz.webp" alt="Size vừa">
       <p><strong>SIZE VỪA</strong><br>21cm x 8cm</p>
     </div>
   </div>
@@ -347,10 +348,10 @@ include 'header.php';
 
   <div class="policy-container">
     <div class="policy-card">
-      <img src="images/cake-feedback-voucher-15.webp" alt="Đặt hàng COD">
+      <img src="../images/cake-feedback-voucher-15.webp" alt="Đặt hàng COD">
     </div>
     <div class="policy-card">
-      <img src="images/Ship-COD-2025-02-01.webp" alt="Chính sách chiết khấu">
+      <img src="../images/Ship-COD-2025-02-01.webp" alt="Chính sách chiết khấu">
     </div>
   </div>
 </section>

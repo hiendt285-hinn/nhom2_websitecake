@@ -1,218 +1,175 @@
+<style>
+    * { 
+        margin: 0; 
+        padding: 0; 
+        box-sizing: border-box; 
+    }
+    
+    body { 
+        font-family: 'Poppins', sans-serif; 
+        background: #fffaf0; 
+        color: #333;
+        
+        display: flex;
+        flex-direction: column; 
+        min-height: 100vh; 
+    }
+    
+
+    table { width: 100%; border-collapse: collapse; }
+    td { vertical-align: top; }
+
+    .header {
+      background:#5a8b56;
+      color: #ff5f9e;
+      padding:10px 30px;; 
+      
+      font-size: 20px;
+      font-weight: bold;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border-radius: 0 0 25px 25px;
+    }
+    .header a {
+      color: #ff5f9e;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s;
+      padding: 0 30px;
+    }
+    .header a:hover {
+      color: #ff90c2;
+    }
+    
+
+    .menu1>li{float:left;}
+    .menu1>li:hover>ul.menu2{
+        display:block;
+        }
+    .menu2{display:none;
+            position:absolute;
+            margin-left:-20px   
+    }
+    .menu2 ul{flex-direction:column;}
+    ul li:hover > ul {
+      display: block !important;
+    }
+
+
+    .sidebar {
+        background: #fffaf0;
+        padding: 20px;
+        min-height: auto; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        width: 100%; 
+        box-sizing: border-box;
+        margin-bottom: 20px; 
+        border-radius: 0;
+    }
+
+
+    .sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex; 
+        flex-wrap: wrap; 
+        justify-content: space-around; 
+        gap: 10px; 
+    }
+
+
+    .sidebar li {
+        width: 30%; 
+        min-width: 200px; 
+        box-sizing: border-box; 
+        margin-bottom: 12px; 
+    }
+
+    .sidebar a {
+        text-decoration: none;
+        color: #333;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 15px;
+        border-radius: 8px;
+        transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+        background: #ff5f9e;
+        color: white;
+    }
+
+    .sidebar i {
+        width: 20px;
+        text-align: center;
+    }
+    
+
+    .content {
+      padding: 30px;
+      background: #fffaf0;
+      flex-grow: 1; 
+
+    }
+    
+    .footer {
+      background: #5a8b56;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 14px;Viền 
+      flex-shrink: 0; 
+    }
+</style>
 <?php
 session_start();
-require_once 'connect.php';
-
-// Kiểm tra đăng nhập
-if (!isset($_SESSION['user_id']) || !is_numeric($_SESSION['user_id'])) {
-    header('Location: login.php');
+if (!isset($_SESSION["admin"])) {
+    header("Location: login_admin.php");
     exit();
-}
-
-$order_id = isset($_GET['id']) && is_numeric($_GET['id']) ? (int)$_GET['id'] : 0;
-$user_id = (int)$_SESSION['user_id'];
-
-if ($order_id <= 0) {
-    die('ID đơn hàng không hợp lệ.');
-}
-
-// Lấy thông tin đơn hàng
-$order = null;
-$orderSql = "SELECT o.*, u.username FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ? AND o.user_id = ? LIMIT 1";
-if ($stmt = $conn->prepare($orderSql)) {
-    $stmt->bind_param('ii', $order_id, $user_id);
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        $order = $result ? $result->fetch_assoc() : null;
-    }
-    $stmt->close();
-} else {
-    die('Lỗi truy vấn đơn hàng.');
-}
-
-if (!$order) {
-    die('Đơn hàng không tồn tại hoặc bạn không có quyền xem.');
-}
-
-// Lấy chi tiết sản phẩm từ order_items
-$items = [];
-$detailSql = "SELECT oi.product_id, oi.size, oi.flavor, oi.quantity, oi.unit_price, p.name 
-              FROM order_items oi 
-              JOIN products p ON oi.product_id = p.id 
-              WHERE oi.order_id = ?";
-if ($stmt = $conn->prepare($detailSql)) {
-    $stmt->bind_param('i', $order_id);
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        // Ensure fetch_assoc is used correctly and not looping infinitely
-        while ($row = $result->fetch_assoc()) {
-            $items[] = $row;
-        }
-    }
-    $stmt->close();
-} else {
-    die('Lỗi truy vấn chi tiết đơn hàng.');
-}
-
-function status_text($status) {
-    $map = [
-        'pending' => 'Chờ xử lý',
-        'confirmed' => 'Đã xác nhận',
-        'shipping' => 'Đang giao',
-        'delivered' => 'Đã giao',
-        'cancelled' => 'Đã hủy',
-    ];
-    return $map[$status] ?? htmlspecialchars($status);
-}
-
-function status_color($status) {
-    switch ($status) {
-        case 'delivered': return '#4CAF50';
-        case 'pending': return '#ff9800';
-        case 'confirmed': return '#1976D2';
-        case 'shipping': return '#9C27B0';
-        case 'cancelled': return '#f44336';
-        default: return '#555';
-    }
 }
 ?>
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Chi tiết đơn hàng #<?php echo htmlspecialchars($order_id); ?></title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f7f7f7;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            padding: 32px 24px;
-        }
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 24px;
-            color: #1976D2;
-        }
-        .info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        .info div {
-            min-width: 220px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 24px;
-        }
-        th, td {
-            padding: 12px 8px;
-            border-bottom: 1px solid #e0e0e0;
-            text-align: left;
-        }
-        th {
-            background: #f0f4fa;
-            color: #1976D2;
-            font-weight: 600;
-        }
-        tr:last-child td {
-            border-bottom: none;
-        }
-        .muted {
-            color: #888;
-            font-size: 0.95em;
-        }
-        .total {
-            font-size: 1.2em;
-            text-align: right;
-            margin-bottom: 24px;
-        }
-        .back-btn {
-            display: inline-block;
-            padding: 10px 18px;
-            background: #1976D2;
-            color: #fff;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        .back-btn:hover {
-            background: #1565c0;
-        }
-        @media (max-width: 600px) {
-            .container {
-                padding: 16px 6px;
-            }
-            .info {
-                flex-direction: column;
-            }
-            table, th, td {
-                font-size: 0.95em;
-            }
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản trị - Savor Cake</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div class="container">
-    <h1>Chi tiết đơn hàng #<?php echo htmlspecialchars($order['id']); ?></h1>
-
-    <div class="info">
-        <div>
-            <p><strong>Khách hàng:</strong> <?php echo htmlspecialchars($order['username']); ?></p>
-            <p><strong>Ngày đặt:</strong> <?php echo date('d/m/Y H:i:s', strtotime($order['created_at'])); ?></p>
-            <p><strong>Thanh toán:</strong> <?php echo htmlspecialchars($order['payment_method']); ?></p>
-        </div>
-        <div style="text-align: right;">
-            <p><strong>Trạng thái:</strong>
-                <span style="color: <?php echo status_color($order['status']); ?>; font-weight: bold;">
-                    <?php echo status_text($order['status']); ?>
-                </span>
-            </p>
-            <p><strong>Tổng cộng:</strong> <?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</p>
-        </div>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Biến thể</th>
-                <th>Số lượng</th>
-                <th>Đơn giá</th>
-                <th>Thành tiền</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($items as $item): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($item['name']); ?></td>
-                <td class="muted">
-                    <?php if (!empty($item['size'])): ?>Size: <?php echo htmlspecialchars($item['size']); ?><?php endif; ?>
-                    <?php if (!empty($item['flavor'])): ?><?php echo !empty($item['size']) ? ' · ' : ''; ?>Vị: <?php echo htmlspecialchars($item['flavor']); ?><?php endif; ?>
-                </td>
-                <td><?php echo (int)$item['quantity']; ?></td>
-                <td><?php echo number_format($item['unit_price'], 0, ',', '.'); ?> ₫</td>
-                <td><?php echo number_format($item['unit_price'] * $item['quantity'], 0, ',', '.'); ?> ₫</td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <p class="total">
-        Tổng cộng: <strong><?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</strong>
-    </p>
-
-    <a href="order_history.php" class="back-btn">Quay lại danh sách đơn hàng</a>
-</div>
+<table border="0">
+    <tr>
+        <td colspan="2" class="header" style="position:relative;">
+            <img src="../images/35-mau-thiet-ke-logo-tiem-banh-dep-5-removebg-preview.png" alt="Logo" style="height:40px; vertical-align:middle; margin-right:10px;">
+            Savor Cake
+            <span style="float:right; font-weight:normal;">
+                <a href="logout_admin.php">Đăng xuất</a>
+            </span>
+        </td>
+    </tr>    <tr>
+        <td width="220" valign="top" class="sidebar">
+            <ul>
+            <li><a href="manage_producttype.php"><i class="fas fa-list"></i> Quản lý danh mục</a></li>
+            <li><a href="manage_products.php"><i class="fas fa-cake-candles"></i> Quản lý sản phẩm</a></li>
+            <li><a href="manage_customers.php"><i class="fas fa-users"></i> Quản lý khách hàng</a></li>
+            <li><a href="manage_orders.php"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
+            <li><a href="manage_shipping.php"><i class="fas fa-truck"></i> Quản lý giao hàng</a></li>
+            <li><a href="manage_reports.php"><i class="fas fa-chart-line"></i> Báo cáo</a></li>
+            </ul>
+        </td>
+        <td class="content">
+            
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" class="footer">
+            &copy; 2025 Quản trị website - All rights reserved
+        </td>
+    </tr>
+</table>
 </body>
 </html>

@@ -236,7 +236,7 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
                     <?php foreach ($_SESSION['cart'] as $item_key => $item): ?>
                         <tr>
                             <td>
-                                <img src="images/products/<?php echo htmlspecialchars($item['image']); ?>" 
+                                <img src="../images/products/<?php echo htmlspecialchars($item['image']); ?>" 
                                      alt="<?php echo htmlspecialchars($item['name']); ?>" class="cart-item-img">
                                 <div>
                                     <div class="item-name"><?php echo htmlspecialchars($item['name']); ?></div>

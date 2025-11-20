@@ -17,12 +17,12 @@
         <div class="footer-column center">
             <h3>Our brands</h3>
             <div class="brand-logos">
-                <img src="images/35-mau-thiet-ke-logo-tiem-banh-dep-5.jpg" alt="Abby logo">
+                <img src="../images/35-mau-thiet-ke-logo-tiem-banh-dep-5.jpg" alt="Abby logo">
             </div>
             <p class="press-text">Báo chí nói gì về Savor Cake ?</p>
         </div>
 
-        <img src="images/bo-cong-thuong.webp" alt="Đã thông báo Bộ Công Thương" class="gov-logo">
+        <img src="../images/bo-cong-thuong.webp" alt="Đã thông báo Bộ Công Thương" class="gov-logo">
     </div>
 </footer>
 
