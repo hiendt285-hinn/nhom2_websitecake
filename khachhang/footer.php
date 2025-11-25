@@ -1,8 +1,8 @@
 <?php
 // footer.php - Phần footer chung cho website (dựa trên HTML cung cấp)
 ?>
+<footer class="footer" id="lienhe">
 
-<footer class="footer">
     <div class="footer-container">
         <!-- Cột 1: Thông tin liên hệ -->
         <div class="footer-column">

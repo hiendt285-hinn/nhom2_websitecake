@@ -65,10 +65,9 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
         </div>
         <ul>
             <li><a href="products.php">Sản phẩm</a></li>
-            <li><a href="news.php">Tin tức</a></li>
-            <li><a href="sale.php">Khuyến mại</a></li>
+            <li><a href="policy.php">Chính sách</a></li>
             <li><a href="feedback.php">Feedback</a></li>
-            <li><a href="contact.php">Liên hệ</a></li>
+            <li><a href="#lienhe">Liên hệ</a></li>
             <li>
                 <a href="cart.php">
                     Giỏ hàng (<?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>)

@@ -1,23 +1,13 @@
 <?php
-// index.php - Trang chủ website bán bánh ngọt (dựa trên HTML cung cấp, cấu trúc theo gợi ý file)
-
-// Bắt đầu session (cho giỏ hàng hoặc đăng nhập nếu cần sau này)
 session_start();
-
-// Include file kết nối database (nếu dùng DB cho sản phẩm nổi bật, nhưng hiện tại giữ tĩnh theo HTML)
-include 'connect.php'; // Nếu có DB, uncomment và dùng truy vấn
-
-// Include header (đã điều chỉnh để phù hợp với HTML cung cấp)
+include 'connect.php';
 include 'header.php';
 ?>
-
-<!-- Nội dung chính từ HTML cung cấp, giữ nguyên cấu trúc nhưng loại bỏ phần header và footer gốc -->
-<!-- Banner chính -->
 <section class="hero">
   <div class="hero-content">
     <h1>Mỗi miếng bánh, một câu chuyện hạnh phúc</h1>
     <p>BST Bánh Sinh Nhật</p>
-    <a href="products.php" class="btn">Xem BST ngay</a> <!-- Link đến products.php theo gợi ý -->
+    <a href="products.php" class="btn">Xem BST ngay</a>
   </div>
   <div class="hero-imgs">
     <img src="../images/AE2CDC01-6F2C-4BE5-AF72-3C24605224B9.png" alt="Bánh">
@@ -67,8 +57,9 @@ include 'header.php';
       <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
       <p class="price">189.000₫</p>
       <div class="actions">
-        <button class="btn-order">Đặt ngay</button>
-        <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
+      <a href="checkout.php" class="btn-order"> Đặt hàng </a>
+      <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
+        <i class="fas fa-cart-plus"></i></button>
       </div>
     </div>
 
@@ -79,8 +70,8 @@ include 'header.php';
       <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
       <p class="price">169.000₫</p>
       <div class="actions">
-        <button class="btn-order">Đặt ngay</button>
-        <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
+        <a href="checkout.php" class="btn-order">Đặt ngay</a>
+        <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
       </div>
     </div>
 
@@ -91,8 +82,8 @@ include 'header.php';
       <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
       <p class="price">259.000₫</p>
       <div class="actions">
-        <button class="btn-order">Đặt ngay</button>
-        <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
+        <a href="checkout.php" class="btn-order">Đặt ngay</a>
+        <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
       </div>
     </div>
 
@@ -103,8 +94,8 @@ include 'header.php';
       <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
       <p class="price">Giá: <strong>259.000 ₫</strong></p>
       <div class="actions">
-        <button class="btn-order">Đặt ngay</button>
-        <button class="btn-cart"><i class="fas fa-cart-plus"></i></button>
+        <a href="checkout.php" class="btn-order">Đặt ngay</a>
+        <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
       </div>
     </div>
   </div>
@@ -135,8 +126,8 @@ include 'header.php';
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
     <p class="price">189.000₫</p>
     <div class="actions">
-      <button class="btn-order">Đặt ngay</button>
-      <button class="btn-cart">🛒</button>
+      <a href="checkout.php" class="btn-order">Đặt ngay</a>
+      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
     </div>
   </div>
 
@@ -147,8 +138,8 @@ include 'header.php';
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
     <p class="price">169.000₫</p>
     <div class="actions">
-      <button class="btn-order">Đặt ngay</button>
-      <button class="btn-cart">🛒</button>
+      <a href="checkout.php" class="btn-order">Đặt ngay</a>
+      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
     </div>
   </div>
 
@@ -159,8 +150,8 @@ include 'header.php';
     <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
     <p class="price">150.000₫</p>
     <div class="actions">
-      <button class="btn-order">Đặt ngay</button>
-      <button class="btn-cart">🛒</button>
+      <a href="checkout.php" class="btn-order">Đặt ngay</a>
+      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
     </div>
   </div>
 </div>
@@ -195,8 +186,8 @@ include 'header.php';
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
     <p class="price">220.000₫</p>
     <div class="actions">
-      <button class="btn-order">Đặt ngay</button>
-      <button class="btn-cart">🛒</button>
+      <a href="checkout.php" class="btn-order">Đặt ngay</a>
+      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
     </div>
   </div>
 
@@ -207,8 +198,8 @@ include 'header.php';
     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
     <p class="price">Giá: <strong>220.000 ₫</strong></p>
     <div class="actions">
-      <button class="btn-order">Đặt ngay</button>
-      <button class="btn-cart">🛒</button>
+      <a href="checkout.php" class="btn-order">Đặt ngay</a>
+      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
     </div>
   </div>
 
@@ -219,9 +210,8 @@ include 'header.php';
     <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
     <p class="price">230.000₫</p>
     <div class="actions">
-      <button class="btn-order">Đặt ngay</button>
-      <button class="btn-cart">🛒</button>
-    </div>
+      <a href="checkout.php" class="btn-order">Đặt ngay</a>
+      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
   </div>
 </div>
 
@@ -344,7 +334,7 @@ include 'header.php';
 
 <section class="policy-section">
   <h2>Chính sách ship & bán hàng</h2>
-  <p class="subtext">Bấm để xem thêm chi tiết <a href="#">TẠI ĐÂY</a></p>
+  <p class="subtext">Bấm để xem thêm chi tiết <a href="policy.php">TẠI ĐÂY</a></p>
 
   <div class="policy-container">
     <div class="policy-card">
