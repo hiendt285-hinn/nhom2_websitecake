@@ -5,24 +5,46 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
+include 'admin_header.php';
 require_once 'connect.php';
 
-// Xử lý xóa sản phẩm (nếu có)
+// Xử lý xóa sản phẩm (nếu có) - Bây giờ hỗ trợ AJAX và renumber ID
 if (isset($_GET['delete_id'])) {
     $delete_id = intval($_GET['delete_id']);
     $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
     $stmt->bind_param('i', $delete_id);
-    $stmt->execute();
+    if ($stmt->execute()) {
+        // Renumber ID sau xóa (reset thứ tự liên tục)
+        $conn->query("SET @row_number = 0;");
+        $conn->query("UPDATE products SET id = (@row_number := @row_number + 1) ORDER BY created_at DESC;"); // Đổi ORDER BY p.id ASC nếu muốn sắp xếp tăng dần
+        
+        // Set AUTO_INCREMENT = max(id) + 1 để ID mới đúng
+        $max_result = $conn->query("SELECT MAX(id) AS max_id FROM products");
+        $max_id = $max_result ? $max_result->fetch_assoc()['max_id'] : 0;
+        $conn->query("ALTER TABLE products AUTO_INCREMENT = " . ($max_id + 1) . ";");
+
+        // Nếu là AJAX request, trả JSON thay vì redirect
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            echo json_encode(['success' => true]);
+            exit();
+        } else {
+            header('Location: manage_products.php');
+            exit();
+        }
+    } else {
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            echo json_encode(['success' => false, 'error' => 'Lỗi khi xóa sản phẩm.']);
+            exit();
+        }
+    }
     $stmt->close();
-    header('Location: manage_products.php');
-    exit();
 }
 
 // Lấy danh sách sản phẩm với tên danh mục
 $sql = "SELECT p.*, c.name AS category_name 
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.id
-        ORDER BY p.created_at DESC";
+        ORDER BY p.created_at DESC"; // Hoặc ORDER BY p.id ASC nếu muốn ID tăng dần
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -39,7 +61,7 @@ $result = $conn->query($sql);
     th { background: #ff5f9e; color: white; }
     a { color: #ff5f9e; text-decoration: none; font-weight: 600; }
     a:hover { color: #ff90c2; }
-    .btn-delete { color: red; }
+    .btn-delete { color: red; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -60,7 +82,7 @@ $result = $conn->query($sql);
     <tbody>
         <?php if ($result && $result->num_rows > 0): ?>
             <?php while($row = $result->fetch_assoc()): ?>
-                <tr>
+                <tr id="row-<?php echo $row['id']; ?>">
                     <td><?php echo $row['id'] ?></td>
                     <td><?php echo htmlspecialchars($row['name']) ?></td>
                     <td><?php echo htmlspecialchars($row['category_name']) ?></td>
@@ -68,7 +90,7 @@ $result = $conn->query($sql);
                     <td><img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="" style="height:50px;"></td>
                     <td><?php echo $row['stock'] ?></td>
                     <td>
-                        <a href="manage_products.php?delete_id=<?php echo $row['id'] ?>" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');" class="btn-delete">Xóa</a>
+                        <span class="btn-delete" onclick="deleteProduct(<?php echo $row['id']; ?>)">Xóa</span>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -77,5 +99,31 @@ $result = $conn->query($sql);
         <?php endif; ?>
     </tbody>
 </table>
+
+<script>
+function deleteProduct(id) {
+    if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+        // Gửi AJAX request
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'manage_products.php?delete_id=' + id, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); // Để PHP biết là AJAX
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    // Remove row tạm thời, rồi reload để cập nhật ID mới
+                    document.getElementById('row-' + id).remove();
+                    location.reload(); // Reload để thấy thứ tự ID đã reset
+                } else {
+                    alert(response.error || 'Lỗi khi xóa.');
+                }
+            } else {
+                alert('Lỗi kết nối server.');
+            }
+        };
+        xhr.send();
+    }
+}
+</script>
 </body>
 </html>

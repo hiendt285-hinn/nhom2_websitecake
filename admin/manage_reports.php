@@ -4,6 +4,7 @@ if (!isset($_SESSION["admin"])) {
     header("Location: login_admin.php");
     exit();
 }
+include 'admin_header.php';
 require_once 'connect.php';
 
 // Xử lý lọc theo ngày

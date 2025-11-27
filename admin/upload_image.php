@@ -30,24 +30,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Chỉ chấp nhận định dạng ảnh: jpg, jpeg, png, gif, webp";
         } else {
             $new_file_name = uniqid() . '.' . $ext;
-            $target_dir = '../images/';
-            $target_file = $target_dir . $new_file_name;
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                // Thêm sản phẩm vào DB
-                $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, short_description, category_id, stock) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param('sisssii', $name, $price, $new_file_name, $description, $short_description, $category_id, $stock);
-                if ($stmt->execute()) {
-                    $success = "Thêm sản phẩm thành công!";
-                } else {
-                    $error = "Lỗi khi thêm sản phẩm.";
+            $target_dir = __DIR__ . '/../images/';  // Sử dụng đường dẫn trực tiếp, không realpath để tránh false
+            
+            // Kiểm tra và tạo thư mục nếu chưa tồn tại
+            if (!is_dir($target_dir)) {
+                if (!mkdir($target_dir, 0755, true)) {
+                    $error = "Không thể tạo thư mục images. Kiểm tra quyền server.";
                 }
-                $stmt->close();
-            } else {
-                $error = "Lỗi khi upload ảnh.";
+            }
+            
+            if (empty($error)) {
+                $target_file = $target_dir . $new_file_name;
+                
+                // Debug optional: Log để xem đường dẫn (xóa sau khi test)
+                // error_log("Target dir: $target_dir | Target file: $target_file");
+                
+                if (@move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                    // Thêm sản phẩm vào DB
+                    $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, short_description, category_id, stock) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->bind_param('sisssii', $name, $price, $new_file_name, $description, $short_description, $category_id, $stock);
+                    if ($stmt->execute()) {
+                        $success = "Thêm sản phẩm thành công!";
+                        // Redirect về manage sau success (tùy chọn)
+                        header('Location: manage_products.php');
+                        exit();
+                    } else {
+                        $error = "Lỗi khi thêm sản phẩm: " . $stmt->error;
+                    }
+                    $stmt->close();
+                } else {
+                    $error = "Lỗi khi upload ảnh. Chi tiết: " . error_get_last()['message'];  // Lấy lỗi chi tiết
+                }
             }
         }
     } else {
-        $error = "Vui lòng chọn ảnh sản phẩm.";
+        $error = "Vui lòng chọn ảnh sản phẩm hoặc kiểm tra lỗi upload: " . $_FILES['image']['error'];
     }
 }
 ?>

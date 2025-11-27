@@ -125,11 +125,7 @@
     }
 </style>
 <?php
-session_start();
-if (!isset($_SESSION["admin"])) {
-    header("Location: login_admin.php");
-    exit();
-}
+include 'admin_header.php';
 ?>
 <!DOCTYPE html>
 <html>
@@ -143,14 +139,6 @@ if (!isset($_SESSION["admin"])) {
 <body>
 <table border="0">
     <tr>
-        <td colspan="2" class="header" style="position:relative;">
-            <img src="../images/35-mau-thiet-ke-logo-tiem-banh-dep-5-removebg-preview.png" alt="Logo" style="height:40px; vertical-align:middle; margin-right:10px;">
-            Savor Cake
-            <span style="float:right; font-weight:normal;">
-                <a href="logout_admin.php">Đăng xuất</a>
-            </span>
-        </td>
-    </tr>    <tr>
         <td width="220" valign="top" class="sidebar">
             <ul>
             <li><a href="manage_producttype.php"><i class="fas fa-list"></i> Quản lý danh mục</a></li>
