@@ -37,7 +37,7 @@ $orders = $conn->query("SELECT * FROM orders WHERE $where ORDER BY created_at DE
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 body {font-family:'Poppins',sans-serif; background:#fffaf0; margin:0; padding:0;}
-table {width:100%; border-collapse: collapse; margin-top:10px;}
+table {width:100%; border-collapse: collapse; margin-top:10px;background:#ffffff}
 th, td {border:1px solid #ccc; padding:8px; text-align:left;}
 th {background:#ff5f9e; color:white;}
 .message {padding:10px; margin-bottom:10px; border-radius:5px;}

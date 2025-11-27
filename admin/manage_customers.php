@@ -79,7 +79,7 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
     body {font-family: 'Poppins', sans-serif; background:#fffaf0; margin:0; padding:0;}
-    table {width:100%; border-collapse: collapse; margin-top:10px;}
+    table {width:100%; border-collapse: collapse; margin-top:10px;background:#ffffff}
     th, td {border:1px solid #ccc; padding:8px; text-align:left;}
     th {background:#ff5f9e; color:white;}
     .btn {padding:5px 10px; border:none; border-radius:5px; cursor:pointer;}

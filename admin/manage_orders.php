@@ -31,8 +31,11 @@ $orders = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
 <title>Quản lý đơn hàng</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
-/* CSS giữ nguyên phong cách dashboard */
-table { width:100%; border-collapse: collapse; }
+body { 
+        font-family: 'Poppins', sans-serif; 
+        background: #fffaf0; 
+    }
+table { width:100%; border-collapse: collapse; background:rgb(255, 255, 255); }
 td, th { padding: 8px; border: 1px solid #ccc; }
 th { background: #ff5f9e; color: white; }
 .status-form select { padding:5px; }

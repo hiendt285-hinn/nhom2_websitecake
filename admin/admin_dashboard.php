@@ -18,27 +18,6 @@
 
     table { width: 100%; border-collapse: collapse; }
     td { vertical-align: top; }
-
-    .header {
-      background:#5a8b56;
-      color: #ff5f9e;
-      padding:10px 30px;; 
-      
-      font-size: 20px;
-      font-weight: bold;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      border-radius: 0 0 25px 25px;
-    }
-    .header a {
-      color: #ff5f9e;
-      text-decoration: none;
-      font-weight: 600;
-      transition: 0.3s;
-      padding: 0 30px;
-    }
-    .header a:hover {
-      color: #ff90c2;
-    }
     
 
     .menu1>li{float:left;}
