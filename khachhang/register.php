@@ -71,16 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: 'Poppins', sans-serif; /* Sử dụng font từ file mới */
+        font-family: 'Open Sans', sans-serif; /* Sử dụng font từ file mới */
     }
 
     /* Tông màu chính từ file style.css mới */
     :root {
-        --primary-color: #ff5f9e; /* Màu pink chính cho nút, link */
-        --primary-hover: #ff90c2; /* Hover pink */
-        --accent-color: #4CAF50; /* Màu xanh green cho accent */
-        --accent-hover: #388e3c; /* Hover green */
-        --background-color: #fffaf0; /* Nền kem nhạt */
+        --primary-color: #8B6F47; /* Màu brown chính cho nút, link */
+        --primary-hover: #A0826D; /* Hover light brown */
+        --accent-color: #F5F1E8; /* Màu beige light cho accent */
+        --accent-hover: #D4C5B5; /* Hover light brown */
+        --background-color: #F5F1E8; /* Nền kem nhạt */
         --text-color: #333; /* Màu chữ chính */
         --error-color: #d32f2f; /* Màu lỗi đỏ */
         --border-color: #e0e0e0; /* Viền nhạt */

@@ -1,39 +1,39 @@
 <?php
 // cart.php - Trang hiển thị giỏ hàng
-
+error_reporting(0);
 session_start();
 include 'connect.php'; // Nếu cần cập nhật giá từ DB, nhưng hiện dùng data từ session
 
-// Xử lý cập nhật giỏ hàng / xóa mục (hỗ trợ AJAX và non-AJAX)
+// Xử lý cập nhật giỏ hàng / xóa mục (dạng form thông thường, không phụ thuộc JS)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-    $response = ['success' => false];
-
-    $action = isset($_POST['action']) ? $_POST['action'] : '';
-
-    if ($action === 'update' && isset($_POST['quantities']) && is_array($_POST['quantities'])) {
+    // Xóa 1 item nếu bấm nút thùng rác
+    if (isset($_POST['remove_key'])) {
+        $itemKey = $_POST['remove_key'];
+        if (isset($_SESSION['cart'][$itemKey])) {
+            unset($_SESSION['cart'][$itemKey]);
+            if (empty($_SESSION['cart'])) {
+                unset($_SESSION['cart']);
+            }
+        }
+    }
+    // Cập nhật toàn bộ số lượng
+    elseif (isset($_POST['quantities']) && is_array($_POST['quantities'])) {
         foreach ($_POST['quantities'] as $itemKey => $qty) {
-            $qty = max(1, (int)$qty);
-            if (isset($_SESSION['cart'][$itemKey])) {
+            $qty = (int)$qty;
+            if ($qty <= 0) {
+                unset($_SESSION['cart'][$itemKey]);
+            } elseif (isset($_SESSION['cart'][$itemKey])) {
                 $_SESSION['cart'][$itemKey]['quantity'] = $qty;
             }
         }
-        $response['success'] = true;
-        echo json_encode($response);
-        exit;
-    }
 
-    if ($action === 'remove' && isset($_POST['item_key'])) {
-        $itemKey = $_POST['item_key'];
-        if (isset($_SESSION['cart'][$itemKey])) {
-            unset($_SESSION['cart'][$itemKey]);
-            $response['success'] = true;
+        if (empty($_SESSION['cart'])) {
+            unset($_SESSION['cart']);
         }
-        echo json_encode($response);
-        exit;
     }
 
-    echo json_encode($response);
+    // Sau khi xử lý, quay lại trang giỏ hàng (PRG pattern)
+    header('Location: cart.php');
     exit;
 }
 
@@ -56,26 +56,30 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
     <title>Giỏ hàng - Savor Cake</title>
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* === TRANG GIỎ HÀNG === */
         .cart-page {
             max-width: 1200px;
             margin: 30px auto;
             padding: 0 20px;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Open Sans', sans-serif;
         }
-        .alert-success { background: #e8f5e9; color: #256029; border: 1px solid #c8e6c9; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+        .alert-success { background: var(--light-beige); color: var(--text-black); border: 1px solid rgba(0,0,0,0.06); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
 
         .page-header {
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            padding: 30px 0 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
         }
 
         .page-header h1 {
-            font-size: 32px;
-            color: #ff5f9e;
+            font-size: 28px;
+            color: var(--text-black);
             font-weight: 700;
+            margin: 0;
+            font-family: 'Open Sans', sans-serif;
         }
 
         .cart-empty {
@@ -90,22 +94,27 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
-            background: white;
+            /* Glassmorphism frame */
+            background: rgba(255,255,255,0.55);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.35);
         }
 
         .cart-table th, .cart-table td {
-            padding: 15px;
+            padding: 16px;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
         }
 
         .cart-table th {
-            background: #f8f5f0;
+            background: #f9f6f2;
             font-weight: 600;
-            color: #5D4037;
+            color: var(--text-black);
         }
 
         .cart-item-img {
@@ -117,7 +126,7 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
 
         .item-name {
             font-weight: 600;
-            color: #333;
+            color: var(--text-black);
         }
 
         .item-details {
@@ -129,8 +138,9 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
             width: 60px;
             padding: 8px;
             border: 1px solid #ddd;
-            border-radius: 6px;
+            border-radius: 4px;
             text-align: center;
+            font-size: 14px;
         }
 
         .btn-remove {
@@ -138,7 +148,12 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
             border: none;
             color: #d32f2f;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .btn-remove:hover {
+            color: #ff5f5f;
         }
 
         .cart-summary {
@@ -147,41 +162,49 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
             align-items: center;
             gap: 20px;
             padding: 20px;
-            background: #f8f5f0;
-            border-radius: 12px;
+            /* Glass footer */
+            background: rgba(255,255,255,0.45);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            border-radius: 10px;
+            border-top: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
         }
 
         .total-amount {
             font-size: 20px;
-            font-weight: bold;
-            color: #FFCA28;
+            font-weight: 700;
+            color: var(--main-brown);
         }
 
         .btn-update, .btn-checkout {
             padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
             transition: 0.3s;
+            font-size: 14px;
         }
 
         .btn-update {
-            background: #5D4037;
-            color: white;
+            background: var(--white);
+            color: var(--text-black);
+            border: 1px solid #ddd;
         }
 
         .btn-update:hover {
-            background: #4E342E;
+            background: #f9f6f2;
+            border-color: var(--main-brown);
         }
 
         .btn-checkout {
-            background: #FFCA28;
-            color: #5D4037;
+            background: var(--main-brown);
+            color: var(--white);
         }
 
         .btn-checkout:hover {
-            background: #FFB300;
+            background: var(--brown-light);
         }
 
         /* Responsive */
@@ -236,7 +259,7 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
                     <?php foreach ($_SESSION['cart'] as $item_key => $item): ?>
                         <tr>
                             <td>
-                                <img src="../images/products/<?php echo htmlspecialchars($item['image']); ?>" 
+                                <img src="../images/<?php echo htmlspecialchars($item['image']); ?>" 
                                      alt="<?php echo htmlspecialchars($item['name']); ?>" class="cart-item-img">
                                 <div>
                                     <div class="item-name"><?php echo htmlspecialchars($item['name']); ?></div>
@@ -253,8 +276,10 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
                             </td>
                             <td><?php echo number_format($item['price'] * $item['quantity'], 0, ',', '.'); ?>₫</td>
                             <td>
-                                <button type="button" class="btn-remove" 
-                                        onclick="removeItem('<?php echo $item_key; ?>')">
+                                <button type="submit"
+                                        name="remove_key"
+                                        value="<?php echo htmlspecialchars($item_key, ENT_QUOTES, 'UTF-8'); ?>"
+                                        class="btn-remove">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -270,51 +295,11 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
                 <button type="submit" class="btn-update">Cập nhật giỏ hàng</button>
                 <a href="checkout.php" class="btn-checkout">Tiến hành thanh toán</a> <!-- Link đến checkout nếu có -->
             </div>
-            <input type="hidden" name="action" value="update">
         </form>
     <?php endif; ?>
 </div>
 
 <?php include 'footer.php'; ?>
-
-<script>
-    // Xóa item (AJAX)
-    function removeItem(itemKey) {
-        if (confirm('Xóa sản phẩm này khỏi giỏ?')) {
-            fetch('cart.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ action: 'remove', item_key: itemKey })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Không thể xóa sản phẩm.');
-                }
-            })
-            .catch(() => alert('Không thể xóa sản phẩm.'));
-        }
-    }
-
-    // Cập nhật form submit (AJAX)
-    document.getElementById('cart-form')?.addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        formData.set('action', 'update');
-        fetch('cart.php', {
-            method: 'POST',
-            body: new URLSearchParams(formData)
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            }
-        });
-    });
-</script>
 
 </body>
 </html>

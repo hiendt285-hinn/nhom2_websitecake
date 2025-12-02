@@ -32,15 +32,19 @@ $orders = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <style>
 body { 
-        font-family: 'Poppins', sans-serif; 
-        background: #fffaf0; 
+        font-family: 'Open Sans', sans-serif; 
+        background: #F5F1E8; 
+        margin:0;
+        padding:20px;
     }
-table { width:100%; border-collapse: collapse; background:rgb(255, 255, 255); }
-td, th { padding: 8px; border: 1px solid #ccc; }
-th { background: #ff5f9e; color: white; }
-.status-form select { padding:5px; }
-.status-form input[type=submit] { padding:5px 10px; background:#5a8b56; color:white; border:none; border-radius:5px; cursor:pointer; }
-.status-form input[type=submit]:hover { background:#3f6439; }
+h2 { color:#8B6F47; margin-bottom:16px; }
+table { width:100%; border-collapse: collapse; background:#ffffff; border-radius:8px; overflow:hidden; }
+td, th { padding: 10px 12px; border-bottom: 1px solid #eee; font-size:14px; }
+th { background: #f9f6f2; color: #333; font-weight:600; }
+tr:nth-child(even) { background:#fafafa; }
+.status-form select { padding:6px 8px; border-radius:4px; border:1px solid #ccc; font-size:13px; }
+.status-form input[type=submit] { padding:6px 12px; background:#8B6F47; color:white; border:none; border-radius:999px; cursor:pointer; font-size:13px; font-weight:600; }
+.status-form input[type=submit]:hover { background:#A0826D; }
 </style>
 </head>
 <body>

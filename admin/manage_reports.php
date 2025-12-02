@@ -34,20 +34,20 @@ $orders = $conn->query("SELECT * FROM orders WHERE $where ORDER BY created_at DE
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Báo cáo doanh thu - Savor Cake</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body {font-family:'Poppins',sans-serif; background:#fffaf0; margin:0; padding:0;}
-table {width:100%; border-collapse: collapse; margin-top:10px;background:#ffffff}
-th, td {border:1px solid #ccc; padding:8px; text-align:left;}
-th {background:#ff5f9e; color:white;}
+body {font-family:'Open Sans',sans-serif; background:#F5F1E8; margin:0; padding:20px;}
+table {width:100%; border-collapse: collapse; margin-top:10px;background:#ffffff; border-radius:8px; overflow:hidden;}
+th, td {border-bottom:1px solid #eee; padding:10px 12px; text-align:left; font-size:14px;}
+th {background:#f9f6f2; color:#333; font-weight:600;}
 .message {padding:10px; margin-bottom:10px; border-radius:5px;}
-.filter-form input[type=date] {padding:5px; margin-right:10px;}
-.filter-form input[type=submit] {padding:5px 10px; background:#5a8b56; color:white; border:none; border-radius:5px; cursor:pointer;}
+.filter-form input[type=date] {padding:6px 8px; margin-right:10px; border-radius:4px; border:1px solid #ccc;}
+.filter-form input[type=submit] {padding:6px 12px; background:#8B6F47; color:white; border:none; border-radius:999px; cursor:pointer; font-size:13px; font-weight:600;}
 </style>
 </head>
 <body>
-<div style="padding:20px;">
-    <h2>Báo cáo doanh thu</h2>
+<div style="padding:0 0 20px 0;">
+    <h2 style="color:#8B6F47;">Báo cáo doanh thu</h2>
 
     <form method="get" class="filter-form">
         <label>Ngày bắt đầu:</label>

@@ -21,7 +21,7 @@ $totalAmount = 0;
 foreach ($_SESSION['cart'] as $item) {
     $totalAmount += $item['price'] * $item['quantity'];
 }
-
+$error = '';
 // Xử lý đặt hàng (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fullName = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
@@ -33,52 +33,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($fullName === '' || $phone === '' || $address === '') {
         $error = 'Vui lòng nhập đầy đủ Họ tên, SĐT và Địa chỉ.';
     } else {
-        $conn->begin_transaction();
-        try {
-            // Tạo đơn hàng
-            $orderSql = "INSERT INTO orders (user_id, session_id, full_name, phone, address, note, total_amount, status, payment_method, created_at)
-                          VALUES (?, NULL, ?, ?, ?, ?, ?, 'pending', ?, NOW())";
-            $stmtOrder = $conn->prepare($orderSql);
-            if (!$stmtOrder) {
-                throw new Exception('Không thể chuẩn bị truy vấn đơn hàng.');
-            }
+        // Tạo đơn hàng (theo cấu trúc bảng trong ban_banh-3.sql)
+        // orders: id, user_id, full_name, phone, address, note, total_amount, status, payment_method, created_at
+        $orderSql = "INSERT INTO orders (user_id, full_name, phone, address, note, total_amount, status, payment_method, created_at)
+                     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NOW())";
+        $stmtOrder = $conn->prepare($orderSql);
+        if (!$stmtOrder) {
+            $error = 'Lỗi hệ thống (orders): ' . $conn->error;
+        } else {
             $stmtOrder->bind_param('issssds', $userId, $fullName, $phone, $address, $note, $totalAmount, $paymentMethod);
             if (!$stmtOrder->execute()) {
-                throw new Exception('Không thể lưu đơn hàng.');
-            }
-            $orderId = $conn->insert_id;
-            $stmtOrder->close();
+                $error = 'Không thể lưu đơn hàng: ' . $stmtOrder->error;
+            } else {
+                $orderId = $conn->insert_id;
 
-            // Lưu từng item
-            $itemSql = "INSERT INTO order_items (order_id, product_id, size, flavor, quantity, unit_price) VALUES (?, ?, ?, ?, ?, ?)";
-            $stmtItem = $conn->prepare($itemSql);
-            if (!$stmtItem) {
-                throw new Exception('Không thể chuẩn bị truy vấn chi tiết đơn hàng.');
-            }
-    foreach ($_SESSION['cart'] as $item) {
-                $productId = (int)$item['id'];
-                $size = isset($item['size']) ? (string)$item['size'] : null;
-                $flavor = isset($item['flavor']) ? (string)$item['flavor'] : null;
-                $quantity = (int)$item['quantity'];
-                $unitPrice = (float)$item['price'];
-                $stmtItem->bind_param('iissid', $orderId, $productId, $size, $flavor, $quantity, $unitPrice);
-                if (!$stmtItem->execute()) {
-                    throw new Exception('Không thể lưu chi tiết đơn hàng.');
+                // Lưu từng item
+                $itemSql = "INSERT INTO order_items (order_id, product_id, size, flavor, quantity, unit_price)
+                            VALUES (?, ?, ?, ?, ?, ?)";
+                $stmtItem = $conn->prepare($itemSql);
+                if (!$stmtItem) {
+                    $error = 'Lỗi hệ thống (order_items): ' . $conn->error;
+                } else {
+                    $allOk = true;
+                    foreach ($_SESSION['cart'] as $item) {
+                        $productId = (int)$item['id'];
+                        // Bảng order_items trong ban_banh-3.sql yêu cầu size, flavor NOT NULL
+                        $size = isset($item['size']) ? (string)$item['size'] : '';
+                        $flavor = isset($item['flavor']) ? (string)$item['flavor'] : '';
+                        $quantity = (int)$item['quantity'];
+                        $unitPrice = (float)$item['price'];
+                        $stmtItem->bind_param('iissid', $orderId, $productId, $size, $flavor, $quantity, $unitPrice);
+                        if (!$stmtItem->execute()) {
+                            $allOk = false;
+                            $error = 'Không thể lưu chi tiết đơn hàng: ' . $stmtItem->error;
+                            break;
+                        }
+                    }
+                    $stmtItem->close();
+
+                    if ($allOk) {
+                        // Xóa giỏ hàng và chuyển sang chi tiết đơn
+                        unset($_SESSION['cart']);
+                        header('Location: order_detail.php?id=' . $orderId);
+                        exit();
+                    }
                 }
             }
-            $stmtItem->close();
-
-            $conn->commit();
-
-            // Xóa giỏ hàng
-    unset($_SESSION['cart']);
-
-            // Chuyển đến trang chi tiết đơn hàng
-            header('Location: order_detail.php?id=' . $orderId);
-    exit();
-} catch (Exception $e) {
-            $conn->rollback();
-            $error = 'Lỗi thanh toán: ' . $e->getMessage();
+            $stmtOrder->close();
         }
     }
 }
@@ -92,9 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Thanh toán - Savor Cake</title>
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        .checkout-page { max-width: 1100px; margin: 30px auto; padding: 0 20px; font-family: 'Poppins', sans-serif; }
+        .checkout-page { max-width: 1100px; margin: 30px auto; padding: 0 20px; font-family: 'Open Sans', sans-serif; }
         .checkout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .card { background: #fffaf0; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; }
         .card h2 { margin-bottom: 15px; color: #5D4037; }
@@ -106,8 +107,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .order-summary { font-size: 14px; }
         .order-summary .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
         .total { font-weight: 700; color: #2e7d32; }
-        .btn-submit { background: #FFCA28; color: #5D4037; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        .btn-submit:hover { background: #FFB300; }
+        .btn-submit {
+            background: var(--main-brown);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-submit:hover {
+            background: var(--white);
+            color: var(--main-brown);
+            border: 1px solid var(--main-brown);
+        }
         .error { color: #d32f2f; margin-bottom: 12px; font-weight: 600; }
         @media (max-width: 900px) { .checkout-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
     </style>

@@ -68,14 +68,14 @@ $cat_result = $conn->query($cat_sql);
     <title>Sản phẩm - Anh Hoa Bakery</title>
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* === TRANG SẢN PHẨM === */
         .products-page {
             max-width: 1200px;
             margin: 30px auto;
             padding: 0 20px;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Open Sans', sans-serif;
         }
 
         .page-header {
@@ -85,7 +85,7 @@ $cat_result = $conn->query($cat_sql);
 
         .page-header h1 {
             font-size: 32px;
-            color: #5D4037;
+            color: #1a1a1a;
             font-weight: 700;
             margin-bottom: 10px;
         }
@@ -105,7 +105,7 @@ $cat_result = $conn->query($cat_sql);
             background: #f8f5f0;
             padding: 15px;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         .filter-group {
@@ -139,7 +139,7 @@ $cat_result = $conn->query($cat_sql);
         }
 
         .btn-search {
-            background: #388e3c;
+            background: var(--main-brown);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -156,13 +156,13 @@ $cat_result = $conn->query($cat_sql);
         }
 
         .btn-search:hover {
-            background: #4E342E;
+            background: var(--brown-light);
         }
 
         /* === GRID SẢN PHẨM === */
         .products-grid {
             display: flex;
-            background: #fffaf0;
+            background: var(--light-beige);
             flex-wrap: wrap;
             gap: 25px;
             justify-content: center;
@@ -173,7 +173,7 @@ $cat_result = $conn->query($cat_sql);
 
         .product-card {
             width: 220px;
-            background-color: #fffaf0;
+            background-color: var(--white);
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
@@ -208,7 +208,7 @@ $cat_result = $conn->query($cat_sql);
         .product-info h3 {
             font-size: 15px;
             font-weight: 600;
-            color: #222;
+            color: var(--text-black);
             margin: 6px 0 4px;
             line-height: 1.3;
         }
@@ -229,7 +229,7 @@ $cat_result = $conn->query($cat_sql);
         .product-price {
             font-size: 18px;
             font-weight: 700;
-            color: #2e7d32;
+            color: var(--main-brown);
             margin: 8px 0 0;
             flex-grow: 1;
         }
@@ -245,7 +245,7 @@ $cat_result = $conn->query($cat_sql);
         }
 
         .btn-view {
-            background: #4caf50;
+            background: var(--main-brown);
             color: #fff;
             padding: 0 20px;
             flex: 1;
@@ -264,28 +264,32 @@ $cat_result = $conn->query($cat_sql);
         }
 
         .btn-view:hover {
-            background: #388e3c;
+            background: var(--brown-light);
         }
 
         .btn-cart {
-            background: #FFCA28;
-            color: #5D4037;
+            background: rgba(255,255,255,0.45);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.35);
+            color: var(--main-brown);
             width: 40px;
             height: 40px;
             padding: 0;
             font-size: 18px;
             border-radius: 8px;
             flex-shrink: 0;
-            border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease, border 0.2s ease;
         }
 
         .btn-cart:hover {
-            background: #FFB300;
+            background: var(--main-brown);
+            color: var(--white);
+            border: 1px solid var(--main-brown);
         }
 
         /* === PHÂN TRANG === */
@@ -303,14 +307,14 @@ $cat_result = $conn->query($cat_sql);
             border: 1px solid #ddd;
             border-radius: 8px;
             text-decoration: none;
-            color: #5D4037;
+            color: #388e3c;
             font-weight: 500;
             transition: 0.3s;
         }
 
         .pagination a:hover,
         .pagination .current {
-            background: #5D4037;
+            background:rgb(12, 86, 16);
             color: white;
             border-color: #5D4037;
         }
@@ -408,12 +412,12 @@ $cat_result = $conn->query($cat_sql);
                             <?php echo number_format($row['price'], 0, ',', '.'); ?>₫
                         </div>
                         <div class="product-actions">
-                            <a href="checkout.php" class="btn-view">
+                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
                                 Đặt hàng
                             </a>
-                            <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
+                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-cart">
                                 <i class="fas fa-cart-plus"></i>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -456,21 +460,6 @@ $cat_result = $conn->query($cat_sql);
 </div>
 
 <?php include 'footer.php'; ?>
-
-<script>
-    // Thêm vào giỏ hàng nhanh
-    function addToCart(productId) {
-        fetch('add-to-cart.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `product_id=${productId}&quantity=1&size=20cm&flavor=Vani`
-        })
-        .then(() => {
-            alert('Đã thêm vào giỏ hàng!');
-            location.reload(); // Cập nhật số lượng giỏ
-        });
-    }
-</script>
 
 </body>
 </html>

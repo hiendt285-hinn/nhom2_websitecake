@@ -6,10 +6,9 @@
     }
     
     body { 
-        font-family: 'Poppins', sans-serif; 
-        background: #fffaf0; 
+        font-family: 'Open Sans', sans-serif; 
+        background: #F5F1E8; 
         color: #333;
-        
         display: flex;
         flex-direction: column; 
         min-height: 100vh; 
@@ -35,14 +34,14 @@
 
 
     .sidebar {
-        background: #fffaf0;
+        background: #ffffff;
         padding: 20px;
         min-height: auto; 
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06); 
         width: 100%; 
         box-sizing: border-box;
         margin-bottom: 20px; 
-        border-radius: 0;
+        border-radius: 12px;
     }
 
 
@@ -89,17 +88,16 @@
 
     .content {
       padding: 30px;
-      background: #fffaf0;
+      background: #F5F1E8;
       flex-grow: 1; 
-
     }
     
     .footer {
-      background: #5a8b56;
+      background: #8B6F47;
       color: white;
       text-align: center;
       padding: 15px;
-      font-size: 14px;Viền 
+      font-size: 14px;
       flex-shrink: 0; 
     }
 </style>

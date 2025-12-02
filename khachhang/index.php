@@ -2,7 +2,35 @@
 session_start();
 include 'connect.php';
 include 'header.php';
+
+// === HÀM LẤY SẢN PHẨM THEO DANH MỤC ===
+// Hàm này được tối ưu để dùng Prepared Statement và lấy 4 sản phẩm mới nhất
+function getProductsByCategory($conn, $category_id) {
+    // Chỉ lấy các trường cần thiết cho card sản phẩm
+    $stmt = $conn->prepare("SELECT id, name, price, image, short_description FROM products WHERE category_id = ? ORDER BY id DESC LIMIT 4");
+    if (!$stmt) {
+        // Xử lý lỗi prepare
+        error_log("Prepare failed: " . $conn->error);
+        return false;
+    }
+    $stmt->bind_param('i', $category_id);
+    $stmt->execute();
+    return $stmt->get_result();
+}
+
+
+$box_collection_id = 7; 
+$hoatoc_id = 3;          
+$mousse_id = 5;          
+
+// === THỰC HIỆN TRUY VẤN DỮ LIỆU ===
+$box_products = getProductsByCategory($conn, $box_collection_id);
+$hoatoc_products = getProductsByCategory($conn, $hoatoc_id);
+$mousse_products = getProductsByCategory($conn, $mousse_id);
+
 ?>
+<div class="content-wrapper"> 
+  
 <section class="hero">
   <div class="hero-content">
     <h1>Mỗi miếng bánh, một câu chuyện hạnh phúc</h1>
@@ -40,124 +68,99 @@ include 'header.php';
 </section>
 
 <section class="box-collection">
-  <h2 class="collection-title">Premium Box Collection<br><span>Open The Delight</span></h2>
-  <p class="collection-desc">
-    Khám phá bộ sưu tập bánh hộp cao cấp độc đáo từ Savor Cake với những tuyệt phẩm Tiramisu, Matcha và Chocolate. 
-    Mỗi chiếc hộp tinh tế là lời mời gọi "open the delight" – mở ra niềm vui với từng tầng hương vị đậm đà, nơi rượu rum 
-    Captain Morgan hòa quyện cùng các nguyên liệu thượng hạng, mang đến một trải nghiệm ẩm thực xa xỉ và đậm chất nghệ thuật.
-  </p>
+    <h2 class="collection-title">Premium Box Collection<br><span>Open The Delight</span></h2>
+    <p class="collection-desc">
+        Khám phá bộ sưu tập bánh hộp cao cấp độc đáo từ Savor Cakevới những tuyệt phẩm Tiramisu, Matcha và Chocolate. 
+        Mỗi chiếc hộp tinh tế là lời mời gọi "open the delight" – mở ra niềm vui với từng tầng hương vị đậm đà, nơi rượu rum 
+        Captain Morgan hòa quyện cùng các nguyên liệu thượng hạng, mang đến một trải nghiệm ẩm thực xa xỉ và đậm chất nghệ thuật.
+    </p>
 
-  <h3 class="box-subtitle">| Bánh hộp thiếc</h3>
+    <h3 class="box-subtitle">| Bánh hộp thiếc</h3>
 
-  <div class="product-grid">
-    <div class="product-card">
-      <img src="../images/tiramisu-matcha-250g.webp" alt="Tiramisu Matcha">
-      <h4>Tiramisu Matcha 250g</h4>
-      <p>Bánh Tiramisu Matcha, bản giao hưởng tinh tế giữa lớp bánh lady finger nhúng nước trà xanh đậm vị kết hợp cùng rượu dark rum Captain Morgan, xen kẽ với lớp kem tiramisu mượt mà, phô mai mascarpone, phía trên phủ lớp bột matcha Haru Nhật Bản, mang đến hậu vị thanh mát, nhẹ nhàng nhưng đầy lôi cuốn</p>
-      <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-      <p class="price">189.000₫</p>
-      <div class="actions">
-      <a href="checkout.php" class="btn-order"> Đặt hàng </a>
-      <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
-        <i class="fas fa-cart-plus"></i></button>
-      </div>
+    <div class="product-grid products-grid">
+        <?php if ($box_products && $box_products->num_rows > 0): ?>
+            <?php while($row = $box_products->fetch_assoc()): ?>
+            <div class="product-card">
+                <a href="product-detail.php?id=<?php echo $row['id']; ?>">
+                    <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
+                </a>
+                <div class="product-info">
+                    <h3>
+                        <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
+                            <?php echo htmlspecialchars($row['name']) ?>
+                        </a>
+                    </h3>
+                    <div class="product-price">
+                        <?php echo number_format($row['price'], 0, ',', '.') ?>₫
+                    </div>
+                    <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
+                    <div class="product-actions">
+                        <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
+                            Đặt hàng
+                        </a>
+                        <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <p style="text-align:center; width:100%; color:#999;">Hiện không có sản phẩm trong bộ sưu tập này.</p>
+        <?php endif; ?>
     </div>
-
-    <div class="product-card">
-      <img src="../images/tiramisu-classic-250g.webp" alt="Tiramisu Classic">
-      <h4>Tiramisu Classic 250g</h4>
-      <p>Bánh Tiramisu Classic là sự kết hợp hài hòa giữa lớp bánh lady finger thấm đẫm cà phê và rượu dark rum Captain Morgan, xen kẽ với lớp kem tiramisu mượt mà làm từ trứng gà, phô mai mascarpone chuẩn Ý</p>
-      <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-      <p class="price">169.000₫</p>
-      <div class="actions">
-        <a href="checkout.php" class="btn-order">Đặt ngay</a>
-        <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <img src="../images/choco-dream-cake.webp" alt="Choco Dream Cake">
-      <h4>Choco Dream Cake 315g</h4>
-      <p>Choco Dream Cake là bản hòa tấu ngọt ngào của 5 tầng hương vị: cốt bánh chocolate ẩm mịn thấm đẫm nước cacao và rượu dark rum Captain Morgan, xen kẽ lớp caramel giòn cùng hạt óc chó và hạnh nhân, mousse chocolate mượt mà và ganache đậm vị. Phía trên là lớp chocolate nguyên chất phủ nhẹ bột cacao cao cấp – dùng thìa đập vỡ và xắn một miếng từ đáy lên để cảm nhận sự bùng nổ của từng tầng hương vị</p>
-      <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
-      <p class="price">259.000₫</p>
-      <div class="actions">
-        <a href="checkout.php" class="btn-order">Đặt ngay</a>
-        <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-      </div>
-    </div>
-
-    <div class="product-card">
-      <img src="../images/berry-lover-cake-500g-no-cherry.webp" alt="Berry Love">
-      <h4>Berry Love 400g</h4>
-      <p>Chiếc bánh là bản tình ca mùa hè gửi đến những tâm hồn yêu trái cây đỏ mọng. Với 5 tầng hương vị đan xen, Berry Lover Cake chinh phục vị giác bằng sự cân bằng tinh tế giữa vị ngọt, vị chua dịu và độ béo mịn hoàn hảo</p>
-      <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
-      <p class="price">Giá: <strong>259.000 ₫</strong></p>
-      <div class="actions">
-        <a href="checkout.php" class="btn-order">Đặt ngay</a>
-        <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-      </div>
-    </div>
-  </div>
 </section>
-
 <section class="ship-fast">
-  <h2>“Biệt đội” <span>Ship hỏa tốc</span></h2>
-  <p class="ship-desc">
-    Sweet Cake xây dựng đội ngũ Shipper chuyên nghiệp & thân thiện, 
-    giao hàng nhanh chóng đến tay khách yêu trong vòng 1H
-  </p>
+    <h2>“Biệt đội” <span>Ship hỏa tốc</span></h2>
+    <p class="ship-desc">
+        Sweet Cake xây dựng đội ngũ Shipper chuyên nghiệp & thân thiện, 
+        giao hàng nhanh chóng đến tay khách yêu trong vòng 1H
+    </p>
 
-  <div class="ship-gallery">
-    <img src="../images/shipperRow1.webp" alt="Shipper giao bánh">
-    <img src="../images/shipperRow4.webp" alt="Shipper tại tiệm bánh">
-    <img src="../images/shipperRow3.webp" alt="Shipper tại tiệm bánh">
-    <img src="../images/shipperRow2 (1).webp" alt="Shipper giao bánh cho khách">
-  </div>
+    <div class="ship-gallery">
+        <img src="../images/shipperRow1.webp" alt="Shipper giao bánh">
+        <img src="../images/shipperRow4.webp" alt="Shipper tại tiệm bánh">
+        <img src="../images/shipperRow3.webp" alt="Shipper tại tiệm bánh">
+        <img src="../images/shipperRow2 (1).webp" alt="Shipper giao bánh cho khách">
+    </div>
 </section>
 
 <h3 class="box-subtitle">| Bánh kem hỏa tốc 1H</h3>
 
-<div class="product-grid">
-  <div class="product-card">
-    <img src="../images/banh-red-velvet-sua-chua-viet-quat-201023.webp" alt="Bánh red velvet sữa chua việt quất">
-    <h4>Bánh red velvet sữa chua việt quất</h4>
-    <p>Bánh kem cốt red velvet tròn, kem sữa chua, bên trên trang trí 3 quả việt quất.</p>
-    <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-    <p class="price">189.000₫</p>
-    <div class="actions">
-      <a href="checkout.php" class="btn-order">Đặt ngay</a>
-      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-    </div>
-  </div>
-
-  <div class="product-card">
-    <img src="../images/banh-kem-bo-xoai-viet-quat.webp" alt="Bánh kem bơ xoài việt quất">
-    <h4>Bánh kem bơ xoài việt quất</h4>
-    <p>Cốt vani và kem bơ, trang trí thêm hoa quả tươi mát gồm xoài và việt quất trên mặt bánh, xen kẽ các bông kem bơ béo ngậy.</p>
-    <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-    <p class="price">169.000₫</p>
-    <div class="actions">
-      <a href="checkout.php" class="btn-order">Đặt ngay</a>
-      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-    </div>
-  </div>
-
-  <div class="product-card">
-    <img src="../images/banh-kem-triple-choco.webp" alt="Triple choco cake">
-    <h4>Triple choco cake</h4>
-    <p>Bánh 3 lần vị socola: cốt bánh socola, kem tươi vị socola, trang trí socola chip.</p>
-    <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
-    <p class="price">150.000₫</p>
-    <div class="actions">
-      <a href="checkout.php" class="btn-order">Đặt ngay</a>
-      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-    </div>
-  </div>
+<div class="product-grid products-grid">
+    <?php if ($hoatoc_products && $hoatoc_products->num_rows > 0): ?>
+      <?php while($row = $hoatoc_products->fetch_assoc()): ?>
+      <div class="product-card">
+        <a href="product-detail.php?id=<?php echo $row['id']; ?>">
+          <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
+        </a>
+        <div class="product-info">
+          <h3>
+            <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
+              <?php echo htmlspecialchars($row['name']) ?>
+            </a>
+          </h3>
+          <div class="product-price">
+            <?php echo number_format($row['price'], 0, ',', '.') ?>₫
+          </div>
+          <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
+          <div class="product-actions">
+            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
+                Đặt hàng
+            </a>
+            <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
+              <i class="fas fa-cart-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <?php endwhile; ?>
+    <?php else: ?>
+      <p style="text-align:center; width:100%; color:#999;">Hiện không có sản phẩm bánh kem hỏa tốc nào.</p>
+    <?php endif; ?>
 </div>
-
 <section class="mousse-section">
-  <div class="mousse-container">
+    <div class="mousse-container">
     <div class="mousse-images">
       <div class="green-circle"></div>
       <img src="../images/z7140806120150_8c57454f6c66ebc70683090fb1ada3d2.jpg" alt="Bánh mousse vàng" class="cake cake3">
@@ -169,53 +172,45 @@ include 'header.php';
         <span class="title-orange">Mousse</span>
       </h2>
       <p>
-        Sweet cake ra mắt bộ sưu tập bánh mousse ngọt mềm, thơm lừng vị hoa quả/cà phê. 
-        Bánh sử dụng nguyên liệu xịn xò, 100% kem tươi whipping nhập khẩu và hoa quả tươi, 
-        phù hợp với những người sành ăn nhất.
+        Sweet cake ra mắt bộ sưu tập bánh mousse ngọt mềm, thơm lừng vị hoa quả/cà phê...
       </p>
     </div>
   </div>
 </section>
 
 <h3 class="box-subtitle">| Bánh lạnh Mousse</h3>
-<div class="product-grid">
-  <div class="product-card">
-    <img src="../images/mousse-sua-chua-viet-quat.webp" alt="Mousse sữa chua việt quất">
-    <h4>Mousse sữa chua việt quất</h4>
-    <p>Cốt vani xen kẽ các tầng bánh. Tầng dưới cùng là lớp mousse việt quất, tiếp theo là tầng mousse sữa chua và trên cùng là lớp thạch gelatin việt quất. Trang trí bằng việt quất, dâu tươi Đà Lạt, socola trắng và lá hương thảo</p>
-    <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-    <p class="price">220.000₫</p>
-    <div class="actions">
-      <a href="checkout.php" class="btn-order">Đặt ngay</a>
-      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-    </div>
-  </div>
-
-  <div class="product-card">
-    <img src="../images/mousse-xoai-original.webp" alt="Mousse Xoài">
-    <h4>Mousse Xoài</h4>
-    <p>Bánh mousse mang đậm hương vị xoài ngọt mát dễ chịu, kem tươi whipping cream kết hợp cùng sữa chua cốt vani, trang trí thêm xoài trên mặt bánh để thêm đậm vị cùng socola</p>
-    <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
-    <p class="price">Giá: <strong>220.000 ₫</strong></p>
-    <div class="actions">
-      <a href="checkout.php" class="btn-order">Đặt ngay</a>
-      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-    </div>
-  </div>
-
-  <div class="product-card">
-    <img src="../images/mousse-bo-sua-dua.webp" alt="Mousse bơ sữa dừa">
-    <h4>Mousse bơ sữa dừa</h4>
-    <p>Chất bánh mousse mềm, mịn, ngọt bùi, kết hợp với 2 lớp mousse thơm ngậy của bơ và sữa dừa, bồng bềnh nhẹ nhàng như tan trong miệng. Trang trí thêm hoa quả bên trên, cùng một bông hoa nhỏ xinh ở giữa.</p>
-    <div class="delivery-time">Giao được từ <span>16 giờ 30 hôm nay</span></div>
-    <p class="price">230.000₫</p>
-    <div class="actions">
-      <a href="checkout.php" class="btn-order">Đặt ngay</a>
-      <a href="cart.php" class="btn-cart"><i class="fas fa-cart-plus"></i></a>
-  </div>
+<div class="product-grid products-grid">
+    <?php if ($mousse_products && $mousse_products->num_rows > 0): ?>
+      <?php while($row = $mousse_products->fetch_assoc()): ?>
+      <div class="product-card">
+        <a href="product-detail.php?id=<?php echo $row['id']; ?>">
+          <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
+        </a>
+        <div class="product-info">
+          <h3>
+            <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
+              <?php echo htmlspecialchars($row['name']) ?>
+            </a>
+          </h3>
+          <div class="product-price">
+            <?php echo number_format($row['price'], 0, ',', '.') ?>₫
+          </div>
+          <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
+          <div class="product-actions">
+            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
+                Đặt hàng
+            </a>
+            <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
+              <i class="fas fa-cart-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <?php endwhile; ?>
+    <?php else: ?>
+      <p style="text-align:center; width:100%; color:#999;">Hiện không có sản phẩm bánh Mousse nào.</p>
+    <?php endif; ?>
 </div>
-
-<!-- Phần giới thiệu cửa hàng -->
 <section class="store-intro">
   <div class="intro-container">
     <div class="intro-text">
@@ -230,7 +225,7 @@ include 'header.php';
         Hãy ghé thăm cửa hàng của chúng tôi để tận mắt cảm nhận không gian ấm cúng, 
         phong cách trang trí ngọt ngào và đội ngũ nhân viên luôn sẵn sàng phục vụ bạn tận tâm nhất.
       </p>
-      <a href="#contact" class="btn-visit">Ghé thăm cửa hàng</a>
+      <a href="#store" class="btn-visit">Ghé thăm cửa hàng</a>
     </div>
 
     <div class="intro-images">
@@ -346,16 +341,21 @@ include 'header.php';
   </div>
 </section>
 
-<section class="store-system">
+<section class="store-system" id="store">
   <h2>Hệ thống cửa hàng</h2>
   <p class="subtitle">Cơ sở sẵn bánh</p>
 
-  <div class="store-wrapper">
+  <div class="store-wrapper" >
     <div class="store-card">
       <h3>Sweet Cake Hinnode</h3>
       <p><strong>Giờ mở cửa:</strong> 8h - 21h T2-CN</p>
       <p><strong>Điện thoại:</strong> 091235355887 (Tư vấn)</p>
-      <p><strong>Địa chỉ:</strong> lk06.15,Kim Chung Di Trạch,Hoài Đức,Hà Nội</p>
+      <p><strong>Địa chỉ:</strong> 15,Kim Chung Di Trạch,Hoài Đức,Hà Nội</p>
+      <p class="map-link-container">
+        <a href="https://maps.app.goo.gl/gJgrzAVwzTYXMNsY9" target="_blank" class="map-link">
+            📍 Xem trên Google Maps
+        </a>
+      </p>
     </div>
 
     <div class="store-card">
@@ -363,15 +363,30 @@ include 'header.php';
       <p><strong>Giờ mở cửa:</strong> 8h - 21h T2-CN</p>
       <p><strong>Điện thoại:</strong> 038521596256 (Tư vấn)</p>
       <p><strong>Địa chỉ:</strong> 232 Phạm Văn Đồng,Cổ Nhuế 1,BẮc Từ Liêm,Hà Nội </p>
+      <p class="map-link-container">
+        <a href="https://maps.app.goo.gl/EVWWVXXMaqsmYJSc9" target="_blank" class="map-link">
+            📍 Xem trên Google Maps
+        </a>
+      </p>
     </div>
   </div>
 </section>
 
-<?php
-// Include footer (đã điều chỉnh để phù hợp)
-include 'footer.php';
+</div> 
 
-// Đóng kết nối DB nếu dùng
+<?php
+
+?>
+<script>
+    function addToCart(productId) { 
+        window.location.href = 'product-detail.php?id=' + productId;
+    }
+</script>
+
+<?php 
+include 'footer.php'; 
+
+// Đóng kết nối DB
 if (isset($conn)) {
     mysqli_close($conn);
 }

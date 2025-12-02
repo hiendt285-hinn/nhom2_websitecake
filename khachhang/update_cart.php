@@ -15,7 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['quantities'])) {
         }
     }
 
-    echo json_encode(['success' => true, 'cart_count' => count($_SESSION['cart'])]);
+    if (empty($_SESSION['cart'])) {
+        unset($_SESSION['cart']);
+    }
+
+    echo json_encode([
+        'success' => true,
+        'cart_count' => isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0
+    ]);
 } else {
     header('Location: cart.php');
 }

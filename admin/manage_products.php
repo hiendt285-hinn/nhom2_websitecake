@@ -54,14 +54,15 @@ $result = $conn->query($sql);
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Quản lý sản phẩm - Savor Cake</title>
 <style>
-    body { font-family: 'Poppins', sans-serif; background: #fffaf0; margin:0; padding:20px;}
-    h1 { color: #5a8b56; }
-    table { width: 100%; border-collapse: collapse; background: white; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    th { background: #ff5f9e; color: white; }
-    a { color: #ff5f9e; text-decoration: none; font-weight: 600; }
-    a:hover { color: #ff90c2; }
-    .btn-delete { color: red; cursor: pointer; }
+    body { font-family: 'Open Sans', sans-serif; background: #F5F1E8; margin:0; padding:20px;}
+    h1 { color: #8B6F47; margin-bottom:16px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius:8px; overflow:hidden; }
+    th, td { border-bottom: 1px solid #eee; padding: 10px 12px; text-align: left; font-size:14px; }
+    th { background: #f9f6f2; color: #333; font-weight:600; }
+    a { color: #8B6F47; text-decoration: none; font-weight: 600; }
+    a:hover { color: #A0826D; }
+    .btn-delete { color: #d32f2f; cursor: pointer; margin-left: 10px; }
+    .btn-edit { color: #8B6F47; text-decoration: none; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -90,6 +91,7 @@ $result = $conn->query($sql);
                     <td><img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="" style="height:50px;"></td>
                     <td><?php echo $row['stock'] ?></td>
                     <td>
+                        <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="btn-edit">Chỉnh sửa</a>
                         <span class="btn-delete" onclick="deleteProduct(<?php echo $row['id']; ?>)">Xóa</span>
                     </td>
                 </tr>
@@ -111,9 +113,8 @@ function deleteProduct(id) {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
                 if (response.success) {
-                    // Remove row tạm thời, rồi reload để cập nhật ID mới
                     document.getElementById('row-' + id).remove();
-                    location.reload(); // Reload để thấy thứ tự ID đã reset
+                    location.reload(); 
                 } else {
                     alert(response.error || 'Lỗi khi xóa.');
                 }

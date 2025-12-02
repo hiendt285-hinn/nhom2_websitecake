@@ -50,36 +50,41 @@ function status_text($status) {
 <head>
     <meta charset="UTF-8">
     <title>Lịch sử đơn hàng</title>
+    <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        body { font-family: 'Poppins', Arial, sans-serif; margin: 20px; background: #f7f7f7; }
-        .container { max-width: 900px; margin: auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        body { font-family: 'Open Sans', Arial, sans-serif; margin: 0; background: var(--light-beige); }
+        .order-history-page { max-width: 1000px; margin: 40px auto; padding: 0 20px 40px; }
+        .container { background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
         .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .back-btn { display: inline-flex; align-items: center; gap: 8px; background: #ff5f9e; color: #fff; padding: 10px 18px; border-radius: 999px; text-decoration: none; font-weight: 600; transition: 0.3s; }
-        .back-btn:hover { background: #ff3f85; }
-        h1 { text-align: center; color: #333; margin-bottom: 20px; }
-        .user-summary { background: #fffaf0; border: 1px solid #ffe0e6; border-radius: 12px; padding: 18px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-        .user-summary h2 { grid-column: 1 / -1; margin: 0 0 10px 0; font-size: 20px; color: #5D4037; }
+        .back-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--main-brown); color: #fff; padding: 10px 18px; border-radius: 999px; text-decoration: none; font-weight: 600; transition: 0.3s; font-size: 14px; }
+        .back-btn:hover { background: var(--brown-light); }
+        h1 { text-align: center; color: var(--text-black); margin-bottom: 20px; font-size: 24px; }
+        .user-summary { background: #fffaf0; border: 1px solid #f3e0c7; border-radius: 12px; padding: 18px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+        .user-summary h2 { grid-column: 1 / -1; margin: 0 0 10px 0; font-size: 18px; color: #5D4037; }
         .info-item { display: flex; flex-direction: column; }
-        .info-item label { font-weight: 600; color: #777; margin-bottom: 4px; }
-        .info-item span { background: #fff; border: 1px solid #f0d5da; border-radius: 8px; padding: 10px 12px; color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #ffeff5; color: #5D4037; font-weight: 600; }
-        tr:hover { background-color: #fdf4f7; }
+        .info-item label { font-weight: 600; color: #777; margin-bottom: 4px; font-size: 13px; }
+        .info-item span { background: #fff; border: 1px solid #f0d5da; border-radius: 8px; padding: 8px 10px; color: #333; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background-color: #f9f6f2; color: var(--text-black); font-weight: 600; }
+        tr:hover { background-color: #fdf7f0; }
         .status { font-weight: bold; }
         .pending { color: #ff9800; }
         .confirmed { color: #1976D2; }
         .shipping { color: #9C27B0; }
         .delivered { color: #2e7d32; }
         .cancelled { color: #f44336; }
-        .view-btn { display: inline-block; padding: 6px 12px; background: #2196F3; color: white; text-decoration: none; border-radius: 20px; font-size: 14px; }
-        .view-btn:hover { background: #1976D2; }
+        .view-btn { display: inline-block; padding: 6px 12px; background: var(--main-brown); color: white; text-decoration: none; border-radius: 999px; font-size: 13px; font-weight: 600; }
+        .view-btn:hover { background: var(--brown-light); }
         .no-orders { text-align: center; color: #777; font-style: italic; margin: 40px 0; }
         .footer-link { text-align: center; margin-top: 24px; }
-        .footer-link a { color: #2196F3; text-decoration: none; font-weight: 600; }
+        .footer-link a { color: var(--main-brown); text-decoration: none; font-weight: 600; }
     </style>
 </head>
+
 <body>
+<div class="order-history-page">
 <div class="container">
     <div class="header-actions">
         <a href="account.php" class="back-btn"><i class="fas fa-arrow-left"></i> Quay lại tài khoản</a>
@@ -142,6 +147,7 @@ function status_text($status) {
     <p class="footer-link">
         <a href="index.php">Quay lại trang chủ</a>
     </p>
+</div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js" defer></script>
 </body>

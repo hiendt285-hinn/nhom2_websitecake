@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 require_once 'connect.php';
 
 // Kiểm tra đăng nhập
@@ -43,7 +44,6 @@ if ($stmt = $conn->prepare($detailSql)) {
     $stmt->bind_param('i', $order_id);
     if ($stmt->execute()) {
         $result = $stmt->get_result();
-        // Ensure fetch_assoc is used correctly and not looping infinitely
         while ($row = $result->fetch_assoc()) {
             $items[] = $row;
         }
@@ -80,31 +80,37 @@ function status_color($status) {
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết đơn hàng #<?php echo htmlspecialchars($order_id); ?></title>
+    <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f7f7f7;
+            font-family: 'Open Sans', Arial, sans-serif;
+            background: var(--light-beige);
             margin: 0;
             padding: 0;
         }
-        .container {
-            max-width: 800px;
+        .order-detail-page {
+            max-width: 900px;
             margin: 40px auto;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-            padding: 32px 24px;
+            padding: 0 20px 40px;
         }
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 24px;
-            color: #1976D2;
+        .order-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            padding: 24px 20px;
+        }
+        .order-card h1 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: var(--main-brown);
         }
         .info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
+            gap: 12px;
         }
         .info div {
             min-width: 220px;
@@ -112,16 +118,17 @@ function status_color($status) {
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         th, td {
-            padding: 12px 8px;
+            padding: 10px 8px;
             border-bottom: 1px solid #e0e0e0;
             text-align: left;
+            font-size: 14px;
         }
         th {
-            background: #f0f4fa;
-            color: #1976D2;
+            background: #f9f6f2;
+            color: var(--text-black);
             font-weight: 600;
         }
         tr:last-child td {
@@ -132,87 +139,97 @@ function status_color($status) {
             font-size: 0.95em;
         }
         .total {
-            font-size: 1.2em;
+            font-size: 16px;
             text-align: right;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .total strong {
+            color: var(--main-brown);
         }
         .back-btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 10px 18px;
-            background: #1976D2;
+            background: var(--main-brown);
             color: #fff;
-            border-radius: 4px;
+            border-radius: 999px;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            font-size: 14px;
             transition: background 0.2s;
         }
         .back-btn:hover {
-            background: #1565c0;
+            background: var(--brown-light);
         }
         @media (max-width: 600px) {
-            .container {
-                padding: 16px 6px;
+            .order-card {
+                padding: 18px 12px;
             }
             .info {
                 flex-direction: column;
             }
             table, th, td {
-                font-size: 0.95em;
+                font-size: 0.9em;
             }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>Chi tiết đơn hàng #<?php echo htmlspecialchars($order['id']); ?></h1>
 
-    <div class="info">
-        <div>
-            <p><strong>Khách hàng:</strong> <?php echo htmlspecialchars($order['username']); ?></p>
-            <p><strong>Ngày đặt:</strong> <?php echo date('d/m/Y H:i:s', strtotime($order['created_at'])); ?></p>
-            <p><strong>Thanh toán:</strong> <?php echo htmlspecialchars($order['payment_method']); ?></p>
+<div class="order-detail-page">
+    <div class="order-card">
+        <h1>Chi tiết đơn hàng #<?php echo htmlspecialchars($order['id']); ?></h1>
+
+        <div class="info">
+            <div>
+                <p><strong>Khách hàng:</strong> <?php echo htmlspecialchars($order['username']); ?></p>
+                <p><strong>Ngày đặt:</strong> <?php echo date('d/m/Y H:i:s', strtotime($order['created_at'])); ?></p>
+                <p><strong>Thanh toán:</strong> <?php echo htmlspecialchars($order['payment_method']); ?></p>
+            </div>
+            <div style="text-align: right;">
+                <p><strong>Trạng thái:</strong>
+                    <span style="color: <?php echo status_color($order['status']); ?>; font-weight: bold;">
+                        <?php echo status_text($order['status']); ?>
+                    </span>
+                </p>
+                <p><strong>Tổng cộng:</strong> <?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</p>
+            </div>
         </div>
-        <div style="text-align: right;">
-            <p><strong>Trạng thái:</strong>
-                <span style="color: <?php echo status_color($order['status']); ?>; font-weight: bold;">
-                    <?php echo status_text($order['status']); ?>
-                </span>
-            </p>
-            <p><strong>Tổng cộng:</strong> <?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</p>
-        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Biến thể</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($items as $item): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($item['name']); ?></td>
+                    <td class="muted">
+                        <?php if (!empty($item['size'])): ?>Size: <?php echo htmlspecialchars($item['size']); ?><?php endif; ?>
+                        <?php if (!empty($item['flavor'])): ?><?php echo !empty($item['size']) ? ' · ' : ''; ?>Vị: <?php echo htmlspecialchars($item['flavor']); ?><?php endif; ?>
+                    </td>
+                    <td><?php echo (int)$item['quantity']; ?></td>
+                    <td><?php echo number_format($item['unit_price'], 0, ',', '.'); ?> ₫</td>
+                    <td><?php echo number_format($item['unit_price'] * $item['quantity'], 0, ',', '.'); ?> ₫</td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <p class="total">
+            Tổng cộng: <strong><?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</strong>
+        </p>
+
+        <a href="order_history.php" class="back-btn"><i class="fas fa-arrow-left"></i> Quay lại danh sách đơn hàng</a>
     </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Sản phẩm</th>
-                <th>Biến thể</th>
-                <th>Số lượng</th>
-                <th>Đơn giá</th>
-                <th>Thành tiền</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($items as $item): ?>
-            <tr>
-                <td><?php echo htmlspecialchars($item['name']); ?></td>
-                <td class="muted">
-                    <?php if (!empty($item['size'])): ?>Size: <?php echo htmlspecialchars($item['size']); ?><?php endif; ?>
-                    <?php if (!empty($item['flavor'])): ?><?php echo !empty($item['size']) ? ' · ' : ''; ?>Vị: <?php echo htmlspecialchars($item['flavor']); ?><?php endif; ?>
-                </td>
-                <td><?php echo (int)$item['quantity']; ?></td>
-                <td><?php echo number_format($item['unit_price'], 0, ',', '.'); ?> ₫</td>
-                <td><?php echo number_format($item['unit_price'] * $item['quantity'], 0, ',', '.'); ?> ₫</td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <p class="total">
-        Tổng cộng: <strong><?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</strong>
-    </p>
-
-    <a href="order_history.php" class="back-btn">Quay lại danh sách đơn hàng</a>
 </div>
 </body>
 </html>

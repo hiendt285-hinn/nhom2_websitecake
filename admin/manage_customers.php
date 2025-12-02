@@ -76,19 +76,19 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quản lý khách hàng - Savor Cake</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-    body {font-family: 'Poppins', sans-serif; background:#fffaf0; margin:0; padding:0;}
-    table {width:100%; border-collapse: collapse; margin-top:10px;background:#ffffff}
-    th, td {border:1px solid #ccc; padding:8px; text-align:left;}
-    th {background:#ff5f9e; color:white;}
-    .btn {padding:5px 10px; border:none; border-radius:5px; cursor:pointer;}
-    .btn-edit {background:#5a8b56; color:white;}
-    .btn-delete {background:#ff5f9e; color:white;}
-    .form-popup {display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); border:1px solid #ccc; background:white; padding:20px; z-index:9; border-radius:10px;}
+    body {font-family: 'Open Sans', sans-serif; background:#F5F1E8; margin:0; padding:20px;}
+    table {width:100%; border-collapse: collapse; margin-top:10px;background:#ffffff; border-radius:8px; overflow:hidden;}
+    th, td {border-bottom:1px solid #eee; padding:10px 12px; text-align:left; font-size:14px;}
+    th {background:#f9f6f2; color:#333; font-weight:600;}
+    .btn {padding:6px 10px; border:none; border-radius:999px; cursor:pointer; font-size:13px; font-weight:600;}
+    .btn-edit {background:#8B6F47; color:white;}
+    .btn-delete {background:#d32f2f; color:white;}
+    .form-popup {display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); border:1px solid #ccc; background:white; padding:20px; z-index:9; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.15);}
     .form-container input[type=text], .form-container input[type=password], .form-container input[type=email] {width:100%; padding:8px; margin:5px 0 10px 0; border:1px solid #ccc; border-radius:5px;}
     .form-container .btn {width:100%; margin-top:5px;}
-    .message {padding:10px; margin-bottom:10px; border-radius:5px;}
+    .message {padding:10px; margin-bottom:10px; border-radius:5px; font-size:14px;}
     .success {background:#d4edda; color:#155724;}
     .error {background:#f8d7da; color:#721c24;}
 </style>
@@ -111,8 +111,8 @@ function closeForm() {
 </script>
 </head>
 <body>
-<div style="padding:20px;">
-    <h2>Quản lý khách hàng</h2>
+<div style="padding:0 0 20px 0;">
+    <h2 style="color:#8B6F47;">Quản lý khách hàng</h2>
 
     <?php if($error): ?><div class="message error"><?php echo $error;?></div><?php endif; ?>
     <?php if($success): ?><div class="message success"><?php echo $success;?></div><?php endif; ?>

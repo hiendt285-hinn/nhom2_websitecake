@@ -13,8 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
 $quantity = isset($_POST['quantity']) ? max(1, (int)$_POST['quantity']) : 1;
-$size = isset($_POST['size']) ? trim($_POST['size']) : '20cm';
-$flavor = isset($_POST['flavor']) ? trim($_POST['flavor']) : 'Vani';
+$size = trim($_POST['size'] ?? ''); 
+$flavor = trim($_POST['flavor'] ?? '');
+
+if (empty($size) || empty($flavor)) {
+    echo json_encode(['success' => false, 'message' => 'Vui lòng chọn Kích thước và Hương vị hợp lệ.']);
+    exit();
+}
 
 if ($productId <= 0) {
     echo json_encode(['success' => false, 'message' => 'Thiếu product_id']);

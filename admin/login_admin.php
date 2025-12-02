@@ -4,19 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Đăng nhập Admin - Savor Cake</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
     body {
-        background: #fffaf0;
-        font-family: 'Poppins', sans-serif;
+        background: #F5F1E8;
+        font-family: 'Open Sans', sans-serif;
         margin: 0;
         padding: 0;
     }
 
     table {
-        background-color: #fffaf0;
-        font-family: 'Poppins', sans-serif;
-        border-radius: 20px;
+        background-color: #ffffff;
+        font-family: 'Open Sans', sans-serif;
+        border-radius: 16px;
         padding: 20px;
         width: 450px;
         margin: 80px auto;
@@ -25,7 +25,7 @@
     }
 
     th {
-        background: linear-gradient(to right, #ff5f9e, #ff90c2);
+        background: #8B6F47;
         color: white;
         padding: 16px;
         font-size: 20px;
@@ -57,7 +57,7 @@
     }
 
     input[type="submit"] {
-        background: #ff5f9e;
+        background: #8B6F47;
         color: white;
         padding: 10px 25px;
         border: none;
@@ -69,7 +69,7 @@
     }
 
     input[type="submit"]:hover {
-        background: #ff90c2;
+        background: #A0826D;
     }
 
     .message {
