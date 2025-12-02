@@ -37,7 +37,6 @@ $available_sizes = $sizes_result ? $sizes_result->fetch_all(MYSQLI_ASSOC) : [];
 $flavors_result = $conn->query("SELECT name FROM flavors ORDER BY name ASC");
 $available_flavors = $flavors_result ? $flavors_result->fetch_all(MYSQLI_ASSOC) : [];
 
-
 // 5. Xử lý thông báo sau khi thêm vào giỏ hàng
 $message = '';
 if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
