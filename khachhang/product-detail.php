@@ -118,9 +118,7 @@ if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
                     <button type="submit" class="btn-add-to-cart">
                         <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
                     </button>
-                    <a href="checkout.php" class="btn-checkout">
-                        <i class="fas fa-credit-card"></i> Đặt hàng
-                    </a>
+                    
                 </div>
             </form>
             
