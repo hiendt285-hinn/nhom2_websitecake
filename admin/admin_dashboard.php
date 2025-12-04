@@ -118,6 +118,8 @@ include 'admin_header.php';
     <tr>
         <td width="220" valign="top" class="sidebar">
             <ul>
+            <li><a href="manage_sizes.php"><i class="fas fa-expand-arrows-alt"></i> Quản lý cỡ bánh</a></li>
+            <li><a href="manage_flavors.php"><i class="fas fa-cube"></i> Quản lý hương vị</a></li>
             <li><a href="manage_producttype.php"><i class="fas fa-list"></i> Quản lý danh mục</a></li>
             <li><a href="manage_products.php"><i class="fas fa-cake-candles"></i> Quản lý sản phẩm</a></li>
             <li><a href="manage_customers.php"><i class="fas fa-users"></i> Quản lý khách hàng</a></li>
