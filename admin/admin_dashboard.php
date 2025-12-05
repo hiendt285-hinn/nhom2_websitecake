@@ -76,8 +76,8 @@
     }
 
     .sidebar a:hover {
-        background: #ff5f9e;
-        color: white;
+        background: #F5F1E8;
+        color: black;
     }
 
     .sidebar i {

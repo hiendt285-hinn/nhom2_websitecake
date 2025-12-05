@@ -53,13 +53,13 @@ $result = $conn->query("SELECT * FROM categories ORDER BY id DESC");
 body{font-family:Poppins,sans-serif;background:#fffaf0;padding:20px;}
 table{width:100%;border-collapse:collapse;margin-top:20px;background:#ffffff}
 th,td{border:1px solid #ccc;padding:10px;text-align:left;}
-th{background:#F5F1E8;color:#fff;}
+th{background:#F5F1E8;color: #333;;}
 form input, form textarea{width:95%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;}
-form input[type=submit]{background:#ff5f9e;color:#fff;border:none;padding:10px 15px;cursor:pointer;border-radius:5px;}
-form input[type=submit]:hover{background:#ff90c2;}
-a{color:#ff5f9e;text-decoration:none;}
-a:hover{color:#ff90c2;}
-</style>
+form input[type=submit]{background:#8B6F47;color:#fff;border:none;padding:10px 15px;cursor:pointer;border-radius:5px;}
+form input[type=submit]:hover{background:#A0826D;}
+a{color:#2196F3;text-decoration:none;}
+a:hover{color:#64B5F6;}
+</style> 
 </head>
 <body>
 <h2>Quản lý danh mục sản phẩm</h2>
