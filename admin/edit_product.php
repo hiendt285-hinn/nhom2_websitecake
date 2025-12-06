@@ -87,12 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product_id > 0) {
 <title>Chỉnh sửa sản phẩm - Savor Cake</title>
 <style>
     body { font-family: 'Poppins', sans-serif; background: #fffaf0; margin:0; padding:20px;}
-    h1 { color: #5a8b56; }
+    h1 { color: #8B6F47; }
     form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    label { display: block; margin-top: 10px; font-weight: 600; color: #5a8b56; }
+    label { display: block; margin-top: 10px; font-weight: 600; color: #8B6F47; }
     input[type="text"], input[type="number"], select { width: calc(100% - 22px); padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-    input[type="submit"] { background-color: #ff5f9e; color: white; padding: 12px 20px; margin-top: 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-    input[type="submit"]:hover { background-color: #ff90c2; }
+    input[type="submit"] { background-color: #8B6F47; color: white; padding: 12px 20px; margin-top: 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    input[type="submit"]:hover { background-color: #A08C6D; }
     .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
     .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
     .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }

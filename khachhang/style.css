@@ -1025,12 +1025,12 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   color: #333;
 }
 
-/* Footer (Điều chỉnh để phù hợp với footer.php) */
-.footer {
-  background-color: #8B6F47;
-  color: #fff;
-  padding: 50px 20px;
-  font-family: 'Inter', sans-serif;
+
+.site-footer {
+  background-color: #8B6F47; 
+  color: #E0E0E0;
+  padding: 60px 40px 0;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .footer-container {
@@ -1039,70 +1039,152 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   justify-content: space-between;
   max-width: 1400px;
   margin: 0 auto;
-  gap: 30px;
+  gap: 40px;
+  padding-bottom: 40px;
 }
 
 .footer-column {
   flex: 1;
-  min-width: 250px;
+  min-width: 220px;
 }
 
 .footer-column h3 {
-  font-size: 1.3rem;
-  margin-bottom: 15px;
-  font-weight: 600;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: black; 
+  font-family: 'Playfair Display', serif;
 }
 
-.footer-column p {
-  font-size: 0.95rem;
-  margin: 6px 0;
+.footer-brand {
+    max-width: 300px;
 }
 
-.footer-column a {
-  color: #fff;
-  text-decoration: none;
+.footer-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--white) !important;
+    margin-bottom: 15px;
 }
 
-.footer-column a:hover {
-  text-decoration: underline;
-}
-
-.center {
-  text-align: center;
-}
-
-.brand-logos {
+.footer-column p, .footer-column a, .footer-links ul li a {
+  font-size: 0.9rem;
+  margin: 10px 0;
+  color: #ffffff;
+  line-height: 1.5;
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 25px;
-  margin-top: 10px;
+  gap: 8px;
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
-.brand-logos img {
-  height: 100px;
-  object-fit: contain;
+.footer-column a:hover, .footer-links ul li a:hover {
+  color: var(--main-brown); 
+}
+
+
+.footer-column i {
+    color: black;
+    font-size: 14px;
+}
+
+/* Links */
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* Socials */
+.footer-socials {
+    margin-top: 20px;
+    display: flex;
+    gap: 15px;
+}
+
+.footer-socials a {
+    width: 35px;
+    height: 35px;
+    background: #444;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.3s;
+}
+
+.footer-socials a:hover {
+    background: black;
+}
+
+.footer-socials i {
+    color: #fff;
+    font-size: 16px;
+}
+
+
+/* Certification column */
+.footer-certification {
+    text-align: center;
+}
+
+.gov-logo {
+  width: 150px;
+  height: auto;
+  margin: 10px auto 0;
+  filter: grayscale(100%) brightness(150%); 
+}
+
+.brand-logo-small {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-top: 15px;
+    border-radius: 0;
 }
 
 .press-text {
   margin-top: 10px;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  color: #B0B0B0;
 }
 
-.gov-logo {
-  width: 200px;
-  margin-top: 40px;
-  display: block;
-  margin: 40px auto 0;
+/* Footer Bottom (Copyright) */
+.footer-bottom {
+    border-top: 1px solid #444444;
+    padding: 20px 0;
+    text-align: center;
 }
 
-footer {
-  text-align: center;
-  padding: 20px;
-  color: #777;
-  background: #FFFFFF;
-  border-top: 1px solid #eee;
-  margin-top: 50px;
+.footer-bottom p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: black;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Responsive cho Footer */
+@media (max-width: 768px) {
+  .site-footer {
+    padding: 40px 20px 0;
+  }
+  .footer-container {
+    gap: 30px;
+  }
+  .footer-column {
+    min-width: 100%;
+    text-align: center;
+  }
+  .footer-column p {
+    justify-content: center;
+  }
+  .footer-logo {
+      text-align: center;
+  }
+  .footer-socials {
+      justify-content: center;
+  }
 }
 /* --- Phần giới thiệu cửa hàng --- */
 .store-intro {
