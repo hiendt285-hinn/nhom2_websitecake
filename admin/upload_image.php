@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>Thêm sản phẩm mới - Savor Cake</title>
 <style>
     body { font-family: 'Poppins', sans-serif; background: #fffaf0; margin:0; padding:20px;}
-    h1 { color: #5a8b56; }
+    h1 { color: #8B6F47; }
     form { background: white; padding: 20px; border-radius: 8px; width: 450px; }
     label { display: block; margin-top: 12px; font-weight: 600; }
     input[type=text], input[type=number], textarea, select {
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     textarea { resize: vertical; }
     input[type=submit] {
-        margin-top: 20px; background: #ff5f9e; color: white; border: none; padding: 12px 20px; border-radius: 10px;
+        margin-top: 20px; background: #8B6F47; color: white; border: none; padding: 12px 20px; border-radius: 10px;
         cursor: pointer; font-weight: 600; font-size: 16px;
     }
     input[type=submit]:hover {
