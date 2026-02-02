@@ -109,18 +109,49 @@
         <tr>
             <td width="220" valign="top" class="sidebar">
                 <ul>
-                <li><a href="manage_sizes.php"><i class="fas fa-expand-arrows-alt"></i> Quản lý cỡ bánh</a></li>
-                <li><a href="manage_flavors.php"><i class="fas fa-cube"></i> Quản lý hương vị</a></li>
-                <li><a href="manage_producttype.php"><i class="fas fa-list"></i> Quản lý danh mục</a></li>
-                <li><a href="manage_products.php"><i class="fas fa-cake-candles"></i> Quản lý sản phẩm</a></li>
-                <li><a href="manage_customers.php"><i class="fas fa-users"></i> Quản lý khách hàng</a></li>
-                <li><a href="manage_orders.php"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
-                <li><a href="manage_shipping.php"><i class="fas fa-truck"></i> Quản lý giao hàng</a></li>
-                <li><a href="manage_reports.php"><i class="fas fa-chart-line"></i> Báo cáo</a></li>
+                <li><a href="admin_dashboard.php?page=sizes"><i class="fas fa-expand-arrows-alt"></i> Quản lý cỡ bánh</a></li>
+                <li><a href="admin_dashboard.php?page=flavors"><i class="fas fa-cube"></i> Quản lý hương vị</a></li>
+                <li><a href="admin_dashboard.php?page=producttype"><i class="fas fa-list"></i> Quản lý danh mục</a></li>
+                <li><a href="admin_dashboard.php?page=products"><i class="fas fa-cake-candles"></i> Quản lý sản phẩm</a></li>
+                <li><a href="admin_dashboard.php?page=customers"><i class="fas fa-users"></i> Quản lý khách hàng</a></li>
+                <li><a href="admin_dashboard.php?page=orders"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
+                <li><a href="admin_dashboard.php?page=shipping"><i class="fas fa-truck"></i> Quản lý giao hàng</a></li>
+                <li><a href="admin_dashboard.php?page=reports"><i class="fas fa-chart-line"></i> Báo cáo</a></li>
                 </ul>
             </td>
             <td class="content">
-                
+                 <?php
+                    if (isset($_GET['page'])) {
+                        switch ($_GET['page']) {
+                        case 'customers':
+                        include 'manage_customers.php';
+                        break;
+                        case 'sizes':
+                        include 'manage_sizes.php';
+                        break;
+                        case 'flavors':
+                        include 'manage_flavors.php';
+                        break;
+                        case 'producttype':
+                        include 'manage_producttype.php';
+                        break;
+                        case 'products':
+                        include 'manage_products.php';
+                        break;
+                        case 'orders':
+                        include 'manage_orders.php';
+                        break;
+                        case 'shipping':
+                        include 'manage_shipping.php';
+                        break;
+                        case 'reports':
+                        include 'manage_reports.php';
+                        break;
+                    default:
+                        echo '<h3>Chào mừng Admin</h3>';
+                }
+            }
+        ?>
             </td>
         </tr>
         <tr>

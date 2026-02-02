@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-include 'admin_header.php';
+
 require_once 'connect.php';
 
 // Xử lý xóa sản phẩm (nếu có) - Bây giờ hỗ trợ AJAX và renumber ID
@@ -58,7 +58,7 @@ $result = $conn->query($sql);
     h1 { color: #8B6F47; margin-bottom:16px; }
     table { width: 100%; border-collapse: collapse; background: white; border-radius:8px; overflow:hidden; }
     th, td { border-bottom: 1px solid #eee; padding: 10px 12px; text-align: left; font-size:14px; }
-    th { background: #f9f6f2; color: #333; font-weight:600; }
+    th { background: #F5F1E8; color: #333; font-weight:600; }
     a { color: #8B6F47; text-decoration: none; font-weight: 600; }
     a:hover { color: #A0826D; }
     .btn-delete { color: #d32f2f; cursor: pointer; margin-left: 10px; }

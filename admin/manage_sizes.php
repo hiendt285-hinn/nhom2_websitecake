@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-include 'admin_header.php';
+
 require_once 'connect.php';
 
 $table_name = 'sizes';
@@ -162,6 +162,7 @@ $result = $conn->query($sql);
 </style>
 </head>
 <body>
+<?php if (!defined('ADMIN_HEADER_INCLUDED')) include 'admin_header.php'; ?>
 
 <h1>Quản lý <?php echo $attribute_name; ?></h1>
 

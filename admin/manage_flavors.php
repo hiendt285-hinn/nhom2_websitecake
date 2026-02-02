@@ -5,7 +5,7 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-include 'admin_header.php';
+
 require_once 'connect.php';
 
 $table_name = 'flavors';
