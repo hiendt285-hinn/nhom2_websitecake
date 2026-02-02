@@ -1,0 +1,79 @@
+/* === TYPOGRAPHY ENHANCEMENTS FOR ELEGANT BAKERY DESIGN === */
+
+/* All major headings use Playfair Display serif font */
+.hero-content h1,
+.collection-title,
+.ship-fast h2,
+.fruit-section h2,
+.cake-options h2,
+.cake-size h2,
+.policy-section h2,
+.store-system h2,
+.intro-text h2,
+.box-subtitle {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+/* Specific heading adjustments */
+.hero-content h1 {
+  font-size: 56px;
+  line-height: 1.15;
+}
+
+.collection-title {
+  font-size: 36px;
+  letter-spacing: -1px;
+}
+
+.ship-fast h2,
+.fruit-section h2 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.intro-text h2 {
+  font-size: 40px;
+  line-height: 1.2;
+  letter-spacing: -1px;
+}
+
+.box-subtitle {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Secondary text - use Montserrat for clean look */
+.collection-desc,
+.ship-desc,
+.fruit-text {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  color: #666;
+}
+
+/* Navigation and buttons - Montserrat semibold */
+.navbar ul li a,
+.btn-order,
+.btn-checkout,
+.btn-visit,
+button {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Product titles - clean sans-serif */
+.product-card h4 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* Italics for emphasis */
+.intro-text h2 span {
+  font-style: italic;
+  font-weight: 700;
+}
