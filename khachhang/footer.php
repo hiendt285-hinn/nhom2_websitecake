@@ -1,7 +1,6 @@
 <?php
-// footer.php - Phần footer chung cho website (Đã thiết kế lại)
 ?>
-<footer class="site-footer" id="lienhe">
+<footer class="site-footer" >
 
     <div class="footer-container">
         <div class="footer-column footer-brand">

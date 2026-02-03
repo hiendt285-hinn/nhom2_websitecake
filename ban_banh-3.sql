@@ -23,23 +23,8 @@ CREATE DATABASE IF NOT EXISTS `ban_banh`;
 USE `ban_banh`;
 --
 
--- --------------------------------------------------------
-
---
--- Table structure for table `cart`
---
-
-CREATE TABLE `cart` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `session_id` varchar(255) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `size` varchar(50) DEFAULT '20cm',
-  `flavor` varchar(50) DEFAULT 'Vani',
-  `quantity` int(11) DEFAULT 1,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Bảng đang dùng: categories, flavors, sizes, products, users, orders, order_items.
+-- Đã xóa (không dùng trong code): cart (giỏ dùng session), contacts, posts, product_images, reviews.
 
 -- --------------------------------------------------------
 
@@ -61,31 +46,15 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `created_at`, `updated_at`) VALUES
-(1, 'Bánh kem tạo hình', 'banh-kem-tao-hinh', NULL, '2025-11-08 09:31:24', '2025-11-11 17:46:24'),
-(2, 'Bánh kem giỏ hoa', 'banh-kem-gio-hoa', NULL, '2025-11-08 09:31:24', '2025-11-11 17:46:46'),
-(3, 'Bánh kem Oreo ', 'banh-kem-oreo ', NULL, '2025-11-08 09:31:24', '2025-11-11 18:00:28'),
-(4, 'Bánh kem thiên nga', 'banh-kem-thien-nga', NULL, '2025-11-08 09:31:24', '2025-11-11 18:02:11'),
-(5, 'Bánh kem mousse', 'banh-kem-mousse', NULL, '2025-11-08 09:31:24', '2025-11-08 09:31:24'),
-(6, 'Bánh bông lan trứng muối', 'banh-bong-lan-trung-muoi', '', '2025-11-27 09:13:35', '2025-11-27 09:13:35'),
-(7, 'Bánh hộp thiếc', 'banh-hop-thiec', '', '2025-12-02 14:50:27', '2025-12-02 14:50:27'),
-(8, 'Bánh cupcake', 'banh-cup-cake', '', '2025-12-02 15:00:12', '2025-12-02 15:00:12'),
-(9, 'Bánh kem sự kiện', 'banh-kem-su-kien', '', '2025-12-02 15:09:25', '2025-12-02 15:09:25');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `contacts`
---
-
-CREATE TABLE `contacts` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `phone` varchar(15) DEFAULT NULL,
-  `message` text NOT NULL,
-  `is_read` tinyint(1) DEFAULT 0,
-  `created_at` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(1, 'Bánh kem tạo hình', 'banh-kem-tao-hinh', 'Bánh kem tạo hình theo yêu cầu', '2025-11-08 09:31:24', '2025-11-11 17:46:24'),
+(2, 'Bánh kem giỏ hoa', 'banh-kem-gio-hoa', 'Bánh kem trang trí giỏ hoa', '2025-11-08 09:31:24', '2025-11-11 17:46:46'),
+(3, 'Bánh kem Oreo', 'banh-kem-oreo', 'Bánh kem vị Oreo', '2025-11-08 09:31:24', '2025-11-11 18:00:28'),
+(4, 'Bánh kem thiên nga', 'banh-kem-thien-nga', 'Bánh kem tạo hình thiên nga', '2025-11-08 09:31:24', '2025-11-11 18:02:11'),
+(5, 'Bánh kem mousse', 'banh-kem-mousse', 'Bánh kem mousse mát lạnh', '2025-11-08 09:31:24', '2025-11-08 09:31:24'),
+(6, 'Bánh bông lan trứng muối', 'banh-bong-lan-trung-muoi', 'Bánh bông lan trứng muối thơm ngon', '2025-11-27 09:13:35', '2025-11-27 09:13:35'),
+(7, 'Bánh hộp thiếc', 'banh-hop-thiec', 'Bánh hộp thiếc cao cấp', '2025-12-02 14:50:27', '2025-12-02 14:50:27'),
+(8, 'Bánh cupcake', 'banh-cup-cake', 'Bánh cupcake set quà', '2025-12-02 15:00:12', '2025-12-02 15:00:12'),
+(9, 'Bánh kem sự kiện', 'banh-kem-su-kien', 'Bánh kem cho sự kiện, tiệc', '2025-12-02 15:09:25', '2025-12-02 15:09:25');
 
 -- --------------------------------------------------------
 
@@ -103,13 +72,13 @@ CREATE TABLE `flavors` (
 --
 
 INSERT INTO `flavors` (`id`, `name`) VALUES
-(6, 'Cốt Cà Phê + Kem Cà Phê'),
-(5, 'Cốt Socola + Kem Socola'),
-(7, 'Cốt Trà Xanh + Kem Trà Xanh'),
-(4, 'Cốt Vani + Mứt Cherry'),
-(2, 'Cốt Vani + Mứt Dâu Tây'),
 (1, 'Cốt Vani + Mứt Việt Quất'),
-(3, 'Cốt Vani + Mứt Xoài (kèm xoài tươi)');
+(2, 'Cốt Vani + Mứt Dâu Tây'),
+(3, 'Cốt Vani + Mứt Xoài (kèm xoài tươi)'),
+(4, 'Cốt Vani + Mứt Cherry'),
+(5, 'Cốt Socola + Kem Socola'),
+(6, 'Cốt Cà Phê + Kem Cà Phê'),
+(7, 'Cốt Trà Xanh + Kem Trà Xanh');
 
 -- --------------------------------------------------------
 
@@ -125,7 +94,7 @@ CREATE TABLE `orders` (
   `address` text NOT NULL,
   `note` text DEFAULT NULL,
   `total_amount` decimal(10,2) NOT NULL,
-  `status` varchar(50) DEFAULT 'Pending',
+  `status` varchar(50) DEFAULT 'pending',
   `payment_method` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -146,31 +115,22 @@ CREATE TABLE `order_items` (
   `unit_price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `posts`
+-- Dumping data for table `orders`
 --
 
-CREATE TABLE `posts` (
-  `id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `slug` varchar(255) DEFAULT NULL,
-  `content` text NOT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `category` enum('news','promotion') DEFAULT 'news',
-  `is_published` tinyint(1) DEFAULT 1,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+INSERT INTO `orders` (`id`, `user_id`, `full_name`, `phone`, `address`, `note`, `total_amount`, `status`, `payment_method`, `created_at`) VALUES
+(1, 3, 'Đỗ Thu Hiền', '0900000001', '123 Đường ABC, Quận 1, TP.HCM', 'Giao giờ hành chính', 330000.00, 'completed', 'cod', '2025-12-01 10:00:00'),
+(2, 5, 'Hồ Quỳnh Anh', '0420032044', '456 Đường XYZ, Quận 7, TP.HCM', NULL, 199000.00, 'pending', 'cod', '2025-12-02 14:30:00');
 
 --
--- Dumping data for table `posts`
+-- Dumping data for table `order_items`
 --
 
-INSERT INTO `posts` (`id`, `title`, `slug`, `content`, `image`, `category`, `is_published`, `created_at`, `updated_at`) VALUES
-(1, 'Khuyến mãi 20% bánh sinh nhật', 'khuyen-mai-20-banh-sinh-nhat', 'Từ 1/11 - 15/11, giảm 20% tất cả bánh sinh nhật...', 'km-20.jpg', 'promotion', 1, '2025-11-08 09:31:24', '2025-11-08 09:31:24'),
-(2, 'Mở cửa hàng mới tại Quận 7', 'mo-cua-hang-quan-7', 'Anh Hoa Bakery chính thức khai trương...', 'store-q7.jpg', 'news', 1, '2025-11-08 09:31:24', '2025-11-08 09:31:24');
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `flavor`, `quantity`, `unit_price`) VALUES
+(1, 1, 1, '17cm x 8cm', 'Cốt Vani + Mứt Dâu Tây', 1, 150000.00),
+(2, 1, 6, '17cm x 8cm', 'Cốt Vani + Mứt Xoài (kèm xoài tươi)', 1, 199000.00),
+(3, 2, 6, '21cm x 8cm', 'Cốt Vani + Mứt Việt Quất', 1, 199000.00);
 
 -- --------------------------------------------------------
 
@@ -216,7 +176,7 @@ INSERT INTO `products` (`id`, `name`, `slug`, `price`, `image`, `description`, `
 (15, 'Bánh Kem Oreo Choco', NULL, 160000, '6927bcd901807.webp', 'Bánh kem cốt socola, kem socola và oreo, trang trí trên mặt bánh những \"chú\" oreo tinh nghịch dễ thương và vụn bánh oreo', '', 3, 100, 0, 1, '2025-11-27 09:52:09', '2025-11-27 09:52:09'),
 (16, 'Bánh red velvet sữa chua việt quất', NULL, 150000, '6927bd0515b21.webp', 'Bánh kem cốt red velvet tròn, kem sữa chua, bên trên trang trí 3 quả việt quất. (Trang trí sao vàng mừng 30/4 áp dụng từ 12h 17/4/2025)', '', 5, 100, 0, 1, '2025-11-27 09:52:53', '2025-11-27 09:52:53'),
 (17, 'Berry Lover Cake 500g', NULL, 259000, '692e9a6cb3134.webp', 'Chiếc bánh là bản tình ca mùa hè gửi đến những tâm hồn yêu trái cây đỏ mọng. Với 5 tầng hương vị đan xen, Berry Lover Cake chinh phục vị giác bằng sự cân bằng tinh tế giữa vị ngọt, vị chua dịu và độ béo mịn hoàn hảo: (1) Cốt bánh socola ẩm mịn, làm nền cho các tầng vị tỏa sáng, (2) Mousse dâu tây chua dịu, tươi mát, (3) Mousse mascarpone béo nhẹ, mềm mượt, (4) Mousse custard dâu thơm dịu, ngọt ngào như kem trứng mùa hè, (5) Lớp tráng gương dâu bóng mượt, như chiếc gương phản chiếu sắc đỏ rực rỡ. Bánh được hoàn thiện bằng trái cây tươi trang trí: dâu đỏ mọng, việt quất chua nhẹ.', 'Chiếc bánh là bản tình ca mùa hè gửi đến những tâm hồn yêu trái cây đỏ mọng.', 7, 100, 0, 1, '2025-12-02 14:51:08', '2025-12-02 14:51:08'),
-(18, 'Combo \"CHOCO LOVER', NULL, 529000, '692e9ab7bad60.webp', '', 'Combo gồm: Choco Dream Cake 315g + Tiramisu classic 250g +Tiramisu matcha 250g', 7, 100, 0, 1, '2025-12-02 14:52:23', '2025-12-02 14:52:23'),
+(18, 'Combo "CHOCO LOVER"', NULL, 529000, '692e9ab7bad60.webp', 'Combo gồm: Choco Dream Cake 315g + Tiramisu classic 250g + Tiramisu matcha 250g', 'Combo gồm: Choco Dream Cake 315g + Tiramisu classic 250g + Tiramisu matcha 250g', 7, 100, 0, 1, '2025-12-02 14:52:23', '2025-12-02 14:52:23'),
 (19, 'Combo \"SÀNH ĐIỆU\"', NULL, 469000, '692e9adc7e97f.webp', '', 'Combo gồm: Olong Longan Cake 550g + Choco Tiramisu 400g', 7, 100, 0, 1, '2025-12-02 14:53:00', '2025-12-02 14:53:00'),
 (20, 'Combo \"NHÀN NHÃ\"', NULL, 410000, '692e9b08ce02a.webp', 'Combo gồm: Oolong Longan Cake 550g + Oolong Longan Tiramisu 390g', 'Combo gồm: Oolong Longan Cake 550g + Oolong Longan Tiramisu 390g', 7, 100, 0, 1, '2025-12-02 14:53:44', '2025-12-02 14:53:44'),
 (21, 'Pomelo Mango Pearl Cake 535g', NULL, 249000, '692e9b408c200.webp', 'Chiếc bánh mang hương vị nhiệt đới đầy tinh tế với cốt vani mềm nhẹ, kết hợp cùng lớp mousse xoài dừa tươi mát từ xoài chín mọng. Xen kẽ là tầng thạch bưởi hồng thơm dịu và mousse cream cheese béo ngậy, hòa quyện tạo nên sự cân bằng hài hòa giữa ngọt, chua và béo. Bề mặt bánh được điểm xuyết bằng những tép bưởi hồng căng mọng cùng trân châu trắng dai giòn, mang lại trải nghiệm thanh mát, lạ miệng và cuốn hút ngay từ lần đầu thưởng thức.', 'Chiếc bánh mang hương vị nhiệt đới đầy tinh tế với cốt vani mềm nhẹ,', 7, 100, 0, 1, '2025-12-02 14:54:40', '2025-12-02 14:54:40'),
@@ -238,37 +198,6 @@ INSERT INTO `products` (`id`, `name`, `slug`, `price`, `image`, `description`, `
 (39, 'Bông lan trứng muối chữ nhật cắt miếng viết chữ', NULL, 480000, '692e9f8f1f937.webp', 'Cốt bánh vani, kết hợp cùng sốt phô mai và sốt bơ trứng thơm ngậy, bên trên trang trí ruốc gà cay, chà bông heo và trứng muối, các miếng bánh được chia sẵn tiện lợi và có thể viết chữ theo yêu cầu', 'Cốt bánh vani, kết hợp cùng sốt phô mai và sốt bơ trứng thơm ngậy, bên trên trang trí ruốc gà cay,...', 9, 100, 0, 1, '2025-12-02 15:13:03', '2025-12-02 15:13:03'),
 (40, 'Bánh kem chữ nhật vẽ logo', NULL, 480000, '692e9fc2acfd0.webp', 'Kem tươi vị sữa chua, mứt việt quất, cốt vani. Trang trí thêm hoa quả tươi gồm nho, xoài, dâu tây, việt quất. Bánh chữ nhật nguyên khối chưa cắt miếng, chữ viết tùy chọn', 'Kem tươi vị sữa chua, mứt việt quất, cốt vani. Trang trí thêm hoa quả tươi gồm nho, xoài, dâu tây, việt quất...', 9, 100, 0, 1, '2025-12-02 15:13:54', '2025-12-02 15:13:54'),
 (41, 'Set bánh su kem Singapore bó hoa', NULL, 160000, '692ea00d962a9.webp', 'Bánh su kem Singapore với lớp vỏ dai mềm kết hợp cùng kem vani mát lạnh và béo ngậy từ kem whipping. Trang trí tạo hình bó hoa với kem topping và kẹo bi bạc trang trí cùng chiếc nơ voan trắng xinh xắn.', 'Bánh su kem Singapore với lớp vỏ dai mềm kết hợp cùng kem vani mát lạnh và béo ngậy...', 2, 100, 0, 1, '2025-12-02 15:15:09', '2025-12-02 15:15:09');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `product_images`
---
-
-CREATE TABLE `product_images` (
-  `id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `image` varchar(255) NOT NULL,
-  `is_main` tinyint(1) DEFAULT 0,
-  `alt_text` varchar(255) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `reviews`
---
-
-CREATE TABLE `reviews` (
-  `id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `rating` tinyint(4) DEFAULT NULL CHECK (`rating` between 1 and 5),
-  `comment` text DEFAULT NULL,
-  `is_approved` tinyint(1) DEFAULT 0,
-  `created_at` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -314,9 +243,10 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
+-- users: id 4 = admin, id 3,5 = khách hàng mẫu. Đổi mật khẩu khi triển khai thật.
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `full_name`, `phone`, `address`, `role`, `is_active`, `created_at`, `updated_at`) VALUES
-(3, 'hien123', 'hien@gmail.com', '$2y$10$X4xUKJon6RvDk9QcF8ZxiOMg3Ig59AkbgSrlRn/kxLUV8ZDO6VDVK', 'Đỗ Thu Hiền', '', NULL, 'customer', 1, '2025-11-11 17:53:24', '2025-11-24 13:14:45'),
-(4, 'admin', 'admin@savorcake.com', '$2y$10$5CTm9hLBUl56XMiPlfxeK.KUCEN/tJn5HLd0x9WpM5dAvTJb1HgJC', NULL, NULL, NULL, 'admin', 1, '2025-11-19 09:43:20', '2025-11-19 09:43:20'),
+(3, 'hien123', 'hien@gmail.com', '$2y$10$X4xUKJon6RvDk9QcF8ZxiOMg3Ig59AkbgSrlRn/kxLUV8ZDO6VDVK', 'Đỗ Thu Hiền', '0900000001', NULL, 'customer', 1, '2025-11-11 17:53:24', '2025-11-24 13:14:45'),
+(4, 'admin', 'admin@savorcake.com', '$2y$10$5CTm9hLBUl56XMiPlfxeK.KUCEN/tJn5HLd0x9WpM5dAvTJb1HgJC', 'Quản trị viên', NULL, NULL, 'admin', 1, '2025-11-19 09:43:20', '2025-11-19 09:43:20'),
 (5, 'quynhanh', 'quynhanh123@gmail.com', '$2y$10$Y70EZ0Kz929SVs/7U3o3LeCIlsR1.k392FlgIj3z612/P6d28yOfi', 'Hồ Quỳnh Anh', '0420032044', NULL, 'customer', 1, '2025-11-24 13:14:25', '2025-11-24 13:14:25');
 
 --
@@ -324,26 +254,11 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `full_name`, `phone`
 --
 
 --
--- Indexes for table `cart`
---
-ALTER TABLE `cart`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_cart_item` (`session_id`,`product_id`,`size`,`flavor`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `product_id` (`product_id`);
-
---
 -- Indexes for table `categories`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`);
-
---
--- Indexes for table `contacts`
---
-ALTER TABLE `contacts`
-  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `flavors`
@@ -368,34 +283,12 @@ ALTER TABLE `order_items`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `posts`
---
-ALTER TABLE `posts`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `slug` (`slug`);
-
---
 -- Indexes for table `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`),
   ADD KEY `category_id` (`category_id`);
-
---
--- Indexes for table `product_images`
---
-ALTER TABLE `product_images`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `product_id` (`product_id`);
-
---
--- Indexes for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `product_id` (`product_id`),
-  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `sizes`
@@ -417,22 +310,10 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `cart`
---
-ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
-
---
--- AUTO_INCREMENT for table `contacts`
---
-ALTER TABLE `contacts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `flavors`
@@ -444,37 +325,19 @@ ALTER TABLE `flavors`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `posts`
---
-ALTER TABLE `posts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
-
---
--- AUTO_INCREMENT for table `product_images`
---
-ALTER TABLE `product_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `reviews`
---
-ALTER TABLE `reviews`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `sizes`
@@ -491,13 +354,6 @@ ALTER TABLE `users`
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `cart`
---
-ALTER TABLE `cart`
-  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `orders`
@@ -517,20 +373,22 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `product_images`
---
-ALTER TABLE `product_images`
-  ADD CONSTRAINT `product_images_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 COMMIT;
+
+--
+-- Bảng tùy chọn (chạy riêng khi cần):
+-- Lưu form liên hệ (contact.php): tạo bảng contacts rồi xử lý POST trong contact.php.
+--
+-- CREATE TABLE `contacts` (
+--   `id` int(11) NOT NULL AUTO_INCREMENT,
+--   `name` varchar(100) NOT NULL,
+--   `email` varchar(100) NOT NULL,
+--   `phone` varchar(15) DEFAULT NULL,
+--   `message` text NOT NULL,
+--   `is_read` tinyint(1) DEFAULT 0,
+--   `created_at` datetime DEFAULT current_timestamp(),
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

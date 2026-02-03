@@ -1,11 +1,9 @@
 <?php
-// header.php - Phần header chung
 
 if (!isset($_SESSION)) {
     session_start();
 }
 
-// Xử lý cache-busting an toàn cho CSS
 $css_file = __DIR__ . '/style.css';
 $css_version = file_exists($css_file) ? filemtime($css_file) : time();
 ?>
@@ -17,29 +15,23 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Savor Cake - BST Women's Day</title>
 
-    <!-- CSS chính + cache-busting -->
     <link rel="stylesheet" href="style.css?v=<?php echo $css_version; ?>">
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Bootstrap Icons (fix icon không hiển thị) -->
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body>
 
-<!-- TOPBAR (di chuyển ra ngoài site-header để tách biệt phần trên cùng) -->
 <div class="topbar">
     <div class="container d-flex flex-wrap justify-content-between align-items-center">
 
-        <!-- Left -->
         <div class="topbar-left d-flex flex-wrap align-items-center gap-3">
             <span class="topbar-item"><i class="bi bi-telephone"></i> 1900 636 302</span>
             <span class="topbar-item"><i class="bi bi-envelope"></i> sweetcake05@gmail.com</span>
         </div>
 
-        <!-- Right -->
         <div class="topbar-right d-flex flex-wrap align-items-center gap-3">
             <?php if (isset($_SESSION['user'])): ?>
                 <span class="topbar-link"><i class="bi bi-person-check"></i>
@@ -58,7 +50,6 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
 
 <header class="site-header">
 
-    <!-- NAVBAR -->
     <nav class="navbar">
         <div class="logo">
             <a href="index.php"><img src="../images/35-mau-thiet-ke-logo-tiem-banh-dep-5-removebg-preview.png" alt="Logo"></a>
@@ -67,7 +58,8 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
             <li><a href="products.php">Sản phẩm</a></li>
             <li><a href="policy.php">Chính sách</a></li>
             <li><a href="feedback.php">Feedback</a></li>
-            <li><a href="#lienhe">Liên hệ</a></li>
+            <li><a href="contact.php">Liên hệ</a></li>
+            <li><a href="promotion.php">Khuyến mãi</a></li>
             <li>
                 <a href="cart.php">
                     Giỏ hàng (<?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>)
@@ -76,7 +68,6 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
         </ul>
     </nav>
 
-    <!-- SEARCH BAR (giữ nguyên để flex cùng hàng với navbar) -->
     <div class="search-bar">
         <form action="products.php" method="GET">
             <input type="text" name="search" placeholder="Tìm kiếm bánh ngọt..." required>

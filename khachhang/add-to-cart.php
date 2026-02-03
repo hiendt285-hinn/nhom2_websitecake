@@ -26,8 +26,8 @@ if ($productId <= 0) {
     exit;
 }
 
-// Lấy thông tin sản phẩm từ DB
-$stmt = $conn->prepare('SELECT id, name, price, image FROM products WHERE id = ? AND is_active = 1 LIMIT 1');
+// Lấy thông tin sản phẩm từ DB (kèm stock)
+$stmt = $conn->prepare('SELECT id, name, price, image, stock FROM products WHERE id = ? AND is_active = 1 LIMIT 1');
 if (!$stmt) {
     echo json_encode(['success' => false, 'message' => 'Không thể chuẩn bị truy vấn']);
     exit;
@@ -47,6 +47,21 @@ if (!$product) {
 if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
+
+// Tổng số lượng đã có trong giỏ cho sản phẩm này (cùng product_id)
+$alreadyInCart = 0;
+foreach ($_SESSION['cart'] as $key => $item) {
+    if ((int)$item['id'] === (int)$product['id']) {
+        $alreadyInCart += (int)$item['quantity'];
+    }
+}
+$stock = (int)($product['stock'] ?? 0);
+$available = $stock - $alreadyInCart;
+if ($available <= 0) {
+    echo json_encode(['success' => false, 'message' => 'Sản phẩm "' . $product['name'] . '" đã hết tồn kho hoặc đã đủ số lượng trong giỏ (tồn kho: ' . $stock . ').']);
+    exit;
+}
+$quantity = min($quantity, $available);
 
 // Tạo key duy nhất theo sản phẩm + biến thể (size, flavor)
 $itemKey = $product['id'] . '|' . $size . '|' . $flavor;

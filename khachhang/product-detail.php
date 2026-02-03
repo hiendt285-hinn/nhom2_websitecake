@@ -13,7 +13,7 @@ if ($product_id === 0) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT id, name, price, description, image FROM products WHERE id = ? AND is_active = 1 LIMIT 1");
+$stmt = $conn->prepare("SELECT id, name, price, description, image, stock FROM products WHERE id = ? AND is_active = 1 LIMIT 1");
 if (!$stmt) {
     die("Lỗi chuẩn bị truy vấn: " . $conn->error);
 }
@@ -108,9 +108,13 @@ if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
                     </select>
                 </div>
                 
+                <?php $productStock = (int)($product['stock'] ?? 0); ?>
                 <div class="quantity-group">
                     <label for="quantity">Số lượng:</label>
-                    <input type="number" name="quantity" id="quantity" value="1" min="1" required class="quantity-input">
+                    <input type="number" name="quantity" id="quantity" value="1" min="1" max="<?php echo max(1, $productStock); ?>" required class="quantity-input">
+                    <?php if ($productStock > 0): ?>
+                        <span class="stock-info">(Còn <?php echo $productStock; ?> sản phẩm)</span>
+                    <?php endif; ?>
                 </div>
 
                 <div class="action-buttons">
@@ -244,6 +248,11 @@ select, .quantity-input {
 .quantity-input {
     width: 80px;
     text-align: center;
+}
+.stock-info {
+    margin-left: 8px;
+    color: #666;
+    font-size: 14px;
 }
 
 .action-buttons {

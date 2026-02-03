@@ -33,53 +33,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($fullName === '' || $phone === '' || $address === '') {
         $error = 'Vui lòng nhập đầy đủ Họ tên, SĐT và Địa chỉ.';
     } else {
-        // Tạo đơn hàng (theo cấu trúc bảng trong ban_banh-3.sql)
-        // orders: id, user_id, full_name, phone, address, note, total_amount, status, payment_method, created_at
-        $orderSql = "INSERT INTO orders (user_id, full_name, phone, address, note, total_amount, status, payment_method, created_at)
-                     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NOW())";
-        $stmtOrder = $conn->prepare($orderSql);
-        if (!$stmtOrder) {
-            $error = 'Lỗi hệ thống (orders): ' . $conn->error;
-        } else {
-            $stmtOrder->bind_param('issssds', $userId, $fullName, $phone, $address, $note, $totalAmount, $paymentMethod);
-            if (!$stmtOrder->execute()) {
-                $error = 'Không thể lưu đơn hàng: ' . $stmtOrder->error;
-            } else {
-                $orderId = $conn->insert_id;
+        // Kiểm tra tồn kho: tổng số lượng theo product_id trong giỏ
+        $quantityByProduct = [];
+        foreach ($_SESSION['cart'] as $item) {
+            $productId = (int)$item['id'];
+            $quantityByProduct[$productId] = ($quantityByProduct[$productId] ?? 0) + (int)$item['quantity'];
+        }
+        $productIds = array_keys($quantityByProduct);
+        if (!empty($productIds)) {
+            $placeholders = implode(',', array_fill(0, count($productIds), '?'));
+            $types = str_repeat('i', count($productIds));
+            $stmtStock = $conn->prepare("SELECT id, name, stock FROM products WHERE id IN ($placeholders)");
+            $stmtStock->bind_param($types, ...$productIds);
+            $stmtStock->execute();
+            $stockResult = $stmtStock->get_result();
+            $stmtStock->close();
+            while ($row = $stockResult->fetch_assoc()) {
+                $need = $quantityByProduct[$row['id']];
+                if ((int)$row['stock'] < $need) {
+                    $error = 'Sản phẩm "' . htmlspecialchars($row['name']) . '" không đủ tồn kho (còn ' . (int)$row['stock'] . ', bạn đặt ' . $need . '). Vui lòng giảm số lượng hoặc xóa bớt trong giỏ.';
+                    break;
+                }
+            }
+        }
 
-                // Lưu từng item
+        if ($error === '') {
+            $conn->begin_transaction();
+            try {
+                // Tạo đơn hàng (theo cấu trúc bảng trong ban_banh-3.sql)
+                $orderSql = "INSERT INTO orders (user_id, full_name, phone, address, note, total_amount, status, payment_method, created_at)
+                             VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NOW())";
+                $stmtOrder = $conn->prepare($orderSql);
+                if (!$stmtOrder) {
+                    throw new Exception('Lỗi hệ thống (orders): ' . $conn->error);
+                }
+                $stmtOrder->bind_param('issssds', $userId, $fullName, $phone, $address, $note, $totalAmount, $paymentMethod);
+                if (!$stmtOrder->execute()) {
+                    throw new Exception('Không thể lưu đơn hàng: ' . $stmtOrder->error);
+                }
+                $orderId = $conn->insert_id;
+                $stmtOrder->close();
+
+                // Lưu từng item và trừ tồn kho
                 $itemSql = "INSERT INTO order_items (order_id, product_id, size, flavor, quantity, unit_price)
                             VALUES (?, ?, ?, ?, ?, ?)";
                 $stmtItem = $conn->prepare($itemSql);
                 if (!$stmtItem) {
-                    $error = 'Lỗi hệ thống (order_items): ' . $conn->error;
-                } else {
-                    $allOk = true;
-                    foreach ($_SESSION['cart'] as $item) {
-                        $productId = (int)$item['id'];
-                        // Bảng order_items trong ban_banh-3.sql yêu cầu size, flavor NOT NULL
-                        $size = isset($item['size']) ? (string)$item['size'] : '';
-                        $flavor = isset($item['flavor']) ? (string)$item['flavor'] : '';
-                        $quantity = (int)$item['quantity'];
-                        $unitPrice = (float)$item['price'];
-                        $stmtItem->bind_param('iissid', $orderId, $productId, $size, $flavor, $quantity, $unitPrice);
-                        if (!$stmtItem->execute()) {
-                            $allOk = false;
-                            $error = 'Không thể lưu chi tiết đơn hàng: ' . $stmtItem->error;
-                            break;
-                        }
+                    throw new Exception('Lỗi hệ thống (order_items): ' . $conn->error);
+                }
+                $stmtStockUpdate = $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
+                if (!$stmtStockUpdate) {
+                    throw new Exception('Lỗi hệ thống (stock): ' . $conn->error);
+                }
+                foreach ($_SESSION['cart'] as $item) {
+                    $productId = (int)$item['id'];
+                    $size = isset($item['size']) ? (string)$item['size'] : '';
+                    $flavor = isset($item['flavor']) ? (string)$item['flavor'] : '';
+                    $quantity = (int)$item['quantity'];
+                    $unitPrice = (float)$item['price'];
+                    $stmtItem->bind_param('iissid', $orderId, $productId, $size, $flavor, $quantity, $unitPrice);
+                    if (!$stmtItem->execute()) {
+                        throw new Exception('Không thể lưu chi tiết đơn hàng: ' . $stmtItem->error);
                     }
-                    $stmtItem->close();
-
-                    if ($allOk) {
-                        // Xóa giỏ hàng và chuyển sang chi tiết đơn
-                        unset($_SESSION['cart']);
-                        header('Location: order_detail.php?id=' . $orderId);
-                        exit();
+                    // Giảm số lượng kho theo từng sản phẩm đặt
+                    $stmtStockUpdate->bind_param('ii', $quantity, $productId);
+                    if (!$stmtStockUpdate->execute()) {
+                        throw new Exception('Không thể cập nhật tồn kho: ' . $stmtStockUpdate->error);
                     }
                 }
+                $stmtItem->close();
+                $stmtStockUpdate->close();
+
+                $conn->commit();
+                unset($_SESSION['cart']);
+                header('Location: order_detail.php?id=' . $orderId);
+                exit();
+            } catch (Exception $e) {
+                $conn->rollback();
+                $error = $e->getMessage();
             }
-            $stmtOrder->close();
         }
     }
 }
