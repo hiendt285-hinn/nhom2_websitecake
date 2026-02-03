@@ -55,9 +55,13 @@ $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Lấy danh mục để lọc
+// Lấy danh mục (dùng cho sidebar + form lọc)
 $cat_sql = "SELECT id, name FROM categories ORDER BY name";
 $cat_result = $conn->query($cat_sql);
+$categories = [];
+while ($row = $cat_result->fetch_assoc()) {
+    $categories[] = $row;
+}
 ?>
 
 <!DOCTYPE html>
@@ -72,38 +76,102 @@ $cat_result = $conn->query($cat_sql);
     <style>
         /* === TRANG SẢN PHẨM === */
         .products-page {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 30px auto;
             padding: 0 20px;
             font-family: 'Open Sans', sans-serif;
         }
 
+        .products-layout {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        /* === CỘT TRÁI - DANH MỤC === */
+        .products-sidebar {
+            width: 240px;
+            flex-shrink: 0;
+            background: #f8f5f0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 20px;
+        }
+
+        .products-sidebar h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #5D4037;
+            margin: 0 0 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--main-brown);
+        }
+
+        .sidebar-categories {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar-categories li {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-categories a {
+            display: block;
+            padding: 10px 14px;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .sidebar-categories a:hover {
+            background: rgba(93, 64, 55, 0.08);
+            color: var(--main-brown);
+        }
+
+        .sidebar-categories a.active {
+            background: var(--main-brown);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* === NỘI DUNG CHÍNH === */
+        .products-main {
+            flex: 1;
+            min-width: 0;
+        }
+
         .page-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 24px;
         }
 
         .page-header h1 {
-            font-size: 32px;
+            font-size: 28px;
             color: #1a1a1a;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .page-header p {
             color: #666;
-            font-size: 16px;
+            font-size: 15px;
         }
 
-        /* === BỘ LỌC + TÌM KIẾM === */
+        /* === BỘ LỌC + TÌM KIẾM - KÍCH THƯỚC BẰNG NHAU === */
         .filters {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
-            align-items: end;
+            gap: 12px;
+            margin-bottom: 24px;
+            align-items: stretch;
             background: #f8f5f0;
-            padding: 15px;
+            padding: 16px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
@@ -112,37 +180,46 @@ $cat_result = $conn->query($cat_sql);
             display: flex;
             flex-direction: column;
             gap: 6px;
+            min-width: 0;
+        }
+
+        .filter-group.filter-search {
             flex: 1;
-            min-width: 200px;
+            min-width: 180px;
+        }
+
+        .filter-group.filter-category {
+            width: 200px;
         }
 
         .filter-group label {
             font-weight: 600;
             color: #5D4037;
-            font-size: 14px;
-            height: 20px;
-            display: flex;
-            align-items: center;
+            font-size: 13px;
+            flex-shrink: 0;
         }
 
         .filter-group select,
         .filter-group input {
-            padding: 10px 14px;
+            padding: 0 14px;
+            height: 44px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
             background: white;
+            box-sizing: border-box;
         }
 
         .filter-group input {
-            flex: 1;
+            width: 100%;
         }
 
         .btn-search {
             background: var(--main-brown);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 0 20px;
+            height: 44px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
@@ -150,9 +227,9 @@ $cat_result = $conn->query($cat_sql);
             align-items: center;
             gap: 8px;
             transition: 0.3s;
-            height: 40px;
             min-width: 120px;
             justify-content: center;
+            align-self: flex-end;
         }
 
         .btn-search:hover {
@@ -333,13 +410,38 @@ $cat_result = $conn->query($cat_sql);
         }
 
         /* Responsive */
+        @media (max-width: 900px) {
+            .products-layout {
+                flex-direction: column;
+            }
+            .products-sidebar {
+                width: 100%;
+                position: static;
+            }
+            .sidebar-categories {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .sidebar-categories li {
+                margin: 0;
+            }
+            .sidebar-categories a {
+                padding: 8px 14px;
+            }
+        }
         @media (max-width: 768px) {
             .filters {
                 flex-direction: column;
                 align-items: stretch;
             }
-            .filter-group {
+            .filter-group.filter-search,
+            .filter-group.filter-category {
                 min-width: 100%;
+                width: 100%;
+            }
+            .btn-search {
+                align-self: stretch;
             }
             .products-grid {
                 flex-direction: column;
@@ -361,39 +463,58 @@ $cat_result = $conn->query($cat_sql);
         <p>Khám phá hương vị bánh ngọt tươi ngon mỗi ngày</p>
     </div>
 
-    <!-- Bộ lọc -->
-    <form method="GET" class="filters">
-        <div class="filter-group">
-            <label>Tìm kiếm</label>
-            <input type="text" name="search" placeholder="Tên bánh..." value="<?php echo htmlspecialchars($search); ?>">
-        </div>
-        <div class="filter-group">
-            <label>Danh mục</label>
-            <select name="category">
-                <option value="">Tất cả</option>
-                <?php while ($cat = $cat_result->fetch_assoc()): ?>
-                    <option value="<?php echo $cat['id']; ?>" <?php echo $category_id == $cat['id'] ? 'selected' : ''; ?>>
+    <div class="products-layout">
+        <!-- Cột trái: Danh mục bánh -->
+        <aside class="products-sidebar">
+            <h3>Danh mục bánh</h3>
+            <ul class="sidebar-categories">
+                <li>
+                    <a href="products.php<?php echo $search ? '?search=' . urlencode($search) : ''; ?>" class="<?php echo $category_id === 0 ? 'active' : ''; ?>">Tất cả</a>
+                </li>
+                <?php foreach ($categories as $cat): ?>
+                <li>
+                    <a href="products.php?category=<?php echo (int)$cat['id']; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>" class="<?php echo $category_id == $cat['id'] ? 'active' : ''; ?>">
                         <?php echo htmlspecialchars($cat['name']); ?>
-                    </option>
-                <?php endwhile; ?>
-            </select>
-        </div>
-        <button type="submit" class="btn-search">
-            <i class="fas fa-search"></i> Tìm kiếm
-        </button>
-    </form>
+                    </a>
+                </li>
+                <?php endforeach; ?>
+            </ul>
+        </aside>
 
-    <!-- Kết quả tìm kiếm -->
-    <?php if ($search || $category_id): ?>
-        <div class="search-results">
-            Tìm thấy <strong><?php echo $total_products; ?></strong> sản phẩm
-            <?php if ($search): ?> cho "<em><?php echo htmlspecialchars($search); ?></em>"<?php endif; ?>
-            <?php if ($category_id): ?> trong danh mục đã chọn<?php endif; ?>
-        </div>
-    <?php endif; ?>
+        <div class="products-main">
+            <!-- Bộ lọc - thanh tìm kiếm kích thước bằng nhau -->
+            <form method="GET" class="filters">
+                <div class="filter-group filter-search">
+                    <label>Tìm kiếm</label>
+                    <input type="text" name="search" placeholder="Tên bánh..." value="<?php echo htmlspecialchars($search); ?>">
+                </div>
+                <div class="filter-group filter-category">
+                    <label>Danh mục</label>
+                    <select name="category">
+                        <option value="">Tất cả</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo $cat['id']; ?>" <?php echo $category_id == $cat['id'] ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($cat['name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <button type="submit" class="btn-search">
+                    <i class="fas fa-search"></i> Tìm kiếm
+                </button>
+            </form>
 
-    <!-- Grid sản phẩm -->
-    <div class="products-grid">
+            <!-- Kết quả tìm kiếm -->
+            <?php if ($search || $category_id): ?>
+                <div class="search-results">
+                    Tìm thấy <strong><?php echo $total_products; ?></strong> sản phẩm
+                    <?php if ($search): ?> cho "<em><?php echo htmlspecialchars($search); ?></em>"<?php endif; ?>
+                    <?php if ($category_id): ?> trong danh mục đã chọn<?php endif; ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Grid sản phẩm -->
+            <div class="products-grid">
         <?php if ($result->num_rows > 0): ?>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <div class="product-card">
@@ -427,36 +548,38 @@ $cat_result = $conn->query($cat_sql);
                 Không tìm thấy sản phẩm nào.
             </p>
         <?php endif; ?>
-    </div>
+            </div>
 
-    <!-- Phân trang -->
-    <?php if ($total_pages > 1): ?>
-        <div class="pagination">
-            <?php if ($page > 1): ?>
-                <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>">Trước</a>
-            <?php else: ?>
-                <span class="disabled">Trước</span>
-            <?php endif; ?>
+            <!-- Phân trang -->
+            <?php if ($total_pages > 1): ?>
+                <div class="pagination">
+                    <?php if ($page > 1): ?>
+                        <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>">Trước</a>
+                    <?php else: ?>
+                        <span class="disabled">Trước</span>
+                    <?php endif; ?>
 
-            <?php
-            $start = max(1, $page - 2);
-            $end = min($total_pages, $page + 2);
-            for ($i = $start; $i <= $end; $i++):
-            ?>
-                <?php if ($i == $page): ?>
-                    <span class="current"><?php echo $i; ?></span>
-                <?php else: ?>
-                    <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"><?php echo $i; ?></a>
-                <?php endif; ?>
-            <?php endfor; ?>
+                    <?php
+                    $start = max(1, $page - 2);
+                    $end = min($total_pages, $page + 2);
+                    for ($i = $start; $i <= $end; $i++):
+                    ?>
+                        <?php if ($i == $page): ?>
+                            <span class="current"><?php echo $i; ?></span>
+                        <?php else: ?>
+                            <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"><?php echo $i; ?></a>
+                        <?php endif; ?>
+                    <?php endfor; ?>
 
-            <?php if ($page < $total_pages): ?>
-                <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>">Sau</a>
-            <?php else: ?>
-                <span class="disabled">Sau</span>
+                    <?php if ($page < $total_pages): ?>
+                        <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>">Sau</a>
+                    <?php else: ?>
+                        <span class="disabled">Sau</span>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
         </div>
-    <?php endif; ?>
+    </div>
 </div>
 
 <?php include 'footer.php'; ?>
