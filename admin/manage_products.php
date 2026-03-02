@@ -28,7 +28,7 @@ if (isset($_GET['delete_id'])) {
             echo json_encode(['success' => true]);
             exit();
         } else {
-            header('Location: manage_products.php');
+            header('Location: admin_dashboard.php?page=products');
             exit();
         }
     } else {
@@ -47,28 +47,11 @@ $sql = "SELECT p.*, c.name AS category_name
         ORDER BY p.created_at DESC"; // Hoặc ORDER BY p.id ASC nếu muốn ID tăng dần
 $result = $conn->query($sql);
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Quản lý sản phẩm - Savor Cake</title>
-<style>
-    body { font-family: 'Open Sans', sans-serif; background: #F5F1E8; margin:0; padding:20px;}
-    h1 { color: #8B6F47; margin-bottom:16px; }
-    table { width: 100%; border-collapse: collapse; background: white; border-radius:8px; overflow:hidden; }
-    th, td { border-bottom: 1px solid #eee; padding: 10px 12px; text-align: left; font-size:14px; }
-    th { background: #F5F1E8; color: #333; font-weight:600; }
-    a { color: #8B6F47; text-decoration: none; font-weight: 600; }
-    a:hover { color: #A0826D; }
-    .btn-delete { color: #d32f2f; cursor: pointer; margin-left: 10px; }
-    .btn-edit { color: #8B6F47; text-decoration: none; font-weight: 600; }
-</style>
-</head>
-<body>
-<h1>Quản lý sản phẩm</h1>
-<p><a href="upload_image.php">Thêm sản phẩm mới</a></p>
-<table>
+<div class="admin-content">
+<h1 class="admin-page-title"><i class="fas fa-cake-candles"></i> Quản lý sản phẩm</h1>
+<p style="margin-bottom:16px;"><a href="upload_image.php" class="admin-btn admin-btn-primary">Thêm sản phẩm mới</a></p>
+<div class="admin-card">
+<table class="admin-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -76,7 +59,6 @@ $result = $conn->query($sql);
             <th>Danh mục</th>
             <th>Giá</th>
             <th>Hình ảnh</th>
-            <th>Số lượng kho</th>
             <th>Thao tác</th>
         </tr>
     </thead>
@@ -89,18 +71,19 @@ $result = $conn->query($sql);
                     <td><?php echo htmlspecialchars($row['category_name']) ?></td>
                     <td><?php echo number_format($row['price'], 0, ',', '.') ?>₫</td>
                     <td><img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="" style="height:50px;"></td>
-                    <td><?php echo $row['stock'] ?></td>
                     <td>
-                        <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="btn-edit">Chỉnh sửa</a>
-                        <span class="btn-delete" onclick="deleteProduct(<?php echo $row['id']; ?>)">Xóa</span>
+                        <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="admin-link">Chỉnh sửa</a>
+                        <span style="color:#d32f2f; cursor:pointer; margin-left:10px;" onclick="deleteProduct(<?php echo $row['id']; ?>)">Xóa</span>
                     </td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="7">Không có sản phẩm nào.</td></tr>
+            <tr><td colspan="6">Không có sản phẩm nào.</td></tr>
         <?php endif; ?>
     </tbody>
 </table>
+</div>
+</div>
 
 <script>
 function deleteProduct(id) {
@@ -126,5 +109,3 @@ function deleteProduct(id) {
     }
 }
 </script>
-</body>
-</html>

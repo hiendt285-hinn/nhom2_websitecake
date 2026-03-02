@@ -16,7 +16,7 @@ if (isset($_POST['update_status'])) {
     $stmt->bind_param("si", $status, $order_id);
     $stmt->execute();
     $stmt->close();
-    header("Location: manage_orders.php");
+    header("Location: admin_dashboard.php?page=orders");
     exit();
 }
 
@@ -24,35 +24,11 @@ if (isset($_POST['update_status'])) {
 $orders = $conn->query("SELECT * FROM orders ORDER BY created_at DESC");
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Quản lý đơn hàng</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<style>
-body { 
-        font-family: 'Open Sans', sans-serif; 
-        background: #F5F1E8; 
-        margin:0;
-        padding:20px;
-    }
-h2 { color:#8B6F47; margin-bottom:16px; }
-table { width:100%; border-collapse: collapse; background:#ffffff; border-radius:8px; overflow:hidden; }
-td, th { padding: 10px 12px; border-bottom: 1px solid #eee; font-size:14px; }
-th { background: #f9f6f2; color: #333; font-weight:600; }
-tr:nth-child(even) { background:#fafafa; }
-.status-form select { padding:6px 8px; border-radius:4px; border:1px solid #ccc; font-size:13px; }
-.status-form input[type=submit] { padding:6px 12px; background:#8B6F47; color:white; border:none; border-radius:999px; cursor:pointer; font-size:13px; font-weight:600; }
-.status-form input[type=submit]:hover { background:#A0826D; }
-</style>
-</head>
-<body>
-
-<h2>Quản lý đơn hàng</h2>
-
-<table>
-<tr>
+<div class="admin-content">
+<h1 class="admin-page-title"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</h1>
+<div class="admin-card">
+<table class="admin-table">
+<thead><tr>
 <th>ID</th>
 <th>Khách hàng</th>
 <th>SĐT</th>
@@ -62,8 +38,8 @@ tr:nth-child(even) { background:#fafafa; }
 <th>Trạng thái</th>
 <th>Ngày tạo</th>
 <th>Hành động</th>
-</tr>
-
+</tr></thead>
+<tbody>
 <?php while ($row = $orders->fetch_assoc()): ?>
 <tr>
     <td><?php echo $row['id']; ?></td>
@@ -75,21 +51,21 @@ tr:nth-child(even) { background:#fafafa; }
     <td><?php echo ucfirst($row['status']); ?></td>
     <td><?php echo $row['created_at']; ?></td>
     <td>
-        <form method="post" class="status-form">
+        <form method="post" style="display:inline;">
             <input type="hidden" name="order_id" value="<?php echo $row['id']; ?>">
-            <select name="status">
+            <select name="status" style="padding:6px 8px; border-radius:4px; border:1px solid #ccc; font-size:13px;">
                 <option value="pending" <?php if($row['status']=='pending') echo 'selected'; ?>>Pending</option>
                 <option value="confirmed" <?php if($row['status']=='confirmed') echo 'selected'; ?>>Confirmed</option>
                 <option value="shipping" <?php if($row['status']=='shipping') echo 'selected'; ?>>Shipping</option>
                 <option value="delivered" <?php if($row['status']=='delivered') echo 'selected'; ?>>Delivered</option>
                 <option value="cancelled" <?php if($row['status']=='cancelled') echo 'selected'; ?>>Cancelled</option>
             </select>
-            <input type="submit" name="update_status" value="Cập nhật">
+            <button type="submit" name="update_status" class="admin-btn admin-btn-primary">Cập nhật</button>
         </form>
     </td>
 </tr>
 <?php endwhile; ?>
-
+</tbody>
 </table>
-</body>
-</html>
+</div>
+</div>

@@ -1,0 +1,124 @@
+/* Admin UI - Đồng bộ giao diện */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background: #F5F1E8;
+    color: #333;
+    font-size: 14px;
+}
+
+.admin-content {
+    padding: 0;
+    min-height: 280px;
+}
+
+.admin-page-title {
+    color: #8B6F47;
+    font-size: 22px;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.admin-page-title i {
+    margin-right: 8px;
+}
+
+.admin-card {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+.admin-card h2 {
+    color: #5D4037;
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    font-size: 14px;
+}
+
+.admin-table th {
+    background: #f9f6f2;
+    color: #333;
+    font-weight: 600;
+}
+
+.admin-table tr:nth-child(even) {
+    background: #fafafa;
+}
+
+.admin-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.admin-btn-primary {
+    background: #8B6F47;
+    color: #fff;
+}
+
+.admin-btn-primary:hover {
+    background: #735c3a;
+}
+
+.admin-btn-lg {
+    padding: 12px 24px;
+    font-size: 14px;
+}
+
+.admin-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.admin-message-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.admin-message-error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.muted {
+    color: #666;
+    font-size: 13px;
+}
+
+.chart-wrap {
+    max-width: 900px;
+}
+
+a.admin-link {
+    color: #8B6F47;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+a.admin-link:hover {
+    color: #A0826D;
+}

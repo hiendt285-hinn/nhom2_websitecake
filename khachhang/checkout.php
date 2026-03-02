@@ -16,12 +16,35 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
 
 $userId = (int)$_SESSION['user_id'];
 
+// Đảm bảo bảng promotions và cột đơn hàng tồn tại
+$conn->query("CREATE TABLE IF NOT EXISTS promotions (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  code varchar(50) NOT NULL,
+  title varchar(255) DEFAULT NULL,
+  discount_type enum('percent','fixed') NOT NULL DEFAULT 'percent',
+  discount_value decimal(10,2) NOT NULL DEFAULT 0,
+  min_order_amount decimal(10,2) DEFAULT 0,
+  valid_from datetime DEFAULT NULL,
+  valid_to datetime DEFAULT NULL,
+  is_active tinyint(1) DEFAULT 1,
+  created_at datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (id),
+  UNIQUE KEY code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+$chk = $conn->query("SHOW COLUMNS FROM orders LIKE 'promo_code'");
+if ($chk && $chk->num_rows === 0) {
+    $conn->query("ALTER TABLE orders ADD COLUMN promo_code varchar(50) DEFAULT NULL, ADD COLUMN discount_amount decimal(10,2) DEFAULT 0");
+}
+
 // Tính tổng tiền
 $totalAmount = 0;
 foreach ($_SESSION['cart'] as $item) {
     $totalAmount += $item['price'] * $item['quantity'];
 }
-$error = '';
+$discountAmount = 0;
+$appliedPromo = null;
+$promoError = '';
+$finalAmount = $totalAmount;
 // Xử lý đặt hàng (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fullName = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
@@ -29,45 +52,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address = isset($_POST['address']) ? trim($_POST['address']) : '';
     $note = isset($_POST['note']) ? trim($_POST['note']) : null;
     $paymentMethod = isset($_POST['payment_method']) ? $_POST['payment_method'] : 'cod';
+    $promoCodeInput = isset($_POST['promo_code']) ? strtoupper(trim($_POST['promo_code'])) : '';
 
-    if ($fullName === '' || $phone === '' || $address === '') {
-        $error = 'Vui lòng nhập đầy đủ Họ tên, SĐT và Địa chỉ.';
-    } else {
-        // Kiểm tra tồn kho: tổng số lượng theo product_id trong giỏ
-        $quantityByProduct = [];
-        foreach ($_SESSION['cart'] as $item) {
-            $productId = (int)$item['id'];
-            $quantityByProduct[$productId] = ($quantityByProduct[$productId] ?? 0) + (int)$item['quantity'];
-        }
-        $productIds = array_keys($quantityByProduct);
-        if (!empty($productIds)) {
-            $placeholders = implode(',', array_fill(0, count($productIds), '?'));
-            $types = str_repeat('i', count($productIds));
-            $stmtStock = $conn->prepare("SELECT id, name, stock FROM products WHERE id IN ($placeholders)");
-            $stmtStock->bind_param($types, ...$productIds);
-            $stmtStock->execute();
-            $stockResult = $stmtStock->get_result();
-            $stmtStock->close();
-            while ($row = $stockResult->fetch_assoc()) {
-                $need = $quantityByProduct[$row['id']];
-                if ((int)$row['stock'] < $need) {
-                    $error = 'Sản phẩm "' . htmlspecialchars($row['name']) . '" không đủ tồn kho (còn ' . (int)$row['stock'] . ', bạn đặt ' . $need . '). Vui lòng giảm số lượng hoặc xóa bớt trong giỏ.';
-                    break;
+    $totalAmount = 0;
+    foreach ($_SESSION['cart'] as $item) {
+        $totalAmount += $item['price'] * $item['quantity'];
+    }
+    $discountAmount = 0;
+    $appliedPromo = null;
+    if ($promoCodeInput !== '') {
+        $stmtP = $conn->prepare("SELECT id, code, discount_type, discount_value, min_order_amount, valid_from, valid_to FROM promotions WHERE code = ? AND is_active = 1 LIMIT 1");
+        $stmtP->bind_param('s', $promoCodeInput);
+        $stmtP->execute();
+        $promo = $stmtP->get_result()->fetch_assoc();
+        $stmtP->close();
+        if ($promo) {
+            $minOrder = (float)$promo['min_order_amount'];
+            if ($totalAmount >= $minOrder) {
+                $valid = true;
+                if (!empty($promo['valid_from']) && strtotime($promo['valid_from']) > time()) $valid = false;
+                if (!empty($promo['valid_to']) && strtotime($promo['valid_to']) < time()) $valid = false;
+                if ($valid) {
+                    if ($promo['discount_type'] === 'percent') {
+                        $discountAmount = round($totalAmount * (float)$promo['discount_value'] / 100, 0);
+                    } else {
+                        $discountAmount = min((float)$promo['discount_value'], $totalAmount);
+                    }
+                    $appliedPromo = $promo;
                 }
             }
         }
+        if ($promoCodeInput !== '' && !$appliedPromo) {
+            $promoError = 'Mã không hợp lệ, đã hết hạn hoặc chưa đủ điều kiện đơn hàng.';
+        }
+    }
+    $finalAmount = max(0, $totalAmount - $discountAmount);
 
+    $error = '';
+    if ($fullName === '' || $phone === '' || $address === '') {
+        $error = 'Vui lòng nhập đầy đủ Họ tên, SĐT và Địa chỉ.';
+    } else {
         if ($error === '') {
             $conn->begin_transaction();
             try {
-                // Tạo đơn hàng (theo cấu trúc bảng trong ban_banh-3.sql)
-                $orderSql = "INSERT INTO orders (user_id, full_name, phone, address, note, total_amount, status, payment_method, created_at)
-                             VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, NOW())";
+                $orderSql = "INSERT INTO orders (user_id, full_name, phone, address, note, total_amount, status, payment_method, promo_code, discount_amount, created_at)
+                             VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, NOW())";
                 $stmtOrder = $conn->prepare($orderSql);
                 if (!$stmtOrder) {
                     throw new Exception('Lỗi hệ thống (orders): ' . $conn->error);
                 }
-                $stmtOrder->bind_param('issssds', $userId, $fullName, $phone, $address, $note, $totalAmount, $paymentMethod);
+                $promoCodeSave = $appliedPromo ? $appliedPromo['code'] : '';
+                $stmtOrder->bind_param('issssdsd', $userId, $fullName, $phone, $address, $note, $finalAmount, $paymentMethod, $promoCodeSave, $discountAmount);
                 if (!$stmtOrder->execute()) {
                     throw new Exception('Không thể lưu đơn hàng: ' . $stmtOrder->error);
                 }
@@ -81,10 +116,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$stmtItem) {
                     throw new Exception('Lỗi hệ thống (order_items): ' . $conn->error);
                 }
-                $stmtStockUpdate = $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
-                if (!$stmtStockUpdate) {
-                    throw new Exception('Lỗi hệ thống (stock): ' . $conn->error);
-                }
                 foreach ($_SESSION['cart'] as $item) {
                     $productId = (int)$item['id'];
                     $size = isset($item['size']) ? (string)$item['size'] : '';
@@ -95,14 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!$stmtItem->execute()) {
                         throw new Exception('Không thể lưu chi tiết đơn hàng: ' . $stmtItem->error);
                     }
-                    // Giảm số lượng kho theo từng sản phẩm đặt
-                    $stmtStockUpdate->bind_param('ii', $quantity, $productId);
-                    if (!$stmtStockUpdate->execute()) {
-                        throw new Exception('Không thể cập nhật tồn kho: ' . $stmtStockUpdate->error);
-                    }
                 }
                 $stmtItem->close();
-                $stmtStockUpdate->close();
 
                 $conn->commit();
                 unset($_SESSION['cart']);
@@ -205,9 +230,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endforeach; ?>
             <hr style="margin:12px 0; border:none; border-top:1px solid #eee;">
+            <div class="form-group" style="margin-bottom:12px;">
+                <label>Mã khuyến mãi</label>
+                <input type="text" name="promo_code" placeholder="Nhập mã (vd: SWEET10)" value="<?php echo isset($_POST['promo_code']) ? htmlspecialchars($_POST['promo_code']) : ''; ?>" style="text-transform:uppercase;">
+                <?php if (isset($promoError) && $promoError): ?>
+                    <span style="color:#d32f2f; font-size:12px;"><?php echo htmlspecialchars($promoError); ?></span>
+                <?php endif; ?>
+                <?php if (isset($appliedPromo) && $appliedPromo): ?>
+                    <span style="color:#2e7d32; font-size:12px;">Đã áp dụng: <?php echo htmlspecialchars($appliedPromo['code']); ?> (-<?php echo number_format($discountAmount, 0, ',', '.'); ?>₫)</span>
+                <?php endif; ?>
+            </div>
+            <div class="row">
+                <div>Tạm tính</div>
+                <div><?php echo number_format($totalAmount, 0, ',', '.'); ?>₫</div>
+            </div>
+            <?php if ($discountAmount > 0): ?>
+            <div class="row" style="color:#2e7d32;">
+                <div>Giảm giá (<?php echo htmlspecialchars($appliedPromo['code'] ?? ''); ?>)</div>
+                <div>-<?php echo number_format($discountAmount, 0, ',', '.'); ?>₫</div>
+            </div>
+            <?php endif; ?>
+            <hr style="margin:12px 0; border:none; border-top:1px solid #eee;">
             <div class="row total">
                 <div>Tổng cộng</div>
-                <div><?php echo number_format($totalAmount, 0, ',', '.'); ?>₫</div>
+                <div><?php echo number_format($finalAmount, 0, ',', '.'); ?>₫</div>
             </div>
             <div style="margin-top:16px; text-align:right;">
                 <button type="submit" class="btn-submit">Đặt hàng</button>

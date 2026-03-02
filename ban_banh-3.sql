@@ -23,8 +23,7 @@ CREATE DATABASE IF NOT EXISTS `ban_banh`;
 USE `ban_banh`;
 --
 
--- Bảng đang dùng: categories, flavors, sizes, products, users, orders, order_items.
--- Đã xóa (không dùng trong code): cart (giỏ dùng session), contacts, posts, product_images, reviews.
+-- Bảng đang dùng: categories, flavors, sizes, products, users, orders, order_items, contacts, promotions.
 
 -- --------------------------------------------------------
 
@@ -94,6 +93,8 @@ CREATE TABLE `orders` (
   `address` text NOT NULL,
   `note` text DEFAULT NULL,
   `total_amount` decimal(10,2) NOT NULL,
+  `promo_code` varchar(50) DEFAULT NULL,
+  `discount_amount` decimal(10,2) DEFAULT 0,
   `status` varchar(50) DEFAULT 'pending',
   `payment_method` varchar(50) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -119,9 +120,9 @@ CREATE TABLE `order_items` (
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `full_name`, `phone`, `address`, `note`, `total_amount`, `status`, `payment_method`, `created_at`) VALUES
-(1, 3, 'Đỗ Thu Hiền', '0900000001', '123 Đường ABC, Quận 1, TP.HCM', 'Giao giờ hành chính', 330000.00, 'completed', 'cod', '2025-12-01 10:00:00'),
-(2, 5, 'Hồ Quỳnh Anh', '0420032044', '456 Đường XYZ, Quận 7, TP.HCM', NULL, 199000.00, 'pending', 'cod', '2025-12-02 14:30:00');
+INSERT INTO `orders` (`id`, `user_id`, `full_name`, `phone`, `address`, `note`, `total_amount`, `promo_code`, `discount_amount`, `status`, `payment_method`, `created_at`) VALUES
+(1, 3, 'Đỗ Thu Hiền', '0900000001', '123 Đường ABC, Quận 1, TP.HCM', 'Giao giờ hành chính', 330000.00, NULL, 0, 'completed', 'cod', '2025-12-01 10:00:00'),
+(2, 5, 'Hồ Quỳnh Anh', '0420032044', '456 Đường XYZ, Quận 7, TP.HCM', NULL, 199000.00, NULL, 0, 'pending', 'cod', '2025-12-02 14:30:00');
 
 --
 -- Dumping data for table `order_items`
@@ -131,6 +132,50 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `flavor`, `qu
 (1, 1, 1, '17cm x 8cm', 'Cốt Vani + Mứt Dâu Tây', 1, 150000.00),
 (2, 1, 6, '17cm x 8cm', 'Cốt Vani + Mứt Xoài (kèm xoài tươi)', 1, 199000.00),
 (3, 2, 6, '21cm x 8cm', 'Cốt Vani + Mứt Việt Quất', 1, 199000.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `contacts`
+--
+
+CREATE TABLE `contacts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `message` text NOT NULL,
+  `status` varchar(50) DEFAULT 'new',
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `promotions`
+--
+
+CREATE TABLE `promotions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `discount_type` enum('percent','fixed') NOT NULL DEFAULT 'percent',
+  `discount_value` decimal(10,2) NOT NULL DEFAULT 0,
+  `min_order_amount` decimal(10,2) DEFAULT 0,
+  `valid_from` datetime DEFAULT NULL,
+  `valid_to` datetime DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `promotions`
+--
+
+INSERT INTO `promotions` (`code`, `title`, `discount_type`, `discount_value`, `min_order_amount`, `is_active`) VALUES
+('SINHNHAT15', 'Giảm 15% bánh sinh nhật', 'percent', 15.00, 0, 1),
+('FREESHIP350', 'Freeship đơn từ 350K', 'fixed', 30000.00, 350000.00, 1),
+('SWEET10', 'Giảm 10% đơn hàng', 'percent', 10.00, 200000.00, 1);
 
 -- --------------------------------------------------------
 
@@ -283,12 +328,25 @@ ALTER TABLE `order_items`
   ADD KEY `product_id` (`product_id`);
 
 --
+-- Indexes for table `contacts`
+--
+ALTER TABLE `contacts`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`),
   ADD KEY `category_id` (`category_id`);
+
+--
+-- Indexes for table `promotions`
+--
+ALTER TABLE `promotions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `code` (`code`);
 
 --
 -- Indexes for table `sizes`
@@ -334,6 +392,18 @@ ALTER TABLE `order_items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `contacts`
+--
+ALTER TABLE `contacts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `promotions`
+--
+ALTER TABLE `promotions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
@@ -374,21 +444,6 @@ ALTER TABLE `order_items`
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
 COMMIT;
-
---
--- Bảng tùy chọn (chạy riêng khi cần):
--- Lưu form liên hệ (contact.php): tạo bảng contacts rồi xử lý POST trong contact.php.
---
--- CREATE TABLE `contacts` (
---   `id` int(11) NOT NULL AUTO_INCREMENT,
---   `name` varchar(100) NOT NULL,
---   `email` varchar(100) NOT NULL,
---   `phone` varchar(15) DEFAULT NULL,
---   `message` text NOT NULL,
---   `is_read` tinyint(1) DEFAULT 0,
---   `created_at` datetime DEFAULT current_timestamp(),
---   PRIMARY KEY (`id`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

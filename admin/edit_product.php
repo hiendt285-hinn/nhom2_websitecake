@@ -43,7 +43,6 @@ if ($product_id > 0) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product_id > 0) {
     $name = trim($_POST['name'] ?? '');
     $price = floatval($_POST['price'] ?? 0);
-    $stock = intval($_POST['stock'] ?? 0);
     $category_id = intval($_POST['category_id'] ?? 0);
     $current_image = $product['image']; // Giữ ảnh cũ
 
@@ -65,12 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product_id > 0) {
         }
 
         if (empty($error_message)) {
-            $stmt = $conn->prepare("UPDATE products SET name=?, category_id=?, price=?, stock=?, image=? WHERE id=?");
-            $stmt->bind_param('siidis', $name, $category_id, $price, $stock, $new_image, $product_id);
+            $stmt = $conn->prepare("UPDATE products SET name=?, category_id=?, price=?, image=? WHERE id=?");
+            $stmt->bind_param('sidsi', $name, $category_id, $price, $new_image, $product_id);
             
             if ($stmt->execute()) {
                 $success_message = 'Cập nhật sản phẩm thành công!';
-                header("Location: manage_products.php"); 
+                header("Location: admin_dashboard.php?page=products"); 
                 exit();
             } else {
                 $error_message = 'Lỗi khi cập nhật vào database: ' . $conn->error;
@@ -125,9 +124,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product_id > 0) {
 
     <label for="price">Giá (₫):</label>
     <input type="number" id="price" name="price" step="1000" min="0" value="<?php echo $product['price']; ?>" required>
-
-    <label for="stock">Số lượng kho:</label>
-    <input type="number" id="stock" name="stock" min="0" value="<?php echo $product['stock']; ?>" required>
 
     <label>Hình ảnh hiện tại:</label><br>
     <img src="../images/<?php echo htmlspecialchars($product['image']); ?>" alt="Hình ảnh sản phẩm" style="height: 100px; margin-top: 10px;">

@@ -1,6 +1,41 @@
 <?php
 session_start();
 include 'connect.php';
+
+// Tạo bảng promotions nếu chưa có và lấy danh sách mã khuyến mãi đang áp dụng
+$conn->query("CREATE TABLE IF NOT EXISTS promotions (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  code varchar(50) NOT NULL,
+  title varchar(255) DEFAULT NULL,
+  discount_type enum('percent','fixed') NOT NULL DEFAULT 'percent',
+  discount_value decimal(10,2) NOT NULL DEFAULT 0,
+  min_order_amount decimal(10,2) DEFAULT 0,
+  valid_from datetime DEFAULT NULL,
+  valid_to datetime DEFAULT NULL,
+  is_active tinyint(1) DEFAULT 1,
+  created_at datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (id),
+  UNIQUE KEY code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+$promos = [];
+$res = $conn->query("SELECT code, title, discount_type, discount_value, min_order_amount FROM promotions WHERE is_active = 1 AND (valid_from IS NULL OR valid_from <= NOW()) AND (valid_to IS NULL OR valid_to >= NOW()) ORDER BY id");
+if ($res && $res->num_rows > 0) {
+    while ($row = $res->fetch_assoc()) {
+        $promos[] = $row;
+    }
+}
+// Nếu chưa có mã nào, thêm vài mã mặc định
+if (empty($promos)) {
+    $conn->query("INSERT IGNORE INTO promotions (code, title, discount_type, discount_value, min_order_amount, is_active) VALUES
+    ('SINHNHAT15', 'Giảm 15% bánh sinh nhật', 'percent', 15, 0, 1),
+    ('FREESHIP350', 'Freeship đơn từ 350K', 'fixed', 30000, 350000, 1),
+    ('SWEET10', 'Giảm 10% đơn hàng', 'percent', 10, 200000, 1)");
+    $res = $conn->query("SELECT code, title, discount_type, discount_value, min_order_amount FROM promotions WHERE is_active = 1 ORDER BY id");
+    if ($res && $res->num_rows > 0) {
+        while ($row = $res->fetch_assoc()) { $promos[] = $row; }
+    }
+}
+
 include 'header.php';
 ?>
 
@@ -120,68 +155,58 @@ include 'header.php';
 
         <!-- PROMO LIST -->
         <div class="promo-grid">
+            <?php foreach ($promos as $index => $p):
+                $badges = ['HOT', 'NEW', 'ƯU ĐÃI', 'VIP'];
+                $icons = ['🍰', '🎂', '🍓', '🎁'];
+                $badge = $badges[$index % 4];
+                $icon = $icons[$index % 4];
+                $desc = $p['discount_type'] === 'percent'
+                    ? 'Giảm ' . (int)$p['discount_value'] . '% đơn hàng.'
+                    : 'Giảm ' . number_format((float)$p['discount_value'], 0, ',', '.') . '₫.';
+                if ((float)$p['min_order_amount'] > 0) {
+                    $desc .= ' Đơn tối thiểu ' . number_format((float)$p['min_order_amount'], 0, ',', '.') . '₫.';
+                }
+            ?>
+            <div class="promo-card">
+                <div class="promo-badge"><?php echo $badge; ?></div>
+                <div class="promo-image"><?php echo $icon; ?></div>
+                <div class="promo-content">
+                    <h3><?php echo htmlspecialchars($p['title'] ?: $p['code']); ?></h3>
+                    <p><?php echo htmlspecialchars($desc); ?></p>
+                    <p style="margin-top:10px;"><strong>Mã: <code class="promo-code" style="background:#f0f0f0; padding:4px 10px; border-radius:6px;"><?php echo htmlspecialchars($p['code']); ?></code></strong> — Nhập mã khi thanh toán để áp dụng.</p>
+                </div>
+                <div class="promo-footer">
+                    <a href="products.php">Xem sản phẩm</a>
+                    <a href="cart.php" style="margin-left:10px;">Đặt hàng ngay</a>
+                </div>
+            </div>
+            <?php endforeach; ?>
 
-            <!-- PROMO ITEM -->
+            <?php if (empty($promos)): ?>
+            <!-- Fallback khi chưa có mã trong DB -->
             <div class="promo-card">
                 <div class="promo-badge">HOT</div>
                 <div class="promo-image">🍰</div>
                 <div class="promo-content">
                     <h3>Giảm 15% bánh sinh nhật</h3>
-                    <p>
-                        Áp dụng cho tất cả bánh sinh nhật size vừa & lớn.
-                        Không áp dụng chung ưu đãi khác.
-                    </p>
+                    <p>Áp dụng cho tất cả bánh sinh nhật size vừa & lớn. Nhập mã khi thanh toán.</p>
                 </div>
                 <div class="promo-footer">
                     <a href="products.php">Xem sản phẩm</a>
                 </div>
             </div>
-
             <div class="promo-card">
                 <div class="promo-badge">NEW</div>
                 <div class="promo-image">🎂</div>
                 <div class="promo-content">
                     <h3>Freeship đơn từ 350K</h3>
-                    <p>
-                        Miễn phí giao hàng nội thành Hà Nội
-                        cho đơn từ 350.000đ.
-                    </p>
+                    <p>Miễn phí giao hàng nội thành Hà Nội cho đơn từ 350.000đ.</p>
                 </div>
                 <div class="promo-footer">
                     <a href="products.php">Đặt bánh ngay</a>
                 </div>
             </div>
-
-            <div class="promo-card">
-                <div class="promo-badge">ƯU ĐÃI</div>
-                <div class="promo-image">🍓</div>
-                <div class="promo-content">
-                    <h3>Tặng topping trái cây</h3>
-                    <p>
-                        Tặng topping hoa quả tươi cho bánh size lớn
-                        trong khung giờ 9h–11h.
-                    </p>
-                </div>
-                <div class="promo-footer">
-                    <a href="products.php">Xem chi tiết</a>
-                </div>
-            </div>
-
-            <div class="promo-card">
-                <div class="promo-badge">VIP</div>
-                <div class="promo-image">🎁</div>
-                <div class="promo-content">
-                    <h3>Khách thân thiết -10%</h3>
-                    <p>
-                        Áp dụng cho khách có từ 3 đơn hàng trở lên
-                        trong vòng 30 ngày.
-                    </p>
-                </div>
-                <div class="promo-footer">
-                    <a href="products.php">Mua ngay</a>
-                </div>
-            </div>
-
+            <?php endif; ?>
         </div>
     </div>
 </div>

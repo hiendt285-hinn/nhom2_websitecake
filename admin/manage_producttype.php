@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 require_once 'connect.php';
 if (!isset($_SESSION["admin"])) {
     header("Location: login_admin.php");
@@ -27,6 +26,8 @@ if (isset($_GET['delete'])) {
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $stmt->close();
+    header("Location: admin_dashboard.php?page=producttype");
+    exit();
 }
 
 // Sửa danh mục
@@ -39,68 +40,84 @@ if (isset($_POST['edit_category'])) {
     $stmt->bind_param("sssi", $name, $slug, $description, $id);
     $stmt->execute();
     $stmt->close();
+    header("Location: admin_dashboard.php?page=producttype");
+    exit();
 }
 
 // Lấy danh sách danh mục
 $result = $conn->query("SELECT * FROM categories ORDER BY id DESC");
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8">
-<title>Quản lý danh mục</title>
-<style>
-body{font-family:Poppins,sans-serif;background:#fffaf0;padding:20px;}
-table{width:100%;border-collapse:collapse;margin-top:20px;background:#ffffff}
-th,td{border:1px solid #ccc;padding:10px;text-align:left;}
-th{background:#F5F1E8;color: #333;;}
-form input, form textarea{width:95%;padding:8px;margin:5px 0;border-radius:5px;border:1px solid #ccc;}
-form input[type=submit]{background:#8B6F47;color:#fff;border:none;padding:10px 15px;cursor:pointer;border-radius:5px;}
-form input[type=submit]:hover{background:#A0826D;}
-a{color:#2196F3;text-decoration:none;}
-a:hover{color:#64B5F6;}
-</style> 
-</head>
-<body>
-<h2>Quản lý danh mục sản phẩm</h2>
-<form method="post">
-    <input type="text" name="name" placeholder="Tên danh mục" required>
-    <input type="text" name="slug" placeholder="Slug">
-    <textarea name="description" placeholder="Mô tả"></textarea>
-    <input type="submit" name="add_category" value="Thêm danh mục">
-</form>
+<div class="admin-content">
+    <h1 class="admin-page-title"><i class="fas fa-list"></i> Quản lý danh mục sản phẩm</h1>
 
-<table>
-<tr><th>ID</th><th>Tên danh mục</th><th>Slug</th><th>Mô tả</th><th>Hành động</th></tr>
-<?php while($row = $result->fetch_assoc()): ?>
-<tr>
-<td><?php echo $row['id']; ?></td>
-<td><?php echo htmlspecialchars($row['name']); ?></td>
-<td><?php echo htmlspecialchars($row['slug']); ?></td>
-<td><?php echo htmlspecialchars($row['description']); ?></td>
-<td>
-    <a href="manage_producttype.php?edit=<?php echo $row['id']; ?>">Sửa</a> |
-    <a href="manage_producttype.php?delete=<?php echo $row['id']; ?>" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</a>
-</td>
-</tr>
-<?php endwhile; ?>
-</table>
+    <div class="admin-card">
+        <h2>Thêm danh mục mới</h2>
+        <form method="post" style="max-width: 500px;">
+            <div style="margin-bottom: 12px;">
+                <input type="text" name="name" placeholder="Tên danh mục" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <input type="text" name="slug" placeholder="Slug" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <textarea name="description" placeholder="Mô tả" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;"></textarea>
+            </div>
+            <button type="submit" name="add_category" class="admin-btn admin-btn-primary">Thêm danh mục</button>
+        </form>
+    </div>
 
-<?php
-// Form sửa
-if(isset($_GET['edit'])){
-    $id = (int)$_GET['edit'];
-    $res = $conn->query("SELECT * FROM categories WHERE id=$id LIMIT 1");
-    $cat = $res->fetch_assoc();
-?>
-<h3>Sửa danh mục</h3>
-<form method="post">
-<input type="hidden" name="id" value="<?php echo $cat['id']; ?>">
-<input type="text" name="name" value="<?php echo htmlspecialchars($cat['name']); ?>" required>
-<input type="text" name="slug" value="<?php echo htmlspecialchars($cat['slug']); ?>">
-<textarea name="description"><?php echo htmlspecialchars($cat['description']); ?></textarea>
-<input type="submit" name="edit_category" value="Cập nhật danh mục">
-</form>
-<?php } ?>
-</body>
-</html>
+    <div class="admin-card">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên danh mục</th>
+                    <th>Slug</th>
+                    <th>Mô tả</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php while ($result && $row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?php echo (int)$row['id']; ?></td>
+                    <td><?php echo htmlspecialchars($row['name']); ?></td>
+                    <td><?php echo htmlspecialchars($row['slug']); ?></td>
+                    <td><?php echo htmlspecialchars($row['description']); ?></td>
+                    <td>
+                        <a href="admin_dashboard.php?page=producttype&edit=<?php echo (int)$row['id']; ?>" class="admin-link">Sửa</a>
+                        <span style="color: #999;">|</span>
+                        <a href="admin_dashboard.php?page=producttype&delete=<?php echo (int)$row['id']; ?>" class="admin-link" style="color: #d32f2f;" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</a>
+                    </td>
+                </tr>
+                <?php endwhile; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <?php if (isset($_GET['edit'])): ?>
+        <?php
+        $id = (int)$_GET['edit'];
+        $res = $conn->query("SELECT * FROM categories WHERE id=$id LIMIT 1");
+        $cat = $res ? $res->fetch_assoc() : null;
+        if ($cat):
+        ?>
+    <div class="admin-card">
+        <h2>Sửa danh mục</h2>
+        <form method="post" style="max-width: 500px;">
+            <input type="hidden" name="id" value="<?php echo (int)$cat['id']; ?>">
+            <div style="margin-bottom: 12px;">
+                <input type="text" name="name" value="<?php echo htmlspecialchars($cat['name']); ?>" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <input type="text" name="slug" value="<?php echo htmlspecialchars($cat['slug']); ?>" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <textarea name="description" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 6px;"><?php echo htmlspecialchars($cat['description']); ?></textarea>
+            </div>
+            <button type="submit" name="edit_category" class="admin-btn admin-btn-primary">Cập nhật danh mục</button>
+        </form>
+    </div>
+        <?php endif; ?>
+    <?php endif; ?>
+</div>

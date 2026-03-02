@@ -1,6 +1,40 @@
 <?php
 session_start();
 include 'connect.php';
+
+// Tạo bảng contacts nếu chưa có
+$conn->query("CREATE TABLE IF NOT EXISTS contacts (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(255) NOT NULL,
+  email varchar(255) NOT NULL,
+  phone varchar(50) DEFAULT NULL,
+  message text NOT NULL,
+  status varchar(50) DEFAULT 'new',
+  created_at datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+$contactSuccess = '';
+$contactError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'], $_POST['email'], $_POST['message'])) {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone'] ?? '');
+    $message = trim($_POST['message']);
+    if ($name !== '' && $email !== '' && $message !== '') {
+        $stmt = $conn->prepare("INSERT INTO contacts (name, email, phone, message) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param('ssss', $name, $email, $phone, $message);
+        if ($stmt->execute()) {
+            $contactSuccess = 'Cảm ơn bạn! Chúng tôi đã nhận được liên hệ và sẽ phản hồi sớm.';
+        } else {
+            $contactError = 'Gửi không thành công. Vui lòng thử lại.';
+        }
+        $stmt->close();
+    } else {
+        $contactError = 'Vui lòng điền đầy đủ Họ tên, Email và Nội dung.';
+    }
+}
+
 include 'header.php';
 ?>
 
@@ -100,7 +134,9 @@ include 'header.php';
                 từ đặt bánh, tư vấn mẫu cho đến phản hồi dịch vụ.
             </p>
 
-            <div class="#store-card">
+            <div class="info-item">
+                <strong>📍 Địa chỉ:</strong><br>
+                15 Kim Chung Di Trạch, Hoài Đức, Hà Nội
             </div>
 
             <div class="info-item">
@@ -122,12 +158,17 @@ include 'header.php';
         <!-- FORM LIÊN HỆ -->
         <div class="contact-form contact-box">
             <h2>Gửi lời nhắn cho chúng tôi 💌</h2>
-
-            <form method="post" action="#">
-                <input type="text" name="name" placeholder="Họ và tên" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="text" name="phone" placeholder="Số điện thoại">
-                <textarea name="message" placeholder="Nội dung liên hệ..." required></textarea>
+            <?php if ($contactSuccess): ?>
+                <p style="color:#2e7d32; margin-bottom:15px;"><?php echo htmlspecialchars($contactSuccess); ?></p>
+            <?php endif; ?>
+            <?php if ($contactError): ?>
+                <p style="color:#d32f2f; margin-bottom:15px;"><?php echo htmlspecialchars($contactError); ?></p>
+            <?php endif; ?>
+            <form method="post" action="">
+                <input type="text" name="name" placeholder="Họ và tên" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required>
+                <input type="email" name="email" placeholder="Email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
+                <input type="text" name="phone" placeholder="Số điện thoại" value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
+                <textarea name="message" placeholder="Nội dung liên hệ..." required><?php echo isset($_POST['message']) ? htmlspecialchars($_POST['message']) : ''; ?></textarea>
                 <button type="submit">Gửi liên hệ</button>
             </form>
         </div>

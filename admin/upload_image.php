@@ -19,8 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description']);
     $short_description = trim($_POST['short_description']);
     $category_id = intval($_POST['category_id']);
-    $stock = intval($_POST['stock']);
-    
     // Xử lý upload file hình
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $allowed_ext = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
@@ -34,8 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $target_file = $target_dir . $new_file_name;
             if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
                 // Thêm sản phẩm vào DB
-                $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, short_description, category_id, stock) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param('sisssii', $name, $price, $new_file_name, $description, $short_description, $category_id, $stock);
+                $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, short_description, category_id) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param('sisssi', $name, $price, $new_file_name, $description, $short_description, $category_id);
                 if ($stmt->execute()) {
                     $success = "Thêm sản phẩm thành công!";
                 } else {
@@ -104,9 +102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <option value="<?php echo $cat['id'] ?>"><?php echo htmlspecialchars($cat['name']) ?></option>
         <?php endwhile; ?>
     </select>
-
-    <label for="stock">Số lượng kho</label>
-    <input type="number" name="stock" id="stock" min="0" value="100" required>
 
     <label for="short_description">Mô tả ngắn</label>
     <input type="text" name="short_description" id="short_description">

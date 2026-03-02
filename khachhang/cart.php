@@ -15,38 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-    // Cập nhật toàn bộ số lượng (giới hạn theo tồn kho)
-    elseif (isset($_POST['quantities']) && is_array($_POST['quantities']) && isset($conn)) {
+    // Cập nhật toàn bộ số lượng
+    elseif (isset($_POST['quantities']) && is_array($_POST['quantities'])) {
         foreach ($_POST['quantities'] as $itemKey => $qty) {
             $qty = (int)$qty;
-            if ($qty <= 0) {
+            if ($qty <= 0 && isset($_SESSION['cart'][$itemKey])) {
                 unset($_SESSION['cart'][$itemKey]);
-            } elseif (isset($_SESSION['cart'][$itemKey])) {
-                $productId = (int)$_SESSION['cart'][$itemKey]['id'];
-                $stock = 999;
-                $stmt = $conn->prepare('SELECT stock FROM products WHERE id = ? LIMIT 1');
-                if ($stmt) {
-                    $stmt->bind_param('i', $productId);
-                    $stmt->execute();
-                    $row = $stmt->get_result()->fetch_assoc();
-                    $stmt->close();
-                    if ($row !== null) {
-                        $stock = (int)$row['stock'];
-                    }
-                }
-                $otherQty = 0;
-                foreach ($_SESSION['cart'] as $k => $item) {
-                    if ($k !== $itemKey && (int)$item['id'] === $productId) {
-                        $otherQty += (int)$item['quantity'];
-                    }
-                }
-                $maxQty = max(0, $stock - $otherQty);
-                $qty = min($qty, $maxQty > 0 ? $maxQty : 0);
-                if ($qty <= 0) {
-                    unset($_SESSION['cart'][$itemKey]);
-                } else {
-                    $_SESSION['cart'][$itemKey]['quantity'] = $qty;
-                }
+            } elseif ($qty >= 1 && isset($_SESSION['cart'][$itemKey])) {
+                $_SESSION['cart'][$itemKey]['quantity'] = $qty;
             }
         }
 
@@ -60,36 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Tính tổng tiền và lấy tồn kho theo product_id (để giới hạn số lượng trong giỏ)
+// Tính tổng tiền
 $total_amount = 0;
-$stockByProduct = [];
-if (isset($_SESSION['cart']) && !empty($_SESSION['cart']) && isset($conn)) {
-    $productIds = array_values(array_unique(array_map(function ($item) { return (int)$item['id']; }, $_SESSION['cart'])));
-    foreach ($_SESSION['cart'] as $item) {
-        $total_amount += $item['price'] * $item['quantity'];
-    }
-    if (!empty($productIds)) {
-        $placeholders = implode(',', array_fill(0, count($productIds), '?'));
-        $types = str_repeat('i', count($productIds));
-        $stmtStock = $conn->prepare("SELECT id, stock FROM products WHERE id IN ($placeholders)");
-        if ($stmtStock) {
-            $bindParams = array_merge([$types], $productIds);
-            $refs = [];
-            foreach ($bindParams as $key => $val) {
-                $refs[$key] = &$bindParams[$key];
-            }
-            call_user_func_array([$stmtStock, 'bind_param'], $refs);
-            $stmtStock->execute();
-            $res = $stmtStock->get_result();
-            if ($res) {
-                while ($row = $res->fetch_assoc()) {
-                    $stockByProduct[(int)$row['id']] = (int)$row['stock'];
-                }
-            }
-            $stmtStock->close();
-        }
-    }
-} elseif (isset($_SESSION['cart'])) {
+if (isset($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $item) {
         $total_amount += $item['price'] * $item['quantity'];
     }
@@ -321,17 +270,8 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
                             </td>
                             <td><?php echo number_format($item['price'], 0, ',', '.'); ?>₫</td>
                             <td>
-                                <?php
-                                $pid = (int)$item['id'];
-                                $stock = $stockByProduct[$pid] ?? 0;
-                                $otherQty = 0;
-                                foreach ($_SESSION['cart'] as $k => $i) {
-                                    if ($k !== $item_key && (int)$i['id'] === $pid) { $otherQty += (int)$i['quantity']; }
-                                }
-                                $maxQty = max(1, $stock - $otherQty);
-                                ?>
                                 <input type="number" name="quantities[<?php echo $item_key; ?>]" 
-                                       class="quantity-input" value="<?php echo $item['quantity']; ?>" min="1" max="<?php echo $maxQty; ?>">
+                                       class="quantity-input" value="<?php echo $item['quantity']; ?>" min="1">
                             </td>
                             <td><?php echo number_format($item['price'] * $item['quantity'], 0, ',', '.'); ?>₫</td>
                             <td>

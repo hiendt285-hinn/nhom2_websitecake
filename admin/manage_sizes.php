@@ -75,7 +75,7 @@ if (isset($_GET['delete_id'])) {
     $stmt = $conn->prepare("DELETE FROM $table_name WHERE id = ?");
     $stmt->bind_param('i', $delete_id);
     if ($stmt->execute()) {
-        header("Location: manage_sizes.php?success=deleted");
+        header("Location: admin_dashboard.php?page=sizes&success=deleted");
         exit();
     } else {
         $error = "Không thể xóa $attribute_name. Có thể đang được sử dụng (liên kết với sản phẩm, đơn hàng, hoặc giỏ hàng).";
@@ -87,97 +87,20 @@ if (isset($_GET['delete_id'])) {
 $sql = "SELECT id, name FROM $table_name ORDER BY id ASC";
 $result = $conn->query($sql);
 ?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="UTF-8" />
-<title>Quản lý <?php echo $attribute_name; ?></title>
-<style>
-    body { font-family: 'Open Sans', sans-serif; background: #F5F1E8; margin:0; padding:20px;}
-    h1 { color: #8B6F47; margin-bottom:16px; }
-    .form-container { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .form-container input[type="text"] { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 300px; margin-right: 10px; }
-    .form-container button { padding: 10px 15px; background: #8B6F47; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    .form-container button:hover { background: #A0826D; }
-    
-    table { width: 100%; border-collapse: collapse; background: white; border-radius:8px; overflow:hidden; }
-    th, td { border-bottom: 1px solid #eee; padding: 10px 12px; text-align: left; font-size:14px; }
-    th { background: #f9f6f2; color: #333; font-weight:600; }
-    .btn-edit { color: #2196F3; cursor: pointer; margin-right: 10px; }
-    .btn-delete { color: #d32f2f; cursor: pointer; }
-    
-    /* Style cho Modal/Form chỉnh sửa */
-    .edit-modal {
-        display: none; 
-        position: fixed; 
-        z-index: 1000; 
-        left: 0; 
-        top: 0;
-        width: 100%; 
-        height: 100%; 
-        overflow: auto; 
-        background-color: rgba(0,0,0,0.4); 
-    }
-    .modal-content {
-        background-color: #fefefe;
-        margin: 10% auto; 
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%; 
-        max-width: 500px;
-        border-radius: 10px;
-        position: relative;
-    }
-    .close-btn {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-    .close-btn:hover,
-    .close-btn:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-    .modal-content input[type="text"] {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        display: inline-block;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
-    .modal-content button {
-        width: 100%;
-        background-color: #8B6F47;
-        color: white;
-        padding: 14px 20px;
-        margin: 8px 0;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-</style>
-</head>
-<body>
-<?php if (!defined('ADMIN_HEADER_INCLUDED')) include 'admin_header.php'; ?>
-
-<h1>Quản lý <?php echo $attribute_name; ?></h1>
-
-<?php if (isset($message) && $message) echo "<p style='color: green;'>$message</p>"; ?>
-<?php if (isset($error) && $error) echo "<p style='color: red;'>$error</p>"; ?>
-
-<div class="form-container">
+<div class="admin-content">
+<h1 class="admin-page-title"><i class="fas fa-expand-arrows-alt"></i> Quản lý <?php echo $attribute_name; ?></h1>
+<?php if ($message): ?><div class="admin-message admin-message-success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
+<?php if ($error): ?><div class="admin-message admin-message-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+<div class="admin-card">
     <h2>Thêm <?php echo $attribute_name; ?> mới</h2>
     <form method="POST">
-        <input type="text" name="new_name" placeholder="Ví dụ: 20cm" required>
-        <button type="submit">Thêm</button>
+        <input type="text" name="new_name" placeholder="Ví dụ: 20cm" required style="padding:10px; border:1px solid #ccc; border-radius:4px; width:300px; margin-right:10px;">
+        <button type="submit" class="admin-btn admin-btn-primary">Thêm</button>
     </form>
 </div>
 
-<table>
+<div class="admin-card">
+<table class="admin-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -192,8 +115,8 @@ $result = $conn->query($sql);
                     <td><?php echo $row['id'] ?></td>
                     <td><?php echo htmlspecialchars($row['name']) ?></td>
                     <td>
-                        <span class="btn-edit" onclick="openEditModal(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars($row['name']); ?>')">Chỉnh sửa</span>
-                        <span class="btn-delete" onclick="if(confirm('Bạn có chắc muốn xóa <?php echo $row['name']; ?>?')) { window.location.href='manage_sizes.php?delete_id=<?php echo $row['id']; ?>'; }">Xóa</span>
+                        <span class="admin-link" style="cursor:pointer;" onclick="openEditModal(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>')">Chỉnh sửa</span>
+                        <span style="color:#d32f2f; cursor:pointer; margin-left:10px;" onclick="if(confirm('Bạn có chắc muốn xóa <?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>?')) { window.location.href='admin_dashboard.php?page=sizes&delete_id=<?php echo $row['id']; ?>'; }">Xóa</span>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -202,8 +125,9 @@ $result = $conn->query($sql);
         <?php endif; ?>
     </tbody>
 </table>
+</div>
 
-<div id="editModal" class="edit-modal">
+<div id="editModal" class="edit-modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.4);">
     <div class="modal-content">
         <span class="close-btn">&times;</span>
         <h2>Chỉnh sửa <?php echo $attribute_name; ?></h2>
@@ -215,7 +139,6 @@ $result = $conn->query($sql);
         </form>
     </div>
 </div>
-
 <script>
     // Lấy các phần tử modal
     var modal = document.getElementById("editModal");
@@ -240,6 +163,4 @@ $result = $conn->query($sql);
         }
     }
 </script>
-
-</body>
-</html>
+</div>
