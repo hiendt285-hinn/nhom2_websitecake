@@ -8,9 +8,7 @@
 -- PHP Version: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
 SET time_zone = "+00:00";
-
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -19,9 +17,30 @@ SET time_zone = "+00:00";
 
 --
 -- Database: `ban_banh`
-CREATE DATABASE IF NOT EXISTS `ban_banh`;
-USE `ban_banh`;
+-- Import: Chọn database ban_banh trong phpMyAdmin rồi Import, hoặc chạy file để tạo DB và bảng.
 --
+CREATE DATABASE IF NOT EXISTS `ban_banh`
+  DEFAULT CHARACTER SET utf8mb4
+  COLLATE utf8mb4_general_ci;
+USE `ban_banh`;
+
+START TRANSACTION;
+SET FOREIGN_KEY_CHECKS = 0;
+
+--
+-- Drop bảng (theo thứ tự phụ thuộc) để import lại được nhiều lần trên localhost
+--
+DROP TABLE IF EXISTS `order_items`;
+DROP TABLE IF EXISTS `orders`;
+DROP TABLE IF EXISTS `products`;
+DROP TABLE IF EXISTS `categories`;
+DROP TABLE IF EXISTS `flavors`;
+DROP TABLE IF EXISTS `sizes`;
+DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `contacts`;
+DROP TABLE IF EXISTS `promotions`;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Bảng đang dùng: categories, flavors, sizes, products, users, orders, order_items, contacts, promotions.
 
@@ -443,6 +462,7 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
+SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
