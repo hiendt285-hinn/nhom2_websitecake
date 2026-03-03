@@ -13,7 +13,7 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Savor Cake - BST Women's Day</title>
+    <title>Sweet Cake - BST Women's Day</title>
 
     <link rel="stylesheet" href="style.css?v=<?php echo $css_version; ?>">
 
@@ -56,8 +56,8 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
         </div>
         <ul>
             <li><a href="products.php">Sản phẩm</a></li>
+            <li><a href="news.php">Tin tức</a></li>
             <li><a href="policy.php">Chính sách</a></li>
-            <li><a href="feedback.php">Feedback</a></li>
             <li><a href="contact.php">Liên hệ</a></li>
             <li><a href="promotion.php">Khuyến mãi</a></li>
             <li>
