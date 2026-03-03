@@ -534,10 +534,7 @@ while ($row = $cat_result->fetch_assoc()) {
                         </div>
                         <div class="product-actions">
                             <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                                Đặt hàng
-                            </a>
-                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-cart">
-                                <i class="fas fa-cart-plus"></i>
+                                <i class="fas fa-eye"></i> Xem chi tiết
                             </a>
                         </div>
                     </div>

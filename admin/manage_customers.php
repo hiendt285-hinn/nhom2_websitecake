@@ -68,12 +68,13 @@ if (isset($_POST['action'])) {
 $customers = $conn->query("SELECT id, username, full_name, email, phone, is_active FROM users WHERE role='customer' ORDER BY id DESC");
 ?>
 <div class="admin-content">
-    <h1 class="admin-page-title"><i class="fas fa-users"></i> Quản lý khách hàng</h1>
+    <div class="admin-page-header">
+        <h1 class="admin-page-title"><i class="fas fa-users"></i> Quản lý khách hàng</h1>
+        <button class="admin-btn admin-btn-primary" onclick="openForm('add')">Thêm khách hàng</button>
+    </div>
 
     <?php if($error): ?><div class="admin-message admin-message-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
     <?php if($success): ?><div class="admin-message admin-message-success"><?php echo htmlspecialchars($success); ?></div><?php endif; ?>
-
-    <button class="admin-btn admin-btn-primary" onclick="openForm('add')">Thêm khách hàng</button>
 
     <div class="admin-card">
     <table class="admin-table">
@@ -96,12 +97,12 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
                     <td><?php echo htmlspecialchars($row['email']);?></td>
                     <td><?php echo htmlspecialchars($row['phone']);?></td>
                     <td><?php echo $row['is_active'] ? 'Hoạt động' : 'Không hoạt động';?></td>
-                    <td>
-                        <button class="admin-btn admin-btn-primary" onclick="openForm('edit','<?php echo $row['id'];?>','<?php echo htmlspecialchars($row['username'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['email'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['phone'], ENT_QUOTES);?>')">Sửa</button>
+                    <td class="admin-action-cell">
+                        <button type="button" class="admin-btn admin-btn-primary admin-btn-sm" onclick="openForm('edit','<?php echo $row['id'];?>','<?php echo htmlspecialchars($row['username'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['email'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['phone'], ENT_QUOTES);?>')"><i class="fas fa-edit"></i> Sửa</button>
                         <form style="display:inline" method="post" onsubmit="return confirm('Bạn có chắc muốn xóa khách hàng này?');">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="id" value="<?php echo $row['id'];?>">
-                            <button type="submit" class="admin-btn" style="background:#d32f2f; color:white;">Xóa</button>
+                            <button type="submit" class="admin-btn admin-btn-danger admin-btn-sm"><i class="fas fa-trash-alt"></i> Xóa</button>
                         </form>
                     </td>
                 </tr>
@@ -114,37 +115,55 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
     </div>
 </div>
 
-<div class="form-popup" id="formPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); border:1px solid #ccc; background:white; padding:20px; z-index:9999; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.15);">
-    <form method="post" class="form-container">
-        <h3>Khách hàng</h3>
-        <input type="hidden" name="action" id="action">
-        <input type="hidden" name="id" id="id">
-        <label>Username</label>
-        <input type="text" name="username" id="username" required>
-        <label>Họ tên</label>
-        <input type="text" name="full_name" id="full_name" required>
-        <label>Email</label>
-        <input type="email" name="email" id="email" required>
-        <label>Điện thoại</label>
-        <input type="text" name="phone" id="phone">
-        <label>Mật khẩu</label>
-        <input type="password" name="password" id="password">
-        <button type="submit" class="admin-btn admin-btn-primary">Lưu</button>
-        <button type="button" class="admin-btn" style="background:#666; color:white;" onclick="closeForm()">Hủy</button>
-    </form>
+<div class="edit-modal" id="formPopup" style="display:none;">
+    <div class="admin-modal-box">
+        <div class="admin-modal-header">
+            <h2 class="admin-modal-title">Khách hàng</h2>
+            <button type="button" class="admin-modal-close" onclick="closeForm()" aria-label="Đóng">&times;</button>
+        </div>
+        <form method="post" class="admin-modal-body">
+            <input type="hidden" name="action" id="action">
+            <input type="hidden" name="id" id="id">
+            <div class="admin-form-group">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username" required>
+            </div>
+            <div class="admin-form-group">
+                <label for="full_name">Họ tên</label>
+                <input type="text" name="full_name" id="full_name" required>
+            </div>
+            <div class="admin-form-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" required>
+            </div>
+            <div class="admin-form-group">
+                <label for="phone">Điện thoại</label>
+                <input type="text" name="phone" id="phone">
+            </div>
+            <div class="admin-form-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" name="password" id="password">
+                <span class="form-hint" id="passwordHint">Để trống nếu không đổi (khi sửa)</span>
+            </div>
+            <div class="admin-modal-actions">
+                <button type="button" class="admin-btn admin-btn-secondary" onclick="closeForm()">Hủy</button>
+                <button type="submit" class="admin-btn admin-btn-primary">Lưu</button>
+            </div>
+        </form>
+    </div>
 </div>
 <script>
 function openForm(action, id, username, full_name, email, phone) {
     id = id || ''; username = username || ''; full_name = full_name || ''; email = email || ''; phone = phone || '';
-    document.getElementById('formPopup').style.display = 'block';
+    document.getElementById('formPopup').style.display = 'flex';
     document.getElementById('action').value = action;
     document.getElementById('id').value = id;
     document.getElementById('username').value = username;
     document.getElementById('full_name').value = full_name;
     document.getElementById('email').value = email;
     document.getElementById('phone').value = phone;
-    var pwd = document.getElementById('password');
-    pwd.placeholder = (action === 'edit') ? 'Để trống nếu không đổi' : 'Mật khẩu';
+    var hint = document.getElementById('passwordHint');
+    hint.style.display = (action === 'edit') ? 'block' : 'none';
 }
 function closeForm() { document.getElementById('formPopup').style.display = 'none'; }
 </script>

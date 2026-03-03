@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product_id > 0) {
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<title>Chỉnh sửa sản phẩm - Savor Cake</title>
+<title>Chỉnh sửa sản phẩm - Sweet Cake</title>
 <style>
     body { font-family: 'Poppins', sans-serif; background: #fffaf0; margin:0; padding:20px;}
     h1 { color: #8B6F47; }

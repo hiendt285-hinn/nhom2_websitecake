@@ -16,6 +16,21 @@ if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
 
 $userId = (int)$_SESSION['user_id'];
 
+// Lấy thông tin người dùng từ database (điền sẵn form; nếu lỗi thì dùng mảng rỗng tránh trang trắng)
+$userProfile = ['full_name' => '', 'phone' => '', 'address' => ''];
+$stmtUser = $conn->prepare("SELECT full_name, phone, address FROM users WHERE id = ?");
+if ($stmtUser) {
+    $stmtUser->bind_param('i', $userId);
+    $stmtUser->execute();
+    $res = $stmtUser->get_result();
+    if ($res && $row = $res->fetch_assoc()) {
+        $userProfile['full_name'] = (string)($row['full_name'] ?? '');
+        $userProfile['phone'] = (string)($row['phone'] ?? '');
+        $userProfile['address'] = (string)($row['address'] ?? '');
+    }
+    $stmtUser->close();
+}
+
 // Đảm bảo bảng promotions và cột đơn hàng tồn tại
 $conn->query("CREATE TABLE IF NOT EXISTS promotions (
   id int(11) NOT NULL AUTO_INCREMENT,
@@ -36,6 +51,15 @@ if ($chk && $chk->num_rows === 0) {
     $conn->query("ALTER TABLE orders ADD COLUMN promo_code varchar(50) DEFAULT NULL, ADD COLUMN discount_amount decimal(10,2) DEFAULT 0");
 }
 
+// Danh sách mã khuyến mãi đang áp dụng (để hiển thị dropdown)
+$promoList = [];
+$promoRes = $conn->query("SELECT code, title, discount_type, discount_value, min_order_amount FROM promotions WHERE is_active = 1 AND (valid_from IS NULL OR valid_from <= NOW()) AND (valid_to IS NULL OR valid_to >= NOW()) ORDER BY code");
+if ($promoRes && $promoRes->num_rows > 0) {
+    while ($row = $promoRes->fetch_assoc()) {
+        $promoList[] = $row;
+    }
+}
+
 // Tính tổng tiền
 $totalAmount = 0;
 foreach ($_SESSION['cart'] as $item) {
@@ -45,6 +69,7 @@ $discountAmount = 0;
 $appliedPromo = null;
 $promoError = '';
 $finalAmount = $totalAmount;
+
 // Xử lý đặt hàng (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fullName = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
@@ -102,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('Lỗi hệ thống (orders): ' . $conn->error);
                 }
                 $promoCodeSave = $appliedPromo ? $appliedPromo['code'] : '';
-                $stmtOrder->bind_param('issssdsd', $userId, $fullName, $phone, $address, $note, $finalAmount, $paymentMethod, $promoCodeSave, $discountAmount);
+                $stmtOrder->bind_param('issssdsds', $userId, $fullName, $phone, $address, $note, $finalAmount, $paymentMethod, $promoCodeSave, $discountAmount);
                 if (!$stmtOrder->execute()) {
                     throw new Exception('Không thể lưu đơn hàng: ' . $stmtOrder->error);
                 }
@@ -131,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $conn->commit();
                 unset($_SESSION['cart']);
-                header('Location: order_detail.php?id=' . $orderId);
+                header('Location: order_detail.php?id=' . $orderId . '&success=1');
                 exit();
             } catch (Exception $e) {
                 $conn->rollback();
@@ -140,6 +165,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Giá trị hiển thị trong form: ưu tiên POST (khi lỗi), không thì dùng thông tin tài khoản
+$formFullName = isset($_POST['full_name']) ? trim($_POST['full_name']) : ($userProfile['full_name'] ?? '');
+$formPhone = isset($_POST['phone']) ? trim($_POST['phone']) : ($userProfile['phone'] ?? '');
+$formAddress = isset($_POST['address']) ? trim($_POST['address']) : ($userProfile['address'] ?? '');
+$formNote = isset($_POST['note']) ? trim($_POST['note']) : '';
+$formPaymentMethod = isset($_POST['payment_method']) ? $_POST['payment_method'] : 'cod';
 ?>
 
 <!DOCTYPE html>
@@ -147,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán - Savor Cake</title>
+    <title>Thanh toán - Sweet Cake</title>
     <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -165,102 +197,166 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .order-summary .row { display: flex; justify-content: space-between; margin-bottom: 8px; }
         .total { font-weight: 700; color: #2e7d32; }
         .btn-submit {
-            background: var(--main-brown);
-            color: var(--white);
+            background: #5D4037;
+            color: white;
             border: none;
             padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            width: 100%;
         }
         .btn-submit:hover {
-            background: var(--white);
-            color: var(--main-brown);
-            border: 1px solid var(--main-brown);
+            background: white;
+            color: #5D4037;
+            border: 1px solid #5D4037;
         }
         .error { color: #d32f2f; margin-bottom: 12px; font-weight: 600; }
-        @media (max-width: 900px) { .checkout-grid { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+        .info-note {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        @media (max-width: 900px) { 
+            .checkout-grid { grid-template-columns: 1fr; } 
+            .form-row { grid-template-columns: 1fr; } 
+        }
     </style>
 </head>
 <body>
 <?php include 'header.php'; ?>
+
 <div class="checkout-page">
     <h1 style="text-align:center; margin-bottom:20px; color:#5D4037;">Thanh toán</h1>
 
-    <?php if (isset($error)): ?>
+    <?php if (isset($error) && $error !== ''): ?>
         <div class="error"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
+
+    <div class="info-note">
+        <i class="fas fa-info-circle"></i> 
+        Thông tin nhận hàng được tự động lấy từ tài khoản của bạn. Bạn có thể chỉnh sửa nếu cần.
+    </div>
 
     <form method="POST" class="checkout-grid">
         <div class="card">
             <h2>Thông tin nhận hàng</h2>
+            
             <div class="form-group">
                 <label>Họ và tên</label>
-                <input type="text" name="full_name" required>
+                <input type="text" name="full_name" value="<?php echo htmlspecialchars($formFullName); ?>" required placeholder="Nhập họ tên người nhận">
             </div>
+            
             <div class="form-row">
                 <div class="form-group">
                     <label>Số điện thoại</label>
-                    <input type="text" name="phone" required>
+                    <input type="text" name="phone" value="<?php echo htmlspecialchars($formPhone); ?>" required placeholder="Nhập số điện thoại">
                 </div>
+                
                 <div class="form-group">
                     <label>Phương thức thanh toán</label>
                     <select name="payment_method">
-                        <option value="cod">Thanh toán khi nhận hàng (COD)</option>
-                        <option value="banking">Chuyển khoản</option>
-                        <option value="momo">Momo</option>
+                        <option value="cod"<?php echo $formPaymentMethod === 'cod' ? ' selected' : ''; ?>>Thanh toán khi nhận hàng (COD)</option>
+                        <option value="banking"<?php echo $formPaymentMethod === 'banking' ? ' selected' : ''; ?>>Chuyển khoản ngân hàng</option>
+                        <option value="momo"<?php echo $formPaymentMethod === 'momo' ? ' selected' : ''; ?>>Ví MoMo</option>
                     </select>
                 </div>
             </div>
+            
             <div class="form-group">
-                <label>Địa chỉ</label>
-                <textarea name="address" required></textarea>
+                <label>Địa chỉ nhận hàng</label>
+                <textarea name="address" required placeholder="Nhập địa chỉ cụ thể (số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)"><?php echo htmlspecialchars($formAddress); ?></textarea>
             </div>
+            
             <div class="form-group">
                 <label>Ghi chú (tuỳ chọn)</label>
-                <textarea name="note" placeholder="Ví dụ: Giao giờ hành chính..."></textarea>
+                <textarea name="note" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao, để lại trước cửa..."><?php echo htmlspecialchars($formNote); ?></textarea>
             </div>
         </div>
+        
         <div class="card order-summary">
-            <h2>Đơn hàng</h2>
+            <h2>Đơn hàng của bạn</h2>
+            
             <?php foreach ($_SESSION['cart'] as $item): ?>
                 <div class="row">
-                    <div><?php echo htmlspecialchars($item['name']); ?> x <?php echo (int)$item['quantity']; ?></div>
+                    <div>
+                        <?php echo htmlspecialchars($item['name']); ?> 
+                        <?php if (isset($item['size']) && $item['size']): ?>
+                            <span style="font-size:12px; color:#666;">(Size: <?php echo htmlspecialchars($item['size']); ?>)</span>
+                        <?php endif; ?>
+                        <?php if (isset($item['flavor']) && $item['flavor']): ?>
+                            <span style="font-size:12px; color:#666;">(Vị: <?php echo htmlspecialchars($item['flavor']); ?>)</span>
+                        <?php endif; ?>
+                        <span style="font-weight:600;"> x <?php echo (int)$item['quantity']; ?></span>
+                    </div>
                     <div><?php echo number_format($item['price'] * $item['quantity'], 0, ',', '.'); ?>₫</div>
                 </div>
             <?php endforeach; ?>
+            
             <hr style="margin:12px 0; border:none; border-top:1px solid #eee;">
+            
             <div class="form-group" style="margin-bottom:12px;">
                 <label>Mã khuyến mãi</label>
-                <input type="text" name="promo_code" placeholder="Nhập mã (vd: SWEET10)" value="<?php echo isset($_POST['promo_code']) ? htmlspecialchars($_POST['promo_code']) : ''; ?>" style="text-transform:uppercase;">
-                <?php if (isset($promoError) && $promoError): ?>
-                    <span style="color:#d32f2f; font-size:12px;"><?php echo htmlspecialchars($promoError); ?></span>
+                <select name="promo_code" id="promo_code" style="text-transform:uppercase;">
+                    <option value="">— Không dùng mã —</option>
+                    <?php foreach ($promoList as $p):
+                        $short = $p['code'];
+                        $short .= $p['discount_type'] === 'percent' ? ' -' . (int)$p['discount_value'] . '%' : ' -' . number_format((float)$p['discount_value']/1000, 0, '', '') . 'k';
+                        if ((float)$p['min_order_amount'] > 0) $short .= ' (từ ' . number_format((float)$p['min_order_amount']/1000, 0, '', '') . 'k)';
+                        $selected = (isset($_POST['promo_code']) && $_POST['promo_code'] === $p['code']) ? ' selected' : '';
+                    ?>
+                    <option value="<?php echo htmlspecialchars($p['code']); ?>"<?php echo $selected; ?>><?php echo htmlspecialchars($short); ?></option>
+                    <?php endforeach; ?>
+                </select>
+                
+                <?php if (isset($promoError) && $promoError !== ''): ?>
+                    <span style="color:#d32f2f; font-size:12px; display:block; margin-top:5px;">
+                        <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($promoError); ?>
+                    </span>
                 <?php endif; ?>
+                
                 <?php if (isset($appliedPromo) && $appliedPromo): ?>
-                    <span style="color:#2e7d32; font-size:12px;">Đã áp dụng: <?php echo htmlspecialchars($appliedPromo['code']); ?> (-<?php echo number_format($discountAmount, 0, ',', '.'); ?>₫)</span>
+                    <span style="color:#2e7d32; font-size:12px; display:block; margin-top:5px;">
+                        <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($appliedPromo['code']); ?>: -<?php echo number_format($discountAmount, 0, ',', '.'); ?>₫
+                    </span>
                 <?php endif; ?>
             </div>
+            
             <div class="row">
                 <div>Tạm tính</div>
                 <div><?php echo number_format($totalAmount, 0, ',', '.'); ?>₫</div>
             </div>
+            
             <?php if ($discountAmount > 0): ?>
             <div class="row" style="color:#2e7d32;">
-                <div>Giảm giá (<?php echo htmlspecialchars($appliedPromo['code'] ?? ''); ?>)</div>
+                <div>Giảm (<?php echo htmlspecialchars($appliedPromo['code'] ?? ''); ?>)</div>
                 <div>-<?php echo number_format($discountAmount, 0, ',', '.'); ?>₫</div>
             </div>
             <?php endif; ?>
+            
             <hr style="margin:12px 0; border:none; border-top:1px solid #eee;">
-            <div class="row total">
+            
+            <div class="row total" style="font-size:18px;">
                 <div>Tổng cộng</div>
                 <div><?php echo number_format($finalAmount, 0, ',', '.'); ?>₫</div>
             </div>
-            <div style="margin-top:16px; text-align:right;">
-                <button type="submit" class="btn-submit">Đặt hàng</button>
+            
+            <div style="margin-top:20px;">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-check"></i> Đặt hàng
+                </button>
             </div>
+            
+            <p style="text-align:center; margin-top:10px; font-size:12px; color:#666;">
+                <i class="fas fa-lock"></i> Thông tin của bạn được bảo mật
+            </p>
         </div>
     </form>
 </div>
+
 <?php include 'footer.php'; ?>
 </body>
 </html>

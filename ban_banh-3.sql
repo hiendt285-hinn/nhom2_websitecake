@@ -17,18 +17,15 @@ SET time_zone = "+00:00";
 
 --
 -- Database: `ban_banh`
--- Import: Chọn database ban_banh trong phpMyAdmin rồi Import, hoặc chạy file để tạo DB và bảng.
 --
-CREATE DATABASE IF NOT EXISTS `ban_banh`
-  DEFAULT CHARACTER SET utf8mb4
-  COLLATE utf8mb4_general_ci;
+CREATE DATABASE IF NOT EXISTS `ban_banh` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `ban_banh`;
 
 START TRANSACTION;
 SET FOREIGN_KEY_CHECKS = 0;
 
 --
--- Drop bảng (theo thứ tự phụ thuộc) để import lại được nhiều lần trên localhost
+-- Drop bảng (theo thứ tự phụ thuộc)
 --
 DROP TABLE IF EXISTS `order_items`;
 DROP TABLE IF EXISTS `orders`;
@@ -39,10 +36,9 @@ DROP TABLE IF EXISTS `sizes`;
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `contacts`;
 DROP TABLE IF EXISTS `promotions`;
+DROP TABLE IF EXISTS `news`;
 
 SET FOREIGN_KEY_CHECKS = 1;
-
--- Bảng đang dùng: categories, flavors, sizes, products, users, orders, order_items, contacts, promotions.
 
 -- --------------------------------------------------------
 
@@ -51,12 +47,14 @@ SET FOREIGN_KEY_CHECKS = 1;
 --
 
 CREATE TABLE `categories` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `slug` varchar(100) DEFAULT NULL,
   `description` text DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -81,8 +79,10 @@ INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `created_at`, `up
 --
 
 CREATE TABLE `flavors` (
-  `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -101,100 +101,56 @@ INSERT INTO `flavors` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orders`
+-- Table structure for table `sizes`
 --
 
-CREATE TABLE `orders` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `full_name` varchar(255) NOT NULL,
-  `phone` varchar(20) NOT NULL,
-  `address` text NOT NULL,
-  `note` text DEFAULT NULL,
-  `total_amount` decimal(10,2) NOT NULL,
-  `promo_code` varchar(50) DEFAULT NULL,
-  `discount_amount` decimal(10,2) DEFAULT 0,
-  `status` varchar(50) DEFAULT 'pending',
-  `payment_method` varchar(50) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `order_items`
---
-
-CREATE TABLE `order_items` (
-  `id` int(11) NOT NULL,
-  `order_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `size` varchar(100) NOT NULL,
-  `flavor` varchar(100) NOT NULL,
-  `quantity` int(11) NOT NULL,
-  `unit_price` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `user_id`, `full_name`, `phone`, `address`, `note`, `total_amount`, `promo_code`, `discount_amount`, `status`, `payment_method`, `created_at`) VALUES
-(1, 3, 'Đỗ Thu Hiền', '0900000001', '123 Đường ABC, Quận 1, TP.HCM', 'Giao giờ hành chính', 330000.00, NULL, 0, 'completed', 'cod', '2025-12-01 10:00:00'),
-(2, 5, 'Hồ Quỳnh Anh', '0420032044', '456 Đường XYZ, Quận 7, TP.HCM', NULL, 199000.00, NULL, 0, 'pending', 'cod', '2025-12-02 14:30:00');
-
---
--- Dumping data for table `order_items`
---
-
-INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `flavor`, `quantity`, `unit_price`) VALUES
-(1, 1, 1, '17cm x 8cm', 'Cốt Vani + Mứt Dâu Tây', 1, 150000.00),
-(2, 1, 6, '17cm x 8cm', 'Cốt Vani + Mứt Xoài (kèm xoài tươi)', 1, 199000.00),
-(3, 2, 6, '21cm x 8cm', 'Cốt Vani + Mứt Việt Quất', 1, 199000.00);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `contacts`
---
-
-CREATE TABLE `contacts` (
+CREATE TABLE `sizes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `phone` varchar(50) DEFAULT NULL,
-  `message` text NOT NULL,
-  `status` varchar(50) DEFAULT 'new',
-  `created_at` datetime DEFAULT current_timestamp()
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sizes`
+--
+
+INSERT INTO `sizes` (`id`, `name`) VALUES
+(1, '13cm x 6cm'),
+(2, '17cm x 8cm'),
+(3, '21cm x 8cm');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `promotions`
+-- Table structure for table `users`
 --
 
-CREATE TABLE `promotions` (
+CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) NOT NULL,
-  `title` varchar(255) DEFAULT NULL,
-  `discount_type` enum('percent','fixed') NOT NULL DEFAULT 'percent',
-  `discount_value` decimal(10,2) NOT NULL DEFAULT 0,
-  `min_order_amount` decimal(10,2) DEFAULT 0,
-  `valid_from` datetime DEFAULT NULL,
-  `valid_to` datetime DEFAULT NULL,
+  `username` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `full_name` varchar(100) DEFAULT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `role` enum('customer','admin') DEFAULT 'customer',
   `is_active` tinyint(1) DEFAULT 1,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `promotions`
+-- Dumping data for table `users`
 --
 
-INSERT INTO `promotions` (`code`, `title`, `discount_type`, `discount_value`, `min_order_amount`, `is_active`) VALUES
-('SINHNHAT15', 'Giảm 15% bánh sinh nhật', 'percent', 15.00, 0, 1),
-('FREESHIP350', 'Freeship đơn từ 350K', 'fixed', 30000.00, 350000.00, 1),
-('SWEET10', 'Giảm 10% đơn hàng', 'percent', 10.00, 200000.00, 1);
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `full_name`, `phone`, `address`, `role`, `is_active`, `created_at`, `updated_at`) VALUES
+(3, 'hien123', 'hien@gmail.com', '$2y$10$X4xUKJon6RvDk9QcF8ZxiOMg3Ig59AkbgSrlRn/kxLUV8ZDO6VDVK', 'Đỗ Thu Hiền', '0900000001', NULL, 'customer', 1, '2025-11-11 17:53:24', '2025-11-24 13:14:45'),
+(4, 'admin', 'admin@savorcake.com', '$2y$10$5CTm9hLBUl56XMiPlfxeK.KUCEN/tJn5HLd0x9WpM5dAvTJb1HgJC', 'Quản trị viên', NULL, NULL, 'admin', 1, '2025-11-19 09:43:20', '2025-11-19 09:43:20'),
+(5, 'quynhanh', 'quynhanh123@gmail.com', '$2y$10$Y70EZ0Kz929SVs/7U3o3LeCIlsR1.k392FlgIj3z612/P6d28yOfi', 'Hồ Quỳnh Anh', '0420032044', NULL, 'customer', 1, '2025-11-24 13:14:25', '2025-11-24 13:14:25');
 
 -- --------------------------------------------------------
 
@@ -203,7 +159,7 @@ INSERT INTO `promotions` (`code`, `title`, `discount_type`, `discount_value`, `m
 --
 
 CREATE TABLE `products` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(200) NOT NULL,
   `slug` varchar(200) DEFAULT NULL,
   `price` decimal(12,0) NOT NULL,
@@ -215,7 +171,11 @@ CREATE TABLE `products` (
   `is_featured` tinyint(1) DEFAULT 0,
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
+  KEY `category_id` (`category_id`),
+  CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -241,8 +201,8 @@ INSERT INTO `products` (`id`, `name`, `slug`, `price`, `image`, `description`, `
 (16, 'Bánh red velvet sữa chua việt quất', NULL, 150000, '6927bd0515b21.webp', 'Bánh kem cốt red velvet tròn, kem sữa chua, bên trên trang trí 3 quả việt quất. (Trang trí sao vàng mừng 30/4 áp dụng từ 12h 17/4/2025)', '', 5, 100, 0, 1, '2025-11-27 09:52:53', '2025-11-27 09:52:53'),
 (17, 'Berry Lover Cake 500g', NULL, 259000, '692e9a6cb3134.webp', 'Chiếc bánh là bản tình ca mùa hè gửi đến những tâm hồn yêu trái cây đỏ mọng. Với 5 tầng hương vị đan xen, Berry Lover Cake chinh phục vị giác bằng sự cân bằng tinh tế giữa vị ngọt, vị chua dịu và độ béo mịn hoàn hảo: (1) Cốt bánh socola ẩm mịn, làm nền cho các tầng vị tỏa sáng, (2) Mousse dâu tây chua dịu, tươi mát, (3) Mousse mascarpone béo nhẹ, mềm mượt, (4) Mousse custard dâu thơm dịu, ngọt ngào như kem trứng mùa hè, (5) Lớp tráng gương dâu bóng mượt, như chiếc gương phản chiếu sắc đỏ rực rỡ. Bánh được hoàn thiện bằng trái cây tươi trang trí: dâu đỏ mọng, việt quất chua nhẹ.', 'Chiếc bánh là bản tình ca mùa hè gửi đến những tâm hồn yêu trái cây đỏ mọng.', 7, 100, 0, 1, '2025-12-02 14:51:08', '2025-12-02 14:51:08'),
 (18, 'Combo "CHOCO LOVER"', NULL, 529000, '692e9ab7bad60.webp', 'Combo gồm: Choco Dream Cake 315g + Tiramisu classic 250g + Tiramisu matcha 250g', 'Combo gồm: Choco Dream Cake 315g + Tiramisu classic 250g + Tiramisu matcha 250g', 7, 100, 0, 1, '2025-12-02 14:52:23', '2025-12-02 14:52:23'),
-(19, 'Combo \"SÀNH ĐIỆU\"', NULL, 469000, '692e9adc7e97f.webp', '', 'Combo gồm: Olong Longan Cake 550g + Choco Tiramisu 400g', 7, 100, 0, 1, '2025-12-02 14:53:00', '2025-12-02 14:53:00'),
-(20, 'Combo \"NHÀN NHÃ\"', NULL, 410000, '692e9b08ce02a.webp', 'Combo gồm: Oolong Longan Cake 550g + Oolong Longan Tiramisu 390g', 'Combo gồm: Oolong Longan Cake 550g + Oolong Longan Tiramisu 390g', 7, 100, 0, 1, '2025-12-02 14:53:44', '2025-12-02 14:53:44'),
+(19, 'Combo "SÀNH ĐIỆU"', NULL, 469000, '692e9adc7e97f.webp', '', 'Combo gồm: Olong Longan Cake 550g + Choco Tiramisu 400g', 7, 100, 0, 1, '2025-12-02 14:53:00', '2025-12-02 14:53:00'),
+(20, 'Combo "NHÀN NHÃ"', NULL, 410000, '692e9b08ce02a.webp', 'Combo gồm: Oolong Longan Cake 550g + Oolong Longan Tiramisu 390g', 'Combo gồm: Oolong Longan Cake 550g + Oolong Longan Tiramisu 390g', 7, 100, 0, 1, '2025-12-02 14:53:44', '2025-12-02 14:53:44'),
 (21, 'Pomelo Mango Pearl Cake 535g', NULL, 249000, '692e9b408c200.webp', 'Chiếc bánh mang hương vị nhiệt đới đầy tinh tế với cốt vani mềm nhẹ, kết hợp cùng lớp mousse xoài dừa tươi mát từ xoài chín mọng. Xen kẽ là tầng thạch bưởi hồng thơm dịu và mousse cream cheese béo ngậy, hòa quyện tạo nên sự cân bằng hài hòa giữa ngọt, chua và béo. Bề mặt bánh được điểm xuyết bằng những tép bưởi hồng căng mọng cùng trân châu trắng dai giòn, mang lại trải nghiệm thanh mát, lạ miệng và cuốn hút ngay từ lần đầu thưởng thức.', 'Chiếc bánh mang hương vị nhiệt đới đầy tinh tế với cốt vani mềm nhẹ,', 7, 100, 0, 1, '2025-12-02 14:54:40', '2025-12-02 14:54:40'),
 (22, 'Tiramisu Matcha 250g', NULL, 179000, '692e9b7307bd0.webp', 'Bánh Tiramisu Matcha, bản giao hưởng tinh tế giữa lớp bánh lady finger nhúng nước trà xanh đậm vị kết hợp cùng rượu dark rum Captain Morgan, xen kẽ với lớp kem tiramisu mượt mà làm từ trứng gà, phô mai mascarpone và kem whipping - phía trên phủ lớp bột matcha Haru Nhật Bản, mang đến hậu vị thanh mát, nhẹ nhàng nhưng đầy lôi cuốn. Tặng kèm: thìa, túi giữ nhiệt, HDSD', 'Bánh Tiramisu Matcha, bản giao hưởng tinh tế giữa lớp bánh lady finger nhúng nước trà xanh đậm vị kết hợp cùng rượu dark rum...', 7, 100, 0, 1, '2025-12-02 14:55:31', '2025-12-02 14:55:31'),
 (25, 'Bánh kem thiên nga hồng - Pink Ombre Swan', NULL, 450000, '692e9c263b677.webp', 'Bánh kem tạo hình thiên nga, cốt bánh vani, mứt xoài, nhân xoài tươi, trang trí lông vũ và cổ thiên ngà từ socola trắng, tạo hiệu ứng chuyển màu hồng cùng hoa quả tươi: dâu tây, việt quất', 'Bánh kem tạo hình thiên nga, cốt bánh vani, mứt xoài, nhân xoài tươi, ..', 4, 100, 0, 1, '2025-12-02 14:58:30', '2025-12-02 14:58:30'),
@@ -266,202 +226,133 @@ INSERT INTO `products` (`id`, `name`, `slug`, `price`, `image`, `description`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `sizes`
+-- Table structure for table `orders`
 --
 
-CREATE TABLE `sizes` (
-  `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL
+CREATE TABLE `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `phone` varchar(20) NOT NULL,
+  `address` text NOT NULL,
+  `note` text DEFAULT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `promo_code` varchar(50) DEFAULT NULL,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
+  `status` varchar(50) DEFAULT 'pending',
+  `payment_method` varchar(50) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `sizes`
+-- Dumping data for table `orders`
 --
 
-INSERT INTO `sizes` (`id`, `name`) VALUES
-(1, '13cm x 6cm'),
-(2, '17cm x 8cm'),
-(3, '21cm x 8cm');
+INSERT INTO `orders` (`id`, `user_id`, `full_name`, `phone`, `address`, `note`, `total_amount`, `promo_code`, `discount_amount`, `status`, `payment_method`, `created_at`) VALUES
+(1, 3, 'Đỗ Thu Hiền', '0900000001', '123 Đường ABC, Quận 1, TP.HCM', 'Giao giờ hành chính', 330000.00, NULL, 0.00, 'completed', 'cod', '2025-12-01 10:00:00'),
+(2, 5, 'Hồ Quỳnh Anh', '0420032044', '456 Đường XYZ, Quận 7, TP.HCM', NULL, 199000.00, NULL, 0.00, 'pending', 'cod', '2025-12-02 14:30:00');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Table structure for table `order_items`
 --
 
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `full_name` varchar(100) DEFAULT NULL,
-  `phone` varchar(15) DEFAULT NULL,
-  `address` text DEFAULT NULL,
-  `role` enum('customer','admin') DEFAULT 'customer',
-  `is_active` tinyint(1) DEFAULT 1,
-  `created_at` datetime DEFAULT current_timestamp(),
-  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+CREATE TABLE `order_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `size` varchar(100) NOT NULL,
+  `flavor` varchar(100) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Dumping data for table `order_items`
 --
 
--- users: id 4 = admin, id 3,5 = khách hàng mẫu. Đổi mật khẩu khi triển khai thật.
-INSERT INTO `users` (`id`, `username`, `email`, `password`, `full_name`, `phone`, `address`, `role`, `is_active`, `created_at`, `updated_at`) VALUES
-(3, 'hien123', 'hien@gmail.com', '$2y$10$X4xUKJon6RvDk9QcF8ZxiOMg3Ig59AkbgSrlRn/kxLUV8ZDO6VDVK', 'Đỗ Thu Hiền', '0900000001', NULL, 'customer', 1, '2025-11-11 17:53:24', '2025-11-24 13:14:45'),
-(4, 'admin', 'admin@savorcake.com', '$2y$10$5CTm9hLBUl56XMiPlfxeK.KUCEN/tJn5HLd0x9WpM5dAvTJb1HgJC', 'Quản trị viên', NULL, NULL, 'admin', 1, '2025-11-19 09:43:20', '2025-11-19 09:43:20'),
-(5, 'quynhanh', 'quynhanh123@gmail.com', '$2y$10$Y70EZ0Kz929SVs/7U3o3LeCIlsR1.k392FlgIj3z612/P6d28yOfi', 'Hồ Quỳnh Anh', '0420032044', NULL, 'customer', 1, '2025-11-24 13:14:25', '2025-11-24 13:14:25');
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `flavor`, `quantity`, `unit_price`) VALUES
+(1, 1, 1, '17cm x 8cm', 'Cốt Vani + Mứt Dâu Tây', 1, 150000.00),
+(2, 1, 6, '17cm x 8cm', 'Cốt Vani + Mứt Xoài (kèm xoài tươi)', 1, 199000.00),
+(3, 2, 6, '21cm x 8cm', 'Cốt Vani + Mứt Việt Quất', 1, 199000.00);
+
+-- --------------------------------------------------------
 
 --
--- Indexes for dumped tables
+-- Table structure for table `contacts`
 --
 
---
--- Indexes for table `categories`
---
-ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `slug` (`slug`);
+CREATE TABLE `contacts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `message` text NOT NULL,
+  `status` varchar(50) DEFAULT 'new',
+  `created_at` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 --
--- Indexes for table `flavors`
---
-ALTER TABLE `flavors`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
-
---
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
-
---
--- Indexes for table `contacts`
---
-ALTER TABLE `contacts`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `slug` (`slug`),
-  ADD KEY `category_id` (`category_id`);
-
---
--- Indexes for table `promotions`
---
-ALTER TABLE `promotions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `code` (`code`);
-
---
--- Indexes for table `sizes`
---
-ALTER TABLE `sizes`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
-
---
--- AUTO_INCREMENT for dumped tables
+-- Table structure for table `promotions`
 --
 
---
--- AUTO_INCREMENT for table `categories`
---
-ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+CREATE TABLE `promotions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `discount_type` enum('percent','fixed') NOT NULL DEFAULT 'percent',
+  `discount_value` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `min_order_amount` decimal(10,2) DEFAULT 0.00,
+  `valid_from` datetime DEFAULT NULL,
+  `valid_to` datetime DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- AUTO_INCREMENT for table `flavors`
---
-ALTER TABLE `flavors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `orders`
---
-ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `order_items`
---
-ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `contacts`
---
-ALTER TABLE `contacts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `promotions`
---
-ALTER TABLE `promotions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `products`
---
-ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
-
---
--- AUTO_INCREMENT for table `sizes`
---
-ALTER TABLE `sizes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- Constraints for dumped tables
+-- Dumping data for table `promotions`
 --
 
---
--- Constraints for table `orders`
---
-ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+INSERT INTO `promotions` (`code`, `title`, `discount_type`, `discount_value`, `min_order_amount`, `valid_from`, `valid_to`, `is_active`, `created_at`) VALUES
+('SINHNHAT15', 'Giảm 15% bánh sinh nhật', 'percent', 15.00, 0.00, NULL, NULL, 1, current_timestamp()),
+('FREESHIP350', 'Freeship đơn từ 350K', 'fixed', 30000.00, 350000.00, NULL, NULL, 1, current_timestamp()),
+('SWEET10', 'Giảm 10% đơn hàng', 'percent', 10.00, 200000.00, NULL, NULL, 1, current_timestamp());
+
+-- --------------------------------------------------------
 
 --
--- Constraints for table `order_items`
+-- Table structure for table `news`
 --
-ALTER TABLE `order_items`
-  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
---
--- Constraints for table `products`
---
-ALTER TABLE `products`
-  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
+CREATE TABLE `news` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) DEFAULT NULL,
+  `summary` varchar(500) DEFAULT NULL,
+  `content` text DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `slug` (`slug`),
+  KEY `is_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 COMMIT;
 

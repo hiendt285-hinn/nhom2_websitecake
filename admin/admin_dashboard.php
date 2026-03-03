@@ -3,8 +3,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html {
             font-family: 'Open Sans', sans-serif;
-            background: #F5F1E8;
-            color: #333;
+            background: #f5f5f5;
+            color: #2c3e50;
             overflow-x: hidden;
         }
         body {
@@ -24,24 +24,25 @@
             flex-shrink: 0;
             background: #fff;
             padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
             border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.04);
             align-self: stretch;
         }
         .sidebar ul { list-style: none; padding: 0; margin: 0; }
         .sidebar li { list-style: none; }
         .sidebar a {
             text-decoration: none;
-            color: #333;
+            color: #2c2c2c;
             font-weight: 600;
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 12px 15px;
             border-radius: 8px;
-            transition: 0.3s;
+            transition: 0.2s;
         }
-        .sidebar a:hover { background: #F5F1E8; color: black; }
+        .sidebar a:hover { background: #f5f5f5; color: #9a7b5a; }
         .sidebar i { width: 20px; text-align: center; }
 
         .content-wrapper {
@@ -57,8 +58,8 @@
             min-height: 200px;
         }
         .footer {
-            background: #8B6F47;
-            color: white;
+            background: #9a7b5a;
+            color: #fff;
             text-align: center;
             padding: 15px;
             font-size: 14px;
@@ -73,10 +74,13 @@
     <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản trị - Savor Cake</title>
+    <title>Quản trị - Sweet Cake</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="admin_style.css">
+    <?php if (isset($_GET['page']) && $_GET['page'] === 'reports'): ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <?php endif; ?>
     </head>
     <body>
     <div class="admin-layout">
@@ -90,8 +94,10 @@
                 <li><a href="admin_dashboard.php?page=orders"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
                 <li><a href="admin_dashboard.php?page=auto_orders"><i class="fas fa-sync-alt"></i> Tự động cập nhật đơn</a></li>
                 <li><a href="admin_dashboard.php?page=shipping"><i class="fas fa-truck"></i> Quản lý giao hàng</a></li>
-                <li><a href="admin_dashboard.php?page=reports"><i class="fas fa-chart-line"></i> Báo cáo</a></li>
                 <li><a href="admin_dashboard.php?page=contact"><i class="fas fa-envelope"></i> Quản lý liên hệ</a></li>
+                <li><a href="admin_dashboard.php?page=news"><i class="fas fa-newspaper"></i> Quản lý tin tức</a></li>
+                <li><a href="admin_dashboard.php?page=promotions"><i class="fas fa-tag"></i> Mã giảm giá</a></li>
+                <li><a href="admin_dashboard.php?page=reports"><i class="fas fa-chart-line"></i> Báo cáo</a></li>
             </ul>
         </aside>
         <main class="content-wrapper">
@@ -128,6 +134,12 @@
                         break;
                         case 'contact':
                         include 'manage_contact.php';
+                        break;
+                        case 'news':
+                        include 'manage_news.php';
+                        break;
+                        case 'promotions':
+                        include 'manage_promotions.php';
                         break;
                     default:
                         echo '<h3>Chào mừng Admin</h3>';

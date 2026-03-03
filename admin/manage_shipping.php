@@ -24,8 +24,10 @@ $orders = $conn->query("SELECT * FROM orders WHERE status IN ('confirmed','shipp
 ?>
 
 <div class="admin-content">
-<h1 class="admin-page-title"><i class="fas fa-truck"></i> Quản lý giao hàng</h1>
-<div class="admin-card">
+    <div class="admin-page-header">
+        <h1 class="admin-page-title"><i class="fas fa-truck"></i> Quản lý giao hàng</h1>
+    </div>
+    <div class="admin-card">
 <table class="admin-table">
 <thead><tr>
 <th>ID</th>

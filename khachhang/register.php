@@ -15,8 +15,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
     $confirm_password = isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '';
+    $full_name = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
+    $phone = isset($_POST['phone']) ? trim($_POST['phone']) : '';
+    $address = isset($_POST['address']) ? trim($_POST['address']) : '';
 
-    if ($password !== $confirm_password) {
+    if (empty($full_name)) {
+        $error = "Vui lòng nhập họ và tên.";
+    } elseif (empty($phone)) {
+        $error = "Vui lòng nhập số điện thoại.";
+    } elseif (empty($address)) {
+        $error = "Vui lòng nhập địa chỉ.";
+    } elseif ($password !== $confirm_password) {
         $error = "Mật khẩu xác nhận không khớp!";
     } else {
         // Kiểm tra username đã tồn tại
@@ -34,12 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // Hash mật khẩu
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                // Insert vào DB
-                $insStmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+                // Insert vào DB (full_name, phone, address dùng chung với edit-profile & account)
+                $insStmt = $conn->prepare("INSERT INTO users (username, email, password, full_name, phone, address, role) VALUES (?, ?, ?, ?, ?, ?, 'customer')");
                 if ($insStmt) {
-                    $insStmt->bind_param('sss', $username, $email, $hashed_password);
+                    $insStmt->bind_param('ssssss', $username, $email, $hashed_password, $full_name, $phone, $address);
                     if ($insStmt->execute()) {
-                        // Đăng ký thành công → chuyển đến đăng nhập
                         header('Location: login.php');
                         exit();
                     } else {
@@ -62,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký - Savor Cake</title>
+    <title>Đăng ký - Sweet Cake</title>
     <style>
     /* CSS inline cho trang register, dựa trên style.css mới với tông màu pink, green, kem */
 
@@ -166,10 +174,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php endif; ?>
     <form action="register.php" method="POST">
         <label for="username">Tên đăng nhập:</label>
-        <input type="text" id="username" name="username" required>
-        
+        <input type="text" id="username" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
+
+        <label for="full_name">Họ và tên:</label>
+        <input type="text" id="full_name" name="full_name" value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : ''; ?>" required>
+
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
+
+        <label for="phone">Số điện thoại:</label>
+        <input type="tel" id="phone" name="phone" value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>" placeholder="VD: 0901234567" required>
+
+        <label for="address">Địa chỉ:</label>
+        <input type="text" id="address" name="address" value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>" placeholder="Số nhà, đường, quận/huyện, tỉnh/thành" required>
         
         <label for="password">Mật khẩu:</label>
         <input type="password" id="password" name="password" required>

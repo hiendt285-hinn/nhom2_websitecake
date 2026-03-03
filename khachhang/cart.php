@@ -52,7 +52,7 @@ $show_success = isset($_GET['ordered']) && (int)$_GET['ordered'] === 1;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giỏ hàng - Savor Cake</title>
+    <title>Giỏ hàng - Sweet Cake</title>
     <link rel="stylesheet" href="style.css?v=<?php echo (file_exists(__DIR__ . '/style.css') ? filemtime(__DIR__ . '/style.css') : time()); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">

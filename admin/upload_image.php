@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Thêm sản phẩm mới - Savor Cake</title>
+<title>Thêm sản phẩm mới - Sweet Cake</title>
 <style>
     body { font-family: 'Poppins', sans-serif; background: #fffaf0; margin:0; padding:20px;}
     h1 { color: #8B6F47; }

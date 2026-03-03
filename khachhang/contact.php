@@ -16,6 +16,25 @@ $conn->query("CREATE TABLE IF NOT EXISTS contacts (
 
 $contactSuccess = '';
 $contactError = '';
+
+// Lấy thông tin user đăng nhập để tự động điền form (nếu có)
+$contactDefaults = ['name' => '', 'email' => '', 'phone' => ''];
+if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+    $uid = (int)$_SESSION['user_id'];
+    $stmtUser = $conn->prepare("SELECT full_name, email, phone FROM users WHERE id = ? LIMIT 1");
+    if ($stmtUser) {
+        $stmtUser->bind_param('i', $uid);
+        $stmtUser->execute();
+        $resUser = $stmtUser->get_result();
+        if ($resUser && $row = $resUser->fetch_assoc()) {
+            $contactDefaults['name'] = $row['full_name'] ?? '';
+            $contactDefaults['email'] = $row['email'] ?? '';
+            $contactDefaults['phone'] = $row['phone'] ?? '';
+        }
+        $stmtUser->close();
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'], $_POST['email'], $_POST['message'])) {
     $name = trim($_POST['name']);
     $email = trim($_POST['email']);
@@ -165,10 +184,10 @@ include 'header.php';
                 <p style="color:#d32f2f; margin-bottom:15px;"><?php echo htmlspecialchars($contactError); ?></p>
             <?php endif; ?>
             <form method="post" action="">
-                <input type="text" name="name" placeholder="Họ và tên" value="<?php echo isset($_POST['name']) ? htmlspecialchars($_POST['name']) : ''; ?>" required>
-                <input type="email" name="email" placeholder="Email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
-                <input type="text" name="phone" placeholder="Số điện thoại" value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
-                <textarea name="message" placeholder="Nội dung liên hệ..." required><?php echo isset($_POST['message']) ? htmlspecialchars($_POST['message']) : ''; ?></textarea>
+                <input type="text" name="name" placeholder="Họ và tên" value="<?php echo htmlspecialchars(isset($_POST['name']) ? $_POST['name'] : $contactDefaults['name']); ?>" required>
+                <input type="email" name="email" placeholder="Email" value="<?php echo htmlspecialchars(isset($_POST['email']) ? $_POST['email'] : $contactDefaults['email']); ?>" required>
+                <input type="text" name="phone" placeholder="Số điện thoại" value="<?php echo htmlspecialchars(isset($_POST['phone']) ? $_POST['phone'] : $contactDefaults['phone']); ?>">
+                <textarea name="message" placeholder="Nội dung liên hệ..." required><?php echo htmlspecialchars(isset($_POST['message']) ? $_POST['message'] : ''); ?></textarea>
                 <button type="submit">Gửi liên hệ</button>
             </form>
         </div>

@@ -5,17 +5,15 @@
   box-sizing: border-box;
 }
 
-/* Import elegant fonts */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Montserrat:wght@400;500;600;700&family=Lora:wght@400;500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
 
-/* Theme variables */
 :root {
-  --main-brown: #8B6F47; /* light brown */
-  --brown-light: #A0826D;
-  --light-beige: #F5F1E8;
-  --white: #FFFFFF;
-  --text-black: #000000;
+  --main-brown: #9a7b5a;
+  --brown-light: #b0987a;
+  --light-beige: #faf9f6;
+  --white: #ffffff;
+  --text-black: #2c2c2c;
 }
 
 /* Font tổng thể */
@@ -27,7 +25,6 @@ body {
   line-height: 1.6;
 }
 
-/* Global heading and form typography (match checkout.php) */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Open Sans', 'Montserrat', sans-serif;
   color: var(--text-black);
@@ -144,7 +141,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   transition: 0.3s ease;
 }
 .navbar ul li a:hover {
-  color: #8B6F47;
+  color: #9a7b5a;
   transform: none;
 }
   /* Logo */
@@ -172,7 +169,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   width: 180px;
 }
 .search-bar button {
-  background: #8B6F47;
+  background: #9a7b5a;
   color: #fff;
   border: none;
   padding: 8px 20px;
@@ -182,7 +179,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   font-size: 13px;
 }
 .search-bar button:hover {
-  background: #A0826D;
+  background: #b0987a;
 }
 
 /* Banner chính */
@@ -222,7 +219,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 .hero-content .btn {
   display: inline-block;
-  background: #8B6F47;
+  background: #9a7b5a;
   color: white;
   padding: 14px 40px;
   border-radius: 4px;
@@ -233,7 +230,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .hero-content .btn:hover {
-  background: #A0826D;
+  background: #b0987a;
 }
 
 /* Ảnh banner */
@@ -260,7 +257,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   display: flex;
   flex-wrap: wrap;
   padding: 60px 40px;
-  background-color: #F5F1E8;
+  background-color: #faf9f6;
   gap: 30px;
   
 }
@@ -271,7 +268,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 .why-left h2 {
   font-size: 35px;
-  color: #8B6F47;
+  color: #9a7b5a;
   margin-bottom: 20px;
   font-weight: 600;
   line-height: 1.6;
@@ -368,7 +365,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 .box-subtitle {
   font-size: 30px;
-  color: #8B6F47;
+  color: #9a7b5a;
   text-align: left;
   margin-bottom: 20px;
   font-weight: 700;
@@ -580,8 +577,8 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .ship-fast h2 span {
-  color: #8B6F47;
-  border-bottom: 3px solid #8B6F47;
+  color: #9a7b5a;
+  border-bottom: 3px solid #9a7b5a;
 }
 
 .ship-desc {
@@ -620,7 +617,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .box-subtitle {
-  background: #F5F1E8;
+  background: #faf9f6;
   padding: 40px 20px;
   text-align: left;
   font-family: 'Inter', sans-serif;
@@ -650,7 +647,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   left: 20%;
   width: 400px;
   height: 400px;
-  background-color: #8B6F47;
+  background-color: #9a7b5a;
   border-radius: 50%;
   transform: translate(-70%, -80%);
   z-index: 0;
@@ -696,12 +693,12 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .title-green {
-  color: #8B6F47;
+  color: #9a7b5a;
   font-weight: 700;
 }
 
 .title-orange {
-  color: #8B6F47;
+  color: #9a7b5a;
   font-weight: 700;
 }
 
@@ -776,7 +773,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .fruit-text strong {
-  color: #8B6F47;
+  color: #9a7b5a;
 }
 
 .fruit-text em {
@@ -786,7 +783,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 /* Cake Options and Size */
 .cake-options, .cake-size {
   text-align: center;
-  background-color: #F5F1E8;
+  background-color: #faf9f6;
   padding: 40px 20px;
   border-radius: 0;     /* bỏ bo góc nếu muốn full width liền mạch */
   margin: 40px 0;       /* bỏ auto để sát lề trái/phải */
@@ -795,7 +792,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .cake-options h2, .cake-size h2 {
-  color: #8B6F47;
+  color: #9a7b5a;
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 30px;
@@ -811,7 +808,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .type-card {
-  background: #F5F1E8;
+  background: #faf9f6;
   border-radius: 20px;
   padding: 20px;
   width: 180px;
@@ -826,7 +823,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 .type-card .type-number {
   font-size: 1.5rem;
-  color: #8B6F47;
+  color: #9a7b5a;
   font-weight: bold;
 }
 
@@ -844,7 +841,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .flavor {
-  background: #F5F1E8;
+  background: #faf9f6;
   padding: 10px 20px;
   border-radius: 30px;
   font-weight: 600;
@@ -873,13 +870,13 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 .size-card p {
   margin-top: 10px;
-  color: #8B6F47;
+  color: #9a7b5a;
   font-weight: 600;
 }
 
 /* Nút đặt bánh */
 .order-btn {
-  background-color: #8B6F47;
+  background-color: #9a7b5a;
   color: #ffffff;
   font-weight: bold;
   font-size: 1.2rem;
@@ -891,7 +888,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .order-btn:hover {
-  background-color: #8B6F47;
+  background-color: #9a7b5a;
   transform: scale(1.05);
 }
 
@@ -922,7 +919,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .policy-section .subtext a {
-  color: #8B6F47;
+  color: #9a7b5a;
   font-weight: bold;
   text-decoration: none;
 }
@@ -1027,7 +1024,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 
 .site-footer {
-  background-color: #8B6F47; 
+  background-color: #9a7b5a; 
   color: #E0E0E0;
   padding: 60px 40px 0;
   font-family: 'Montserrat', sans-serif;
@@ -1049,7 +1046,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .footer-column h3 {
-  font-size: 1.2rem;
+  font-size: 1 rem;
   margin-bottom: 20px;
   font-weight: 700;
   color: black; 
@@ -1075,7 +1072,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   line-height: 1.5;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   text-decoration: none;
   transition: color 0.3s;
 }
@@ -1227,7 +1224,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 .btn-visit {
   display: inline-block;
-  background-color: #8B6F47;
+  background-color: #9a7b5a;
   color: #fff;
   text-decoration: none;
   padding: 12px 35px;
@@ -1238,7 +1235,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .btn-visit:hover {
-  background-color: #A0826D;
+  background-color: #b0987a;
   transform: none;
 }
 

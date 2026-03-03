@@ -40,17 +40,23 @@ if (isset($_GET['delete_id'])) {
     $stmt->close();
 }
 
-// Lấy danh sách sản phẩm với tên danh mục
-$sql = "SELECT p.*, c.name AS category_name 
+// Lấy danh sách sản phẩm với tên danh mục và tổng đã bán
+$sql = "SELECT p.*, c.name AS category_name,
+        COALESCE(SUM(CASE WHEN o.status = 'completed' THEN oi.quantity ELSE 0 END), 0) AS total_sold
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.id
-        ORDER BY p.created_at DESC"; // Hoặc ORDER BY p.id ASC nếu muốn ID tăng dần
+        LEFT JOIN order_items oi ON oi.product_id = p.id
+        LEFT JOIN orders o ON o.id = oi.order_id
+        GROUP BY p.id, c.name
+        ORDER BY p.created_at DESC";
 $result = $conn->query($sql);
 ?>
 <div class="admin-content">
-<h1 class="admin-page-title"><i class="fas fa-cake-candles"></i> Quản lý sản phẩm</h1>
-<p style="margin-bottom:16px;"><a href="upload_image.php" class="admin-btn admin-btn-primary">Thêm sản phẩm mới</a></p>
-<div class="admin-card">
+    <div class="admin-page-header">
+        <h1 class="admin-page-title"><i class="fas fa-cake-candles"></i> Quản lý sản phẩm</h1>
+        <a href="upload_image.php" class="admin-btn admin-btn-primary">Thêm sản phẩm mới</a>
+    </div>
+    <div class="admin-card">
 <table class="admin-table">
     <thead>
         <tr>
@@ -58,6 +64,7 @@ $result = $conn->query($sql);
             <th>Tên sản phẩm</th>
             <th>Danh mục</th>
             <th>Giá</th>
+            <th>Đã bán</th>
             <th>Hình ảnh</th>
             <th>Thao tác</th>
         </tr>
@@ -70,15 +77,16 @@ $result = $conn->query($sql);
                     <td><?php echo htmlspecialchars($row['name']) ?></td>
                     <td><?php echo htmlspecialchars($row['category_name']) ?></td>
                     <td><?php echo number_format($row['price'], 0, ',', '.') ?>₫</td>
+                    <td><?php echo number_format((int)($row['total_sold'] ?? 0)); ?></td>
                     <td><img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="" style="height:50px;"></td>
-                    <td>
-                        <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="admin-link">Chỉnh sửa</a>
-                        <span style="color:#d32f2f; cursor:pointer; margin-left:10px;" onclick="deleteProduct(<?php echo $row['id']; ?>)">Xóa</span>
+                    <td class="admin-action-cell">
+                        <a href="edit_product.php?id=<?php echo $row['id']; ?>" class="admin-btn admin-btn-primary admin-btn-sm" style="text-decoration:none;"><i class="fas fa-edit"></i> Sửa</a>
+                        <button type="button" class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteProduct(<?php echo $row['id']; ?>)"><i class="fas fa-trash-alt"></i> Xóa</button>
                     </td>
                 </tr>
             <?php endwhile; ?>
         <?php else: ?>
-            <tr><td colspan="6">Không có sản phẩm nào.</td></tr>
+            <tr><td colspan="7">Không có sản phẩm nào.</td></tr>
         <?php endif; ?>
     </tbody>
 </table>

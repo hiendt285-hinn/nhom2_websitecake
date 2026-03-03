@@ -1,124 +1,390 @@
-/* Admin UI - Đồng bộ giao diện */
+/* Admin UI - đồng bộ với giao diện manage_reports.php */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Open Sans', sans-serif;
-    background: #F5F1E8;
-    color: #333;
+    font-family: 'Open Sans', 'Roboto', sans-serif;
+    background: #f5f5f5;
+    color: #2c3e50;
     font-size: 14px;
 }
 
 .admin-content {
+    max-width: 1400px;
+    margin: 0 auto;
     padding: 0;
     min-height: 280px;
 }
 
-.admin-page-title {
-    color: #8B6F47;
-    font-size: 22px;
+/* Header trang - giống report-header */
+.admin-page-header {
+    background: #fff;
+    padding: 20px 24px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
     margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.admin-page-title {
+    color: #2c3e50;
+    font-size: 22px;
+    margin: 0;
     font-weight: 700;
 }
 
 .admin-page-title i {
-    margin-right: 8px;
+    margin-right: 10px;
+    color: #9a7b5a;
 }
 
+/* Card - giống filter-section / data-table */
 .admin-card {
     background: #fff;
-    padding: 24px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding: 20px 24px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
     margin-bottom: 20px;
 }
 
 .admin-card h2 {
-    color: #5D4037;
-    font-size: 16px;
-    margin-bottom: 12px;
+    color: #2c3e50;
+    font-size: 17px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #9a7b5a;
 }
 
+.admin-card h2 i {
+    color: #9a7b5a;
+    margin-right: 8px;
+}
+
+/* Bảng */
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
+    font-size: 14px;
 }
 
 .admin-table th,
 .admin-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid #eee;
+    padding: 12px 14px;
+    border-bottom: 1px solid #ecf0f1;
     text-align: left;
-    font-size: 14px;
 }
 
 .admin-table th {
-    background: #f9f6f2;
-    color: #333;
+    background: #f8f9fa;
+    color: #2c3e50;
     font-weight: 600;
+}
+
+.admin-table tr:hover {
+    background: #fafbfc;
 }
 
 .admin-table tr:nth-child(even) {
-    background: #fafafa;
+    background: #fafbfc;
 }
 
+.admin-table tr:nth-child(even):hover {
+    background: #f5f6f7;
+}
+
+/* Nút - giống btn */
 .admin-btn {
-    padding: 8px 16px;
+    padding: 10px 18px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    transition: 0.2s;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
 }
 
 .admin-btn-primary {
-    background: #8B6F47;
+    background: #9a7b5a;
     color: #fff;
 }
 
 .admin-btn-primary:hover {
-    background: #735c3a;
+    background: #8a6d4e;
+}
+
+.admin-btn-secondary {
+    background: #95a5a6;
+    color: #fff;
+}
+
+.admin-btn-secondary:hover {
+    background: #7f8c8d;
 }
 
 .admin-btn-lg {
-    padding: 12px 24px;
+    padding: 12px 22px;
     font-size: 14px;
 }
 
-.admin-message {
-    padding: 12px 16px;
-    border-radius: 8px;
+/* Filter section - giống manage_reports */
+.filter-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
     margin-bottom: 20px;
 }
 
-.admin-message-success {
-    background: #d4edda;
-    color: #155724;
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    align-items: end;
 }
 
-.admin-message-error {
-    background: #f8d7da;
-    color: #721c24;
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.muted {
-    color: #666;
+.filter-item label {
+    font-weight: 500;
+    color: #7f8c8d;
     font-size: 13px;
 }
+
+.filter-item input,
+.filter-item select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Message */
+.admin-message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.admin-message.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.admin-message.error {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.admin-message-success { background: #e8f5e9; color: #2e7d32; }
+.admin-message-error { background: #ffebee; color: #c62828; }
+.admin-message-info { background: #e3f2fd; color: #1565c0; }
+
+.muted {
+    color: #7f8c8d;
+    font-size: 13px;
+}
+
+.text-success { color: #27ae60; font-weight: 600; }
+.text-muted { color: #95a5a6; }
 
 .chart-wrap {
     max-width: 900px;
 }
 
 a.admin-link {
-    color: #8B6F47;
+    color: #9a7b5a;
     text-decoration: none;
     font-weight: 600;
 }
 
 a.admin-link:hover {
-    color: #A0826D;
+    color: #8a6d4e;
+}
+
+/* Summary / info box */
+.admin-summary {
+    background: #f8f9fa;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #2c3e50;
+    border-left: 4px solid #9a7b5a;
+}
+
+/* ========== Edit Modal (dùng chung cho Customers, Sizes, Flavors, Product type) ========== */
+.edit-modal,
+.admin-modal-overlay {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.admin-modal-box {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.admin-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid #ecf0f1;
+    background: #f8f9fa;
+    border-radius: 12px 12px 0 0;
+}
+
+.admin-modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.admin-modal-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: #7f8c8d;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.admin-modal-close:hover {
+    background: #ecf0f1;
+    color: #2c3e50;
+}
+
+.admin-modal-body {
+    padding: 22px;
+}
+
+.admin-form-group {
+    margin-bottom: 16px;
+}
+
+.admin-form-group label {
+    display: block;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.admin-form-group input,
+.admin-form-group textarea,
+.admin-form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.admin-form-group input:focus,
+.admin-form-group textarea:focus {
+    outline: none;
+    border-color: #9a7b5a;
+}
+
+.admin-form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.admin-form-group .form-hint {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-top: 4px;
+}
+
+.admin-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #ecf0f1;
+}
+
+.admin-modal-actions .admin-btn {
+    min-width: 100px;
+}
+
+/* Add form (Thêm mới) - card nhỏ gọn */
+.admin-add-form .admin-form-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.admin-add-form .admin-form-row .admin-form-group {
+    margin-bottom: 0;
+    flex: 1;
+    min-width: 180px;
+}
+
+/* Table action cells - nút Sửa/Xóa thống nhất */
+.admin-table .admin-action-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.admin-btn-danger {
+    background: #c62828;
+    color: #fff;
+}
+
+.admin-btn-danger:hover {
+    background: #b71c1c;
 }

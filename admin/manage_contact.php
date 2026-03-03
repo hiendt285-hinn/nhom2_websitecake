@@ -42,13 +42,15 @@ $where = ($filter === 'read') ? "WHERE status = 'read'" : (($filter === 'new') ?
 $contacts = $conn->query("SELECT * FROM contacts $where ORDER BY created_at DESC");
 ?>
 <div class="admin-content">
-    <h1 class="admin-page-title"><i class="fas fa-envelope"></i> Quản lý liên hệ</h1>
-    <p class="muted">Tin nhắn từ form Liên hệ trang khách hàng.</p>
-    <div style="margin-bottom: 16px;">
-        <a href="admin_dashboard.php?page=contact" class="admin-btn <?php echo $filter === 'all' ? 'admin-btn-primary' : ''; ?>" style="margin-right:8px;">Tất cả</a>
-        <a href="admin_dashboard.php?page=contact&filter=new" class="admin-btn <?php echo $filter === 'new' ? 'admin-btn-primary' : ''; ?>" style="margin-right:8px;">Chưa xem</a>
-        <a href="admin_dashboard.php?page=contact&filter=read" class="admin-btn <?php echo $filter === 'read' ? 'admin-btn-primary' : ''; ?>">Đã xem</a>
+    <div class="admin-page-header">
+        <h1 class="admin-page-title"><i class="fas fa-envelope"></i> Quản lý liên hệ</h1>
+        <div class="filter-actions">
+            <a href="admin_dashboard.php?page=contact" class="admin-btn <?php echo $filter === 'all' ? 'admin-btn-primary' : 'admin-btn-secondary'; ?>">Tất cả</a>
+            <a href="admin_dashboard.php?page=contact&filter=new" class="admin-btn <?php echo $filter === 'new' ? 'admin-btn-primary' : 'admin-btn-secondary'; ?>">Chưa xem</a>
+            <a href="admin_dashboard.php?page=contact&filter=read" class="admin-btn <?php echo $filter === 'read' ? 'admin-btn-primary' : 'admin-btn-secondary'; ?>">Đã xem</a>
+        </div>
     </div>
+    <p class="muted" style="margin-bottom:16px;">Tin nhắn từ form Liên hệ trang khách hàng.</p>
     <div class="admin-card">
         <table class="admin-table">
             <thead>

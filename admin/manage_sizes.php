@@ -88,79 +88,85 @@ $sql = "SELECT id, name FROM $table_name ORDER BY id ASC";
 $result = $conn->query($sql);
 ?>
 <div class="admin-content">
-<h1 class="admin-page-title"><i class="fas fa-expand-arrows-alt"></i> Quản lý <?php echo $attribute_name; ?></h1>
-<?php if ($message): ?><div class="admin-message admin-message-success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
-<?php if ($error): ?><div class="admin-message admin-message-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-<div class="admin-card">
-    <h2>Thêm <?php echo $attribute_name; ?> mới</h2>
-    <form method="POST">
-        <input type="text" name="new_name" placeholder="Ví dụ: 20cm" required style="padding:10px; border:1px solid #ccc; border-radius:4px; width:300px; margin-right:10px;">
-        <button type="submit" class="admin-btn admin-btn-primary">Thêm</button>
-    </form>
-</div>
-
-<div class="admin-card">
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Tên <?php echo $attribute_name; ?></th>
-            <th>Thao tác</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if ($result && $result->num_rows > 0): ?>
-            <?php while($row = $result->fetch_assoc()): ?>
-                <tr>
-                    <td><?php echo $row['id'] ?></td>
-                    <td><?php echo htmlspecialchars($row['name']) ?></td>
-                    <td>
-                        <span class="admin-link" style="cursor:pointer;" onclick="openEditModal(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>')">Chỉnh sửa</span>
-                        <span style="color:#d32f2f; cursor:pointer; margin-left:10px;" onclick="if(confirm('Bạn có chắc muốn xóa <?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>?')) { window.location.href='admin_dashboard.php?page=sizes&delete_id=<?php echo $row['id']; ?>'; }">Xóa</span>
-                    </td>
-                </tr>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <tr><td colspan="3">Chưa có <?php echo $attribute_name; ?> nào được thêm.</td></tr>
-        <?php endif; ?>
-    </tbody>
-</table>
-</div>
-
-<div id="editModal" class="edit-modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background:rgba(0,0,0,0.4);">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2>Chỉnh sửa <?php echo $attribute_name; ?></h2>
-        <form method="POST">
-            <input type="hidden" id="edit_id" name="edit_id">
-            <label for="edit_name">Tên <?php echo $attribute_name; ?>:</label>
-            <input type="text" id="edit_name" name="edit_name" required>
-            <button type="submit">Lưu Thay đổi</button>
+    <div class="admin-page-header">
+        <h1 class="admin-page-title"><i class="fas fa-expand-arrows-alt"></i> Quản lý <?php echo $attribute_name; ?></h1>
+    </div>
+    <?php if ($message): ?><div class="admin-message admin-message-success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
+    <?php if ($error): ?><div class="admin-message admin-message-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+    <div class="admin-card">
+        <h2><i class="fas fa-plus-circle"></i> Thêm <?php echo $attribute_name; ?> mới</h2>
+        <form method="POST" class="admin-add-form">
+            <div class="admin-form-row">
+                <div class="admin-form-group">
+                    <label for="new_name">Tên <?php echo $attribute_name; ?></label>
+                    <input type="text" id="new_name" name="new_name" placeholder="Ví dụ: 20cm" required>
+                </div>
+                <button type="submit" class="admin-btn admin-btn-primary">Thêm</button>
+            </div>
         </form>
     </div>
-</div>
-<script>
-    // Lấy các phần tử modal
-    var modal = document.getElementById("editModal");
-    var btnClose = document.getElementsByClassName("close-btn")[0];
 
-    // Hàm mở modal và điền dữ liệu
+    <div class="admin-card">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên <?php echo $attribute_name; ?></th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if ($result && $result->num_rows > 0): ?>
+                    <?php while($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><?php echo $row['id'] ?></td>
+                            <td><?php echo htmlspecialchars($row['name']) ?></td>
+                            <td class="admin-action-cell">
+                                <button type="button" class="admin-btn admin-btn-primary admin-btn-sm" onclick="openEditModal(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>')"><i class="fas fa-edit"></i> Sửa</button>
+                                <a href="admin_dashboard.php?page=sizes&delete_id=<?php echo $row['id']; ?>" class="admin-btn admin-btn-danger admin-btn-sm" style="text-decoration:none;" onclick="return confirm('Bạn có chắc muốn xóa <?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>?');"><i class="fas fa-trash-alt"></i> Xóa</a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr><td colspan="3">Chưa có <?php echo $attribute_name; ?> nào được thêm.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="editModal" class="edit-modal" style="display:none;">
+        <div class="admin-modal-box">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title">Chỉnh sửa <?php echo $attribute_name; ?></h2>
+                <button type="button" class="admin-modal-close" onclick="closeEditModal()" aria-label="Đóng">&times;</button>
+            </div>
+            <form method="POST">
+                <div class="admin-modal-body">
+                    <input type="hidden" id="edit_id" name="edit_id">
+                    <div class="admin-form-group">
+                        <label for="edit_name">Tên <?php echo $attribute_name; ?></label>
+                        <input type="text" id="edit_name" name="edit_name" required>
+                    </div>
+                    <div class="admin-modal-actions">
+                        <button type="button" class="admin-btn admin-btn-secondary" onclick="closeEditModal()">Hủy</button>
+                        <button type="submit" class="admin-btn admin-btn-primary">Lưu thay đổi</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+<script>
+(function() {
+    var modal = document.getElementById("editModal");
     function openEditModal(id, name) {
         document.getElementById('edit_id').value = id;
         document.getElementById('edit_name').value = name;
-        modal.style.display = "block";
+        modal.style.display = "flex";
     }
-
-    // Đóng modal khi nhấp vào (x)
-    btnClose.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    // Đóng modal khi nhấp ra ngoài
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
+    function closeEditModal() { modal.style.display = "none"; }
+    window.onclick = function(e) { if (e.target === modal) closeEditModal(); };
+    window.openEditModal = openEditModal;
+    window.closeEditModal = closeEditModal;
+})();
 </script>
 </div>
