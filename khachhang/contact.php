@@ -5,13 +5,16 @@ include 'connect.php';
 // Tạo bảng contacts nếu chưa có
 $conn->query("CREATE TABLE IF NOT EXISTS contacts (
   id int(11) NOT NULL AUTO_INCREMENT,
+  user_id int(11) DEFAULT NULL,
   name varchar(255) NOT NULL,
   email varchar(255) NOT NULL,
   phone varchar(50) DEFAULT NULL,
   message text NOT NULL,
   status varchar(50) DEFAULT 'new',
   created_at datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  KEY user_id (user_id),
+  CONSTRAINT contacts_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
 $contactSuccess = '';
@@ -40,9 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'], $_POST['email
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone'] ?? '');
     $message = trim($_POST['message']);
+    $userId = isset($_SESSION['user_id']) && $_SESSION['user_id'] !== '' ? (int)$_SESSION['user_id'] : null;
     if ($name !== '' && $email !== '' && $message !== '') {
-        $stmt = $conn->prepare("INSERT INTO contacts (name, email, phone, message) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param('ssss', $name, $email, $phone, $message);
+        $stmt = $conn->prepare("INSERT INTO contacts (user_id, name, email, phone, message) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param('issss', $userId, $name, $email, $phone, $message);
         if ($stmt->execute()) {
             $contactSuccess = 'Cảm ơn bạn! Chúng tôi đã nhận được liên hệ và sẽ phản hồi sớm.';
         } else {

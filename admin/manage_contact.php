@@ -6,16 +6,19 @@ if (!isset($_SESSION["admin"])) {
 }
 require_once 'connect.php';
 
-// Tạo bảng contacts nếu chưa có
+// Tạo bảng contacts nếu chưa có (user_id: khách đăng nhập gửi, nullable)
 $conn->query("CREATE TABLE IF NOT EXISTS contacts (
   id int(11) NOT NULL AUTO_INCREMENT,
+  user_id int(11) DEFAULT NULL,
   name varchar(255) NOT NULL,
   email varchar(255) NOT NULL,
   phone varchar(50) DEFAULT NULL,
   message text NOT NULL,
   status varchar(50) DEFAULT 'new',
   created_at datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  KEY user_id (user_id),
+  CONSTRAINT contacts_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
 // Cập nhật trạng thái (đã xem / mới)
@@ -38,8 +41,8 @@ if (isset($_GET['delete_id'])) {
 }
 
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
-$where = ($filter === 'read') ? "WHERE status = 'read'" : (($filter === 'new') ? "WHERE status = 'new'" : "");
-$contacts = $conn->query("SELECT * FROM contacts $where ORDER BY created_at DESC");
+$where = ($filter === 'read') ? "WHERE c.status = 'read'" : (($filter === 'new') ? "WHERE c.status = 'new'" : "");
+$contacts = $conn->query("SELECT c.*, u.username FROM contacts c LEFT JOIN users u ON c.user_id = u.id $where ORDER BY c.created_at DESC");
 ?>
 <div class="admin-content">
     <div class="admin-page-header">
@@ -56,6 +59,7 @@ $contacts = $conn->query("SELECT * FROM contacts $where ORDER BY created_at DESC
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Tài khoản</th>
                     <th>Họ tên</th>
                     <th>Email</th>
                     <th>SĐT</th>
@@ -70,6 +74,7 @@ $contacts = $conn->query("SELECT * FROM contacts $where ORDER BY created_at DESC
                     <?php while ($row = $contacts->fetch_assoc()): ?>
                         <tr>
                             <td><?php echo (int)$row['id']; ?></td>
+                            <td><?php echo !empty($row['username']) ? htmlspecialchars($row['username']) : '<span class="muted">Khách</span>'; ?></td>
                             <td><?php echo htmlspecialchars($row['name']); ?></td>
                             <td><?php echo htmlspecialchars($row['email']); ?></td>
                             <td><?php echo htmlspecialchars($row['phone']); ?></td>
@@ -88,7 +93,7 @@ $contacts = $conn->query("SELECT * FROM contacts $where ORDER BY created_at DESC
                         </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
-                    <tr><td colspan="8">Chưa có liên hệ nào</td></tr>
+                    <tr><td colspan="9">Chưa có liên hệ nào</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
