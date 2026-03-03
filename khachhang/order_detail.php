@@ -74,6 +74,15 @@ function status_color($status) {
         default: return '#555';
     }
 }
+
+$isSuccess = isset($_GET['success']) && $_GET['success'] === '1';
+$discountAmount = (float)($order['discount_amount'] ?? 0);
+$subtotal = $order['total_amount'] + $discountAmount;
+$paymentLabel = [
+    'cod' => 'Thanh toán khi nhận hàng (COD)',
+    'banking' => 'Chuyển khoản ngân hàng',
+    'momo' => 'Ví MoMo',
+];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -163,6 +172,47 @@ function status_color($status) {
         .back-btn:hover {
             background: var(--brown-light);
         }
+        .success-banner {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 1px solid #81c784;
+            color: #2e7d32;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .success-banner i {
+            font-size: 28px;
+        }
+        .delivery-box {
+            background: #f9f6f2;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .delivery-box h3 {
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            color: var(--main-brown);
+        }
+        .delivery-box p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+        .summary-rows {
+            margin-bottom: 12px;
+        }
+        .summary-rows .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+        }
+        .summary-rows .row.discount { color: #2e7d32; }
         @media (max-width: 600px) {
             .order-card {
                 padding: 18px 12px;
@@ -178,15 +228,23 @@ function status_color($status) {
 </head>
 <body>
 
+<?php include 'header.php'; ?>
+
 <div class="order-detail-page">
+    <?php if ($isSuccess): ?>
+    <div class="success-banner">
+        <i class="fas fa-check-circle"></i>
+        <span>Đặt hàng thành công! Đơn hàng #<?php echo $order['id']; ?> đã được ghi nhận. Chúng tôi sẽ liên hệ bạn sớm.</span>
+    </div>
+    <?php endif; ?>
+
     <div class="order-card">
         <h1>Chi tiết đơn hàng #<?php echo htmlspecialchars($order['id']); ?></h1>
 
         <div class="info">
             <div>
-                <p><strong>Khách hàng:</strong> <?php echo htmlspecialchars($order['username']); ?></p>
-                <p><strong>Ngày đặt:</strong> <?php echo date('d/m/Y H:i:s', strtotime($order['created_at'])); ?></p>
-                <p><strong>Thanh toán:</strong> <?php echo htmlspecialchars($order['payment_method']); ?></p>
+                <p><strong>Ngày đặt:</strong> <?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?></p>
+                <p><strong>Thanh toán:</strong> <?php echo htmlspecialchars($paymentLabel[$order['payment_method']] ?? $order['payment_method']); ?></p>
             </div>
             <div style="text-align: right;">
                 <p><strong>Trạng thái:</strong>
@@ -194,8 +252,17 @@ function status_color($status) {
                         <?php echo status_text($order['status']); ?>
                     </span>
                 </p>
-                <p><strong>Tổng cộng:</strong> <?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</p>
             </div>
+        </div>
+
+        <div class="delivery-box">
+            <h3><i class="fas fa-map-marker-alt"></i> Thông tin nhận hàng</h3>
+            <p><strong>Người nhận:</strong> <?php echo htmlspecialchars($order['full_name']); ?></p>
+            <p><strong>Số điện thoại:</strong> <?php echo htmlspecialchars($order['phone']); ?></p>
+            <p><strong>Địa chỉ:</strong> <?php echo nl2br(htmlspecialchars($order['address'])); ?></p>
+            <?php if (!empty(trim($order['note'] ?? ''))): ?>
+            <p><strong>Ghi chú:</strong> <?php echo nl2br(htmlspecialchars($order['note'])); ?></p>
+            <?php endif; ?>
         </div>
 
         <table>
@@ -224,12 +291,27 @@ function status_color($status) {
             </tbody>
         </table>
 
-        <p class="total">
-            Tổng cộng: <strong><?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</strong>
-        </p>
+        <div class="summary-rows">
+            <?php if ($discountAmount > 0): ?>
+            <div class="row">
+                <span>Tạm tính</span>
+                <span><?php echo number_format($subtotal, 0, ',', '.'); ?> ₫</span>
+            </div>
+            <div class="row discount">
+                <span>Giảm giá<?php if (!empty($order['promo_code'])): ?> (mã <?php echo htmlspecialchars($order['promo_code']); ?>)<?php endif; ?></span>
+                <span>-<?php echo number_format($discountAmount, 0, ',', '.'); ?> ₫</span>
+            </div>
+            <?php endif; ?>
+            <div class="row total" style="border-top:1px solid #e0e0e0; padding-top:10px; margin-top:8px;">
+                <strong>Tổng cộng</strong>
+                <strong style="color: var(--main-brown);"><?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</strong>
+            </div>
+        </div>
 
         <a href="order_history.php" class="back-btn"><i class="fas fa-arrow-left"></i> Quay lại danh sách đơn hàng</a>
+        <a href="products.php" class="back-btn" style="margin-left:10px; background:#6d4c41;"><i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm</a>
     </div>
 </div>
+<?php include 'footer.php'; ?>
 </body>
 </html>
