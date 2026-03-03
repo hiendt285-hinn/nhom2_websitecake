@@ -3,8 +3,7 @@ session_start();
 include 'connect.php';
 include 'header.php';
 
-// === HÀM LẤY SẢN PHẨM THEO DANH MỤC ===
-// Hàm này được tối ưu để dùng Prepared Statement và lấy 4 sản phẩm mới nhất
+
 function getProductsByCategory($conn, $category_id) {
     // Chỉ lấy các trường cần thiết cho card sản phẩm
     $stmt = $conn->prepare("SELECT id, name, price, image, short_description FROM products WHERE category_id = ? ORDER BY id DESC LIMIT 4");
@@ -70,7 +69,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
 <section class="box-collection">
     <h2 class="collection-title">Premium Box Collection<br><span>Open The Delight</span></h2>
     <p class="collection-desc">
-        Khám phá bộ sưu tập bánh hộp cao cấp độc đáo từ Savor Cakevới những tuyệt phẩm Tiramisu, Matcha và Chocolate. 
+        Khám phá bộ sưu tập bánh hộp cao cấp độc đáo từ Sweet Cake với những tuyệt phẩm Tiramisu, Matcha và Chocolate. 
         Mỗi chiếc hộp tinh tế là lời mời gọi "open the delight" – mở ra niềm vui với từng tầng hương vị đậm đà, nơi rượu rum 
         Captain Morgan hòa quyện cùng các nguyên liệu thượng hạng, mang đến một trải nghiệm ẩm thực xa xỉ và đậm chất nghệ thuật.
     </p>
@@ -96,11 +95,8 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
                     <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
                     <div class="product-actions">
                         <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                            Đặt hàng
+                            <i class="fas fa-eye"></i> Xem chi tiết
                         </a>
-                        <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
-                            <i class="fas fa-cart-plus"></i>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -146,11 +142,8 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
           <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
           <div class="product-actions">
             <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                Đặt hàng
+                <i class="fas fa-eye"></i> Xem chi tiết
             </a>
-            <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
-              <i class="fas fa-cart-plus"></i>
-            </button>
           </div>
         </div>
       </div>
@@ -198,11 +191,8 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
           <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
           <div class="product-actions">
             <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                Đặt hàng
+                <i class="fas fa-eye"></i> Xem chi tiết
             </a>
-            <button class="btn-cart" onclick="addToCart(<?php echo $row['id']; ?>)">
-              <i class="fas fa-cart-plus"></i>
-            </button>
           </div>
         </div>
       </div>
@@ -248,7 +238,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
 
   <div class="fruit-text">
     <p>
-      Nếu trước đây Savor chỉ có nhân xoài tươi cho cả nhà lựa chọn, thì hiện tại Savor đã bổ sung thêm các loại nhân hoa quả khác, 
+      Nếu trước đây Sweet chỉ có nhân xoài tươi cho cả nhà lựa chọn, thì hiện tại Sweet đã bổ sung thêm các loại nhân hoa quả khác, 
       đặc biệt phải kể: <strong>NHÂN XOÀI DỨA</strong> – Sự kết hợp hoàn hảo giữa vị chua của dứa cân bằng với vị ngọt của xoài 
       cùng hương thơm tươi mát, dịu nhẹ
       <br>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -258,7 +248,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
       <br>Size vừa: 40k/240g
       <br>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       <br><em>Lưu ý:</em> Các mẫu bánh Mousse không được áp dụng thêm nhân hoa quả, 
-      cả nhà nhắn Savor để được tư vấn các mẫu bánh nha 💛
+      cả nhà nhắn Sweet để được tư vấn các mẫu bánh nha 💛
     </p>
   </div>
 
