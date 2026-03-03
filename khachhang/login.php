@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Savor Cake</title>
+    <title>Đăng nhập - Sweet Cake</title>
 
     <style>
     /* Theme adjusted to light brown / light beige / black text */
@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <footer>
-    © 2025 Savor Cake – All rights reserved.
+    © 2025 Sweet Cake – All rights reserved.
 </footer>
 
 </body>
