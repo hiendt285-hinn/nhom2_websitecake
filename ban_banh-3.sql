@@ -73,6 +73,9 @@ INSERT INTO `categories` (`id`, `name`, `slug`, `description`, `created_at`, `up
 (9, 'Bánh kem sự kiện', 'banh-kem-su-kien', 'Bánh kem cho sự kiện, tiệc', '2025-12-02 15:09:25', '2025-12-02 15:09:25');
 
 -- --------------------------------------------------------
+-- Bảng danh mục hương vị (cốt bánh). Dùng làm dropdown ở trang chi tiết SP.
+-- order_items.flavor lưu tên (varchar) đã chọn, không FK để giữ lịch sử khi admin đổi/xóa mã.
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `flavors`
@@ -98,6 +101,9 @@ INSERT INTO `flavors` (`id`, `name`) VALUES
 (6, 'Cốt Cà Phê + Kem Cà Phê'),
 (7, 'Cốt Trà Xanh + Kem Trà Xanh');
 
+-- --------------------------------------------------------
+-- Bảng kích cỡ bánh. Dùng làm dropdown ở trang chi tiết SP.
+-- order_items.size lưu tên (varchar) đã chọn, không FK để giữ lịch sử đơn khi admin đổi/xóa cỡ.
 -- --------------------------------------------------------
 
 --
@@ -286,6 +292,8 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `flavor`, `qu
 (3, 2, 6, '21cm x 8cm', 'Cốt Vani + Mứt Việt Quất', 1, 199000.00);
 
 -- --------------------------------------------------------
+-- Liên hệ từ form khách hàng. user_id: khách đăng nhập gửi (nullable).
+-- --------------------------------------------------------
 
 --
 -- Table structure for table `contacts`
@@ -293,13 +301,16 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `flavor`, `qu
 
 CREATE TABLE `contacts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `message` text NOT NULL,
   `status` varchar(50) DEFAULT 'new',
   `created_at` datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `contacts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -332,6 +343,8 @@ INSERT INTO `promotions` (`code`, `title`, `discount_type`, `discount_value`, `m
 ('FREESHIP350', 'Freeship đơn từ 350K', 'fixed', 30000.00, 350000.00, NULL, NULL, 1, current_timestamp()),
 ('SWEET10', 'Giảm 10% đơn hàng', 'percent', 10.00, 200000.00, NULL, NULL, 1, current_timestamp());
 
+-- --------------------------------------------------------
+-- Tin tức / bài viết. Bảng độc lập, không cần FK sang bảng khác.
 -- --------------------------------------------------------
 
 --
