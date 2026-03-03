@@ -1,8 +1,7 @@
 <?php
-// detail_products.php - Trang chi tiết sản phẩm
 
 session_start();
-require_once 'connect.php'; // Kết nối DB
+require_once 'connect.php'; 
 
 // 1. Lấy ID sản phẩm từ URL
 $product_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -29,8 +28,18 @@ if (!$product) {
     exit;
 }
 
+// 3b. Lấy tổng đã bán (đơn hoàn thành)
+$sold_stmt = $conn->prepare("SELECT COALESCE(SUM(oi.quantity), 0) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE oi.product_id = ? AND o.status = 'completed'");
+$total_sold = 0;
+if ($sold_stmt) {
+    $sold_stmt->bind_param("i", $product_id);
+    $sold_stmt->execute();
+    $sold_row = $sold_stmt->get_result()->fetch_assoc();
+    $total_sold = (int)($sold_row['total_sold'] ?? 0);
+    $sold_stmt->close();
+}
+
 // 4. Lấy danh sách tùy chọn (Size và Flavor) từ DB
-// Phải đảm bảo bạn đã tạo bảng 'sizes' và 'flavors'
 $sizes_result = $conn->query("SELECT name FROM sizes ORDER BY name ASC");
 $available_sizes = $sizes_result ? $sizes_result->fetch_all(MYSQLI_ASSOC) : [];
 
@@ -69,6 +78,7 @@ if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
         <div class="product-info-area">
             <h1><?php echo htmlspecialchars($product['name']); ?></h1>
             <p class="product-price"><?php echo number_format($product['price'], 0, ',', '.'); ?>₫</p>
+            <p class="product-sold"><i class="fas fa-shopping-bag"></i> Đã bán: <strong><?php echo number_format($total_sold); ?></strong></p>
             
             <div class="product-description">
                 <h2>Mô tả sản phẩm</h2>
@@ -114,10 +124,12 @@ if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
                 </div>
 
                 <div class="action-buttons">
-                    <button type="submit" class="btn-add-to-cart">
+                    <button type="submit" class="btn-add-to-cart" name="action" value="cart">
                         <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
                     </button>
-                    
+                    <button type="button" class="btn-checkout" id="btn-order-now" title="Thêm vào giỏ và chuyển đến thanh toán">
+                        <i class="fas fa-credit-card"></i> Đặt hàng
+                    </button>
                 </div>
             </form>
             
@@ -132,6 +144,7 @@ if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
 
 <script>
 document.getElementById('add-to-cart-form')?.addEventListener('submit', function(e) {
+    if (e.submitter && e.submitter.getAttribute('value') === 'checkout') return;
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
@@ -143,8 +156,31 @@ document.getElementById('add-to-cart-form')?.addEventListener('submit', function
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Tải lại trang với tham số 'added=1' để hiển thị thông báo thành công
             window.location.href = 'product-detail.php?id=' + <?php echo $product_id; ?> + '&added=1';
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không thể thêm sản phẩm vào giỏ hàng.'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Đã xảy ra lỗi khi giao tiếp với máy chủ.');
+    });
+});
+
+document.getElementById('btn-order-now')?.addEventListener('click', function() {
+    const form = document.getElementById('add-to-cart-form');
+    if (!form) return;
+    const formData = new FormData(form);
+    formData.set('action', 'checkout');
+
+    fetch('add-to-cart.php', {
+        method: 'POST',
+        body: new URLSearchParams(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = 'checkout.php';
         } else {
             alert('Lỗi: ' + (data.message || 'Không thể thêm sản phẩm vào giỏ hàng.'));
         }
@@ -201,7 +237,18 @@ document.getElementById('add-to-cart-form')?.addEventListener('submit', function
     font-size: 30px;
     font-weight: 800;
     color: var(--main-brown);
+    margin-bottom: 8px;
+}
+
+.product-sold {
+    font-size: 15px;
+    color: #666;
     margin-bottom: 20px;
+}
+
+.product-sold i {
+    color: var(--main-brown);
+    margin-right: 4px;
 }
 
 .product-description h2 {
@@ -292,7 +339,7 @@ select, .quantity-input {
     transition: background-color 0.3s, color 0.3s;
 }
 
-.btn-go-checkout:hover {
+.btn-checkout:hover {
     background-color: var(--main-brown);
     color: var(--white);
 }
