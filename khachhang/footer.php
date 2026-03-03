@@ -4,7 +4,7 @@
 
     <div class="footer-container">
         <div class="footer-column footer-brand">
-            <h3 class="footer-logo">Savor Cake</h3> 
+            <h3 class="footer-logo">Sweet Cake</h3> 
             <p>Nơi hương vị ngọt ngào bắt đầu. Đặt bánh nhanh, giao hàng siêu tốc trên toàn quốc.</p>
             <div class="footer-socials">
                 <a href="https://www.facebook.com/savor.vn/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
@@ -26,20 +26,18 @@
             <ul>
                 <li><a href="products.php">Sản phẩm</a></li>
                 <li><a href="policy.php">Chính sách đổi trả</a></li>
-                <li><a href="feedback.php">Feedback</a></li>
+                <li><a href="contact.php">Liên hệ</a></li>
             </ul>
         </div>
         
         <div class="footer-column footer-certification">
             <h3>Chứng nhận</h3>
             <img src="../images/bo-cong-thuong.webp" alt="Đã thông báo Bộ Công Thương" class="gov-logo">
-            <p class="press-text">Báo chí nói gì về Savor Cake?</p>
-            <img src="../images/35-mau-thiet-ke-logo-tiem-banh-dep-5.jpg" alt="Abby logo" class="brand-logo-small">
         </div>
     </div>
     
     <div class="footer-bottom">
-        <p>&copy; <?php echo date("Y"); ?> Savor Cake. Bảo lưu mọi quyền. | Thiết kế bởi Savor Cake.</p>
+        <p>&copy; <?php echo date("Y"); ?> Sweet Cake. Bảo lưu mọi quyền. | Thiết kế bởi Sweet Cake.</p>
     </div>
 </footer>
 
