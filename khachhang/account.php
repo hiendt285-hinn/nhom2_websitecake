@@ -89,6 +89,10 @@ function status_label($status) {
         .status-default { background: #ececec; color: #333; }
         .btn-view-order { background: #2196f3; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.3s; }
         .btn-view-order:hover { background: #1976d2; }
+        .btn-received { background: #2e7d32; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; transition: 0.3s; }
+        .btn-received:hover { background: #1b5e20; }
+        .btn-received-disabled { background: #9e9e9e !important; color: #fff; cursor: not-allowed; opacity: 0.8; }
+        .btn-received-disabled:hover { background: #9e9e9e !important; }
         .orders-empty { text-align: center; color: #999; font-size: 18px; margin: 30px 0; }
         @media (max-width: 768px) { .info-grid { grid-template-columns: 1fr; } .orders-table { font-size: 14px; } }
     </style>
@@ -126,6 +130,9 @@ function status_label($status) {
 
     <div class="orders-section">
         <h2>Lịch sử đơn hàng</h2>
+        <?php if (isset($_GET['received']) && $_GET['received'] === '1'): ?>
+        <div class="admin-message admin-message-success" style="margin-bottom:16px; padding:12px 16px; border-radius:8px; background:#e8f5e9; color:#2e7d32;">Đã xác nhận nhận hàng. Trạng thái đơn đã cập nhật thành Đã giao.</div>
+        <?php endif; ?>
         <?php if (!empty($orders)): ?>
             <table class="orders-table">
                 <thead>
@@ -145,9 +152,14 @@ function status_label($status) {
                         <td><?php echo number_format($order['total_amount'], 0, ',', '.'); ?>₫</td>
                         <td><span class="status <?php echo $status['class']; ?>"><?php echo $status['label']; ?></span></td>
                             <td>
-                            <a href="order_detail.php?id=<?php echo $order['id']; ?>" class="btn-view-order">
+                                <a href="order_detail.php?id=<?php echo $order['id']; ?>" class="btn-view-order">
                                     <i class="fas fa-eye"></i> Xem chi tiết
                                 </a>
+                                <form method="post" action="confirm_received.php" style="display:inline; margin-left:6px;" onsubmit="return <?php echo $order['status'] === 'shipping' ? "confirm('Bạn đã nhận được hàng?');" : "false;"; ?>">
+                                    <input type="hidden" name="order_id" value="<?php echo (int)$order['id']; ?>">
+                                    <input type="hidden" name="redirect" value="account">
+                                    <button type="submit" class="btn-received <?php echo $order['status'] !== 'shipping' ? 'btn-received-disabled' : ''; ?>" <?php if ($order['status'] !== 'shipping') echo ' disabled title="Chỉ kích hoạt khi đơn ở trạng thái Đang giao."'; ?>><i class="fas fa-box-open"></i> Đã nhận hàng</button>
+                                </form>
                             </td>
                         </tr>
                     <?php endforeach; ?>

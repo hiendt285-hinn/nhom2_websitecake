@@ -22,7 +22,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = (int)$user['id'];
             $_SESSION['username'] = $user['username'];
-            header('Location: index.php');
+            $redirect = 'index.php';
+            if (!empty($_POST['return'])) {
+                $return = trim($_POST['return']);
+                if (preg_match('#^[a-z0-9_\-\./]+\.php(\?.*)?$#i', $return) && strpos($return, '//') === false) {
+                    $redirect = $return;
+                }
+            } elseif (!empty($_GET['return'])) {
+                $return = trim($_GET['return']);
+                if (preg_match('#^[a-z0-9_\-\./]+\.php(\?.*)?$#i', $return) && strpos($return, '//') === false) {
+                    $redirect = $return;
+                }
+            }
+            header('Location: ' . $redirect);
             exit();
         } else {
             $error = "Tên đăng nhập hoặc mật khẩu không đúng!";
@@ -178,6 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <?php endif; ?>
 
     <form action="login.php" method="POST">
+        <?php if (!empty($_GET['return'])): ?>
+        <input type="hidden" name="return" value="<?php echo htmlspecialchars($_GET['return']); ?>">
+        <?php endif; ?>
         <label for="username">Tên đăng nhập:</label>
         <input type="text" id="username" name="username" required>
 

@@ -220,6 +220,10 @@ $formPaymentMethod = isset($_POST['payment_method']) ? $_POST['payment_method'] 
             margin-bottom: 15px;
             font-size: 14px;
         }
+        .btn-copy-promo { background:#5D4037; color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; font-size:13px; white-space:nowrap; }
+        .btn-copy-promo:hover { background:#7d6057; }
+        .promo-chip { background:#f5f5f5; border:1px solid #ddd; padding:6px 12px; border-radius:20px; font-size:12px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; }
+        .promo-chip:hover { background:#e8f5e9; border-color:#2e7d32; color:#2e7d32; }
         @media (max-width: 900px) { 
             .checkout-grid { grid-template-columns: 1fr; } 
             .form-row { grid-template-columns: 1fr; } 
@@ -300,17 +304,20 @@ $formPaymentMethod = isset($_POST['payment_method']) ? $_POST['payment_method'] 
             
             <div class="form-group" style="margin-bottom:12px;">
                 <label>Mã khuyến mãi</label>
-                <select name="promo_code" id="promo_code" style="text-transform:uppercase;">
-                    <option value="">— Không dùng mã —</option>
-                    <?php foreach ($promoList as $p):
-                        $short = $p['code'];
-                        $short .= $p['discount_type'] === 'percent' ? ' -' . (int)$p['discount_value'] . '%' : ' -' . number_format((float)$p['discount_value']/1000, 0, '', '') . 'k';
-                        if ((float)$p['min_order_amount'] > 0) $short .= ' (từ ' . number_format((float)$p['min_order_amount']/1000, 0, '', '') . 'k)';
-                        $selected = (isset($_POST['promo_code']) && $_POST['promo_code'] === $p['code']) ? ' selected' : '';
-                    ?>
-                    <option value="<?php echo htmlspecialchars($p['code']); ?>"<?php echo $selected; ?>><?php echo htmlspecialchars($short); ?></option>
-                    <?php endforeach; ?>
-                </select>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <input type="text" name="promo_code" id="promo_code" value="<?php echo htmlspecialchars(isset($_POST['promo_code']) ? $_POST['promo_code'] : ''); ?>" placeholder="Nhập hoặc dán mã giảm giá" style="text-transform:uppercase; flex:1; min-width:160px; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                    <button type="button" class="btn-copy-promo" onclick="copyPromoFromInput()" title="Sao chép mã"><i class="fas fa-copy"></i> Sao chép</button>
+                </div>
+                <?php if (!empty($promoList)): ?>
+                    <p style="font-size:12px; color:#666; margin-top:8px; margin-bottom:4px;">Mã có sẵn — bấm để sao chép:</p>
+                    <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                        <?php foreach ($promoList as $p): ?>
+                            <button type="button" class="promo-chip" onclick="copyPromoCode('<?php echo htmlspecialchars(addslashes($p['code'])); ?>')" title="Sao chép <?php echo htmlspecialchars($p['code']); ?>">
+                                <?php echo htmlspecialchars($p['code']); ?> <i class="fas fa-copy" style="font-size:10px;"></i>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
                 
                 <?php if (isset($promoError) && $promoError !== ''): ?>
                     <span style="color:#d32f2f; font-size:12px; display:block; margin-top:5px;">
@@ -358,5 +365,27 @@ $formPaymentMethod = isset($_POST['payment_method']) ? $_POST['payment_method'] 
 </div>
 
 <?php include 'footer.php'; ?>
+<script>
+function copyPromoCode(code) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(function() {
+            var inp = document.getElementById('promo_code');
+            if (inp) inp.value = code;
+            alert('Đã sao chép mã: ' + code);
+        });
+    } else {
+        var inp = document.getElementById('promo_code');
+        if (inp) { inp.value = code; inp.select(); document.execCommand('copy'); alert('Đã điền và sao chép mã: ' + code); }
+    }
+}
+function copyPromoFromInput() {
+    var inp = document.getElementById('promo_code');
+    if (!inp || !inp.value.trim()) { alert('Chưa có mã để sao chép.'); return; }
+    var code = inp.value.trim();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(function() { alert('Đã sao chép mã: ' + code); });
+    } else { inp.select(); document.execCommand('copy'); alert('Đã sao chép mã: ' + code); }
+}
+</script>
 </body>
 </html>

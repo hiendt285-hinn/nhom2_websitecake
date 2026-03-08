@@ -1,9 +1,9 @@
 <?php
-// Thông số kết nối database
-$host = 'localhost';  // Thường là localhost nếu dùng local server
-$dbname = 'ban_banh';  // Tên database
-$username = 'root';  // Username MySQL (mặc định root)
-$password = '';  // Password MySQL (mặc định rỗng nếu chưa set)
+
+$host = 'localhost'; 
+$dbname = 'ban_banh'; 
+$username = 'root';  
+$password = ''; 
 
 // Kết nối sử dụng mysqli
 $conn = new mysqli($host, $username, $password, $dbname);

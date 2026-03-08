@@ -1,5 +1,4 @@
 <?php
-// logout.php - Xử lý đăng xuất (không cần CSS vì không có HTML)
 
 // Bắt đầu session
 if (!isset($_SESSION)) {

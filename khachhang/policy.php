@@ -128,7 +128,7 @@
                         </ul>
                     </li>
                 </ul>
-                <p class="highlight">🎀 Lưu ý: Savor hỗ trợ tối đa 60k phí ship.</p>
+                <p class="highlight">🎀 Lưu ý: Sweet hỗ trợ tối đa 60k phí ship.</p>
             </div>
         </div>
     </div>

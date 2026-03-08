@@ -6,21 +6,6 @@ if (!isset($_SESSION["admin"])) {
 }
 require_once 'connect.php';
 
-// Tạo bảng contacts nếu chưa có (user_id: khách đăng nhập gửi, nullable)
-$conn->query("CREATE TABLE IF NOT EXISTS contacts (
-  id int(11) NOT NULL AUTO_INCREMENT,
-  user_id int(11) DEFAULT NULL,
-  name varchar(255) NOT NULL,
-  email varchar(255) NOT NULL,
-  phone varchar(50) DEFAULT NULL,
-  message text NOT NULL,
-  status varchar(50) DEFAULT 'new',
-  created_at datetime DEFAULT current_timestamp(),
-  PRIMARY KEY (id),
-  KEY user_id (user_id),
-  CONSTRAINT contacts_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
 // Cập nhật trạng thái (đã xem / mới)
 if (isset($_GET['status_id']) && isset($_GET['status'])) {
     $id = (int)$_GET['status_id'];

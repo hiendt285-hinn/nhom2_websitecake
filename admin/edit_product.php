@@ -5,74 +5,85 @@ if (!isset($_SESSION['admin'])) {
     exit();
 }
 
-include 'admin_header.php';
 require_once 'connect.php';
 
-$product_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $product = null;
 $categories = [];
-$error_message = '';
-$success_message = '';
+$errorMessage = '';
+$successMessage = '';
 
-
-$category_result = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
-if ($category_result) {
-    while($row = $category_result->fetch_assoc()) {
+$categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
+if ($categoryResult) {
+    while ($row = $categoryResult->fetch_assoc()) {
         $categories[] = $row;
     }
 }
 
-
-if ($product_id > 0) {
+if ($productId > 0) {
     $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
-    $stmt->bind_param('i', $product_id);
+    $stmt->bind_param('i', $productId);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows > 0) {
         $product = $result->fetch_assoc();
     } else {
-        $error_message = 'Không tìm thấy sản phẩm.';
+        $errorMessage = 'Không tìm thấy sản phẩm.';
     }
     $stmt->close();
 } else {
-    $error_message = 'ID sản phẩm không hợp lệ.';
+    $errorMessage = 'ID sản phẩm không hợp lệ.';
 }
 
-
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product_id > 0) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $productId > 0 && $product) {
     $name = trim($_POST['name'] ?? '');
     $price = floatval($_POST['price'] ?? 0);
-    $category_id = intval($_POST['category_id'] ?? 0);
-    $current_image = $product['image']; // Giữ ảnh cũ
+    $categoryId = intval($_POST['category_id'] ?? 0);
+    $shortDescription = trim($_POST['short_description'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $stock = isset($_POST['stock']) ? intval($_POST['stock']) : 100;
+    $isFeatured = isset($_POST['is_featured']) ? 1 : 0;
+    $isActive = isset($_POST['is_active']) ? 1 : 0;
+    $currentImage = $product['image'];
 
-    if (empty($name) || $price <= 0 || $category_id <= 0) {
-        $error_message = 'Vui lòng điền đầy đủ Tên sản phẩm, Giá và chọn Danh mục.';
+    if (empty($name) || $price <= 0 || $categoryId <= 0) {
+        $errorMessage = 'Vui lòng điền đầy đủ Tên sản phẩm, Giá và chọn Danh mục.';
     } else {
-        $new_image = $current_image;
-        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $target_dir = "../images/";
-            $image_file = basename($_FILES["image"]["name"]);
-            $target_file = $target_dir . $image_file;
-            $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
-
-            if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-                $new_image = $image_file;
+        $newImage = $currentImage;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+            $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $fileName = basename($_FILES['image']['name']);
+            $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            if (in_array($ext, $allowedExt)) {
+                $newFileName = uniqid() . '.' . $ext;
+                $targetDir = realpath(__DIR__ . '/../images') . '/';
+                $targetFile = $targetDir . $newFileName;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+                    $newImage = $newFileName;
+                } else {
+                    $errorMessage = 'Lỗi khi upload ảnh mới.';
+                }
             } else {
-                $error_message = 'Lỗi khi upload ảnh mới.';
+                $errorMessage = 'Chỉ chấp nhận ảnh: jpg, jpeg, png, gif, webp.';
             }
         }
 
-        if (empty($error_message)) {
-            $stmt = $conn->prepare("UPDATE products SET name=?, category_id=?, price=?, image=? WHERE id=?");
-            $stmt->bind_param('sidsi', $name, $category_id, $price, $new_image, $product_id);
-            
+        if (empty($errorMessage)) {
+            $stmt = $conn->prepare("UPDATE products SET name=?, category_id=?, price=?, image=?, short_description=?, description=?, stock=?, is_featured=?, is_active=? WHERE id=?");
+            $stmt->bind_param('sidsissiii', $name, $categoryId, $price, $newImage, $shortDescription, $description, $stock, $isFeatured, $isActive, $productId);
             if ($stmt->execute()) {
-                $success_message = 'Cập nhật sản phẩm thành công!';
-                header("Location: admin_dashboard.php?page=products"); 
-                exit();
+                $product['name'] = $name;
+                $product['category_id'] = $categoryId;
+                $product['price'] = $price;
+                $product['image'] = $newImage;
+                $product['short_description'] = $shortDescription;
+                $product['description'] = $description;
+                $product['stock'] = $stock;
+                $product['is_featured'] = $isFeatured;
+                $product['is_active'] = $isActive;
+                $successMessage = 'Cập nhật sản phẩm thành công!';
             } else {
-                $error_message = 'Lỗi khi cập nhật vào database: ' . $conn->error;
+                $errorMessage = 'Lỗi khi cập nhật: ' . $conn->error;
             }
             $stmt->close();
         }
@@ -82,60 +93,112 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $product_id > 0) {
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8" />
-<title>Chỉnh sửa sản phẩm - Sweet Cake</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chỉnh sửa sản phẩm - Sweet Cake</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="admin_style.css">
 <style>
-    body { font-family: 'Poppins', sans-serif; background: #fffaf0; margin:0; padding:20px;}
-    h1 { color: #8B6F47; }
-    form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    label { display: block; margin-top: 10px; font-weight: 600; color: #8B6F47; }
-    input[type="text"], input[type="number"], select { width: calc(100% - 22px); padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-    input[type="submit"] { background-color: #8B6F47; color: white; padding: 12px 20px; margin-top: 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-    input[type="submit"]:hover { background-color: #A08C6D; }
-    .message { padding: 10px; margin-bottom: 15px; border-radius: 4px; }
-    .success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
-    .error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+    .product-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .product-form-grid { grid-template-columns: 1fr; } }
+    .product-form-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ecf0f1; }
+    .image-current-wrap { margin-top: 8px; }
+    .image-current-wrap img { max-width: 200px; max-height: 180px; object-fit: contain; border-radius: 8px; border: 1px solid #ddd; }
+    .image-preview-wrap { margin-top: 8px; }
+    .image-preview-wrap img { max-width: 200px; max-height: 180px; object-fit: contain; border-radius: 8px; border: 1px solid #ddd; }
+    .form-row-2 { grid-column: 1 / -1; }
+    .admin-form-group input[type="checkbox"] { width: auto; margin-right: 8px; }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; font-weight: 500; cursor: pointer; }
+    body { background: #f5f5f5; padding: 20px 30px; }
 </style>
 </head>
 <body>
-<h1>Chỉnh sửa sản phẩm: <?php echo htmlspecialchars($product['name'] ?? 'Không tìm thấy'); ?></h1>
+<?php include 'admin_header.php'; ?>
+<div class="admin-content" style="max-width: 900px; margin: 0 auto; padding: 20px 24px;">
+    <div class="admin-page-header">
+        <h1 class="admin-page-title"><i class="fas fa-edit"></i> Chỉnh sửa sản phẩm</h1>
+        <a href="admin_dashboard.php?page=products" class="admin-btn admin-btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
+    </div>
 
-<?php if ($error_message): ?>
-    <div class="message error"><?php echo $error_message; ?></div>
-<?php endif; ?>
-<?php if ($success_message): ?>
-    <div class="message success"><?php echo $success_message; ?></div>
-<?php endif; ?>
+    <?php if ($errorMessage): ?>
+        <div class="admin-message error"><?php echo htmlspecialchars($errorMessage); ?></div>
+    <?php endif; ?>
+    <?php if ($successMessage): ?>
+        <div class="admin-message success"><?php echo htmlspecialchars($successMessage); ?></div>
+    <?php endif; ?>
 
+    <?php if ($product): ?>
+    <div class="admin-card">
+        <form method="post" action="edit_product.php?id=<?php echo $productId; ?>" enctype="multipart/form-data" class="admin-add-form">
+            <div class="product-form-grid">
+                <div class="admin-form-group">
+                    <label for="name">Tên sản phẩm <span style="color:#c62828;">*</span></label>
+                    <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required placeholder="Nhập tên sản phẩm">
+                </div>
+                <div class="admin-form-group">
+                    <label for="category_id">Danh mục <span style="color:#c62828;">*</span></label>
+                    <select id="category_id" name="category_id" required>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo (int)$cat['id']; ?>" <?php echo ((int)$cat['id'] === (int)($product['category_id'] ?? 0)) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat['name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="admin-form-group">
+                    <label for="price">Giá (VNĐ) <span style="color:#c62828;">*</span></label>
+                    <input type="number" id="price" name="price" step="1000" min="0" value="<?php echo (int)$product['price']; ?>" required>
+                </div>
+                <div class="admin-form-group">
+                    <label for="stock">Tồn kho</label>
+                    <input type="number" id="stock" name="stock" min="0" value="<?php echo (int)($product['stock'] ?? 100); ?>">
+                </div>
+                <div class="admin-form-group form-row-2">
+                    <label for="short_description">Mô tả ngắn</label>
+                    <input type="text" id="short_description" name="short_description" value="<?php echo htmlspecialchars($product['short_description'] ?? ''); ?>" placeholder="Mô tả ngắn hiển thị trên danh sách">
+                </div>
+                <div class="admin-form-group form-row-2">
+                    <label for="description">Mô tả chi tiết</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Mô tả chi tiết sản phẩm"><?php echo htmlspecialchars($product['description'] ?? ''); ?></textarea>
+                </div>
+                <div class="admin-form-group">
+                    <label>Hình ảnh hiện tại</label>
+                    <div class="image-current-wrap">
+                        <img src="../images/<?php echo htmlspecialchars($product['image']); ?>" alt="Ảnh sản phẩm" id="currentImage">
+                    </div>
+                    <label for="image" style="margin-top:12px;display:block;">Thay ảnh (tùy chọn)</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                    <div class="image-preview-wrap" id="imagePreviewWrap" style="display:none;"><img id="imagePreview" src="" alt="Preview"></div>
+                </div>
+                <div class="admin-form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="is_featured" value="1" <?php echo !empty($product['is_featured']) ? 'checked' : ''; ?>>
+                        Sản phẩm nổi bật
+                    </label>
+                    <label class="checkbox-label" style="margin-top: 10px;">
+                        <input type="checkbox" name="is_active" value="1" <?php echo !isset($product['is_active']) || $product['is_active'] ? 'checked' : ''; ?>>
+                        Hiển thị (đang bán)
+                    </label>
+                </div>
+            </div>
+            <div class="product-form-actions">
+                <button type="submit" class="admin-btn admin-btn-primary"><i class="fas fa-save"></i> Cập nhật sản phẩm</button>
+                <a href="admin_dashboard.php?page=products" class="admin-btn admin-btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+    <?php endif; ?>
+</div>
 <?php if ($product): ?>
-<form method="POST" action="edit_product.php?id=<?php echo $product_id; ?>" enctype="multipart/form-data">
-    
-    <label for="name">Tên sản phẩm:</label>
-    <input type="text" id="name" name="name" value="<?php echo htmlspecialchars($product['name']); ?>" required>
-
-    <label for="category_id">Danh mục:</label>
-    <select id="category_id" name="category_id" required>
-        <?php foreach ($categories as $cat): ?>
-            <option value="<?php echo $cat['id']; ?>" <?php echo ($cat['id'] == $product['category_id']) ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($cat['name']); ?>
-            </option>
-        <?php endforeach; ?>
-    </select>
-
-    <label for="price">Giá (₫):</label>
-    <input type="number" id="price" name="price" step="1000" min="0" value="<?php echo $product['price']; ?>" required>
-
-    <label>Hình ảnh hiện tại:</label><br>
-    <img src="../images/<?php echo htmlspecialchars($product['image']); ?>" alt="Hình ảnh sản phẩm" style="height: 100px; margin-top: 10px;">
-    
-    <label for="image">Thay đổi Hình ảnh (Tùy chọn):</label>
-    <input type="file" id="image" name="image" accept="image/*">
-
-    <input type="submit" value="Cập nhật sản phẩm">
-</form>
+<script>
+document.getElementById('image').addEventListener('change', function(e) {
+    var wrap = document.getElementById('imagePreviewWrap');
+    var img = document.getElementById('imagePreview');
+    if (this.files && this.files[0]) {
+        var r = new FileReader();
+        r.onload = function() { img.src = r.result; wrap.style.display = 'block'; };
+        r.readAsDataURL(this.files[0]);
+    } else { wrap.style.display = 'none'; }
+});
+</script>
 <?php endif; ?>
-
-<p><a href="manage_products.php">Quay lại Quản lý sản phẩm</a></p>
-
 </body>
 </html>

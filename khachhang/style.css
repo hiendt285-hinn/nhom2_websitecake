@@ -1072,7 +1072,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   line-height: 1.5;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   text-decoration: none;
   transition: color 0.3s;
 }

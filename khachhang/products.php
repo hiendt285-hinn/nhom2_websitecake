@@ -8,6 +8,17 @@ include 'connect.php'; // Kết nối DB
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $category_id = isset($_GET['category']) ? (int)$_GET['category'] : 0;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$sort = isset($_GET['sort']) ? $_GET['sort'] : '';
+if (!in_array($sort, ['price_asc', 'price_desc'], true)) {
+    $sort = '';
+}
+$orderBy = 'p.id DESC';
+if ($sort === 'price_asc') {
+    $orderBy = 'p.price ASC, p.id DESC';
+} elseif ($sort === 'price_desc') {
+    $orderBy = 'p.price DESC, p.id DESC';
+}
+
 $limit = 12; // Số sản phẩm/trang
 $offset = ($page - 1) * $limit;
 
@@ -45,7 +56,7 @@ $sql = "SELECT p.id, p.name, p.price, p.image, c.name as category_name
         FROM products p 
         LEFT JOIN categories c ON p.category_id = c.id 
         $where_clause 
-        ORDER BY p.id DESC 
+        ORDER BY $orderBy 
         LIMIT ? OFFSET ?";
 $stmt = $conn->prepare($sql);
 $params[] = $limit;
@@ -62,6 +73,11 @@ $categories = [];
 while ($row = $cat_result->fetch_assoc()) {
     $categories[] = $row;
 }
+
+// Tham số GET cơ bản (giữ search, sort khi chuyển danh mục)
+$baseQuery = [];
+if ($search !== '') $baseQuery['search'] = $search;
+if ($sort !== '') $baseQuery['sort'] = $sort;
 ?>
 
 <!DOCTYPE html>
@@ -190,6 +206,10 @@ while ($row = $cat_result->fetch_assoc()) {
 
         .filter-group.filter-category {
             width: 200px;
+        }
+
+        .filter-group.filter-sort {
+            width: 180px;
         }
 
         .filter-group label {
@@ -436,7 +456,8 @@ while ($row = $cat_result->fetch_assoc()) {
                 align-items: stretch;
             }
             .filter-group.filter-search,
-            .filter-group.filter-category {
+            .filter-group.filter-category,
+            .filter-group.filter-sort {
                 min-width: 100%;
                 width: 100%;
             }
@@ -469,11 +490,11 @@ while ($row = $cat_result->fetch_assoc()) {
             <h3>Danh mục bánh</h3>
             <ul class="sidebar-categories">
                 <li>
-                    <a href="products.php<?php echo $search ? '?search=' . urlencode($search) : ''; ?>" class="<?php echo $category_id === 0 ? 'active' : ''; ?>">Tất cả</a>
+                    <a href="products.php<?php echo $baseQuery ? '?' . http_build_query($baseQuery) : ''; ?>" class="<?php echo $category_id === 0 ? 'active' : ''; ?>">Tất cả</a>
                 </li>
                 <?php foreach ($categories as $cat): ?>
                 <li>
-                    <a href="products.php?category=<?php echo (int)$cat['id']; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>" class="<?php echo $category_id == $cat['id'] ? 'active' : ''; ?>">
+                    <a href="products.php?<?php echo http_build_query(array_merge($baseQuery, ['category' => (int)$cat['id']])); ?>" class="<?php echo $category_id == $cat['id'] ? 'active' : ''; ?>">
                         <?php echo htmlspecialchars($cat['name']); ?>
                     </a>
                 </li>
@@ -497,6 +518,14 @@ while ($row = $cat_result->fetch_assoc()) {
                                 <?php echo htmlspecialchars($cat['name']); ?>
                             </option>
                         <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="filter-group filter-sort">
+                    <label>Sắp xếp</label>
+                    <select name="sort">
+                        <option value="" <?php echo $sort === '' ? 'selected' : ''; ?>>Mặc định</option>
+                        <option value="price_asc" <?php echo $sort === 'price_asc' ? 'selected' : ''; ?>>Giá tăng dần</option>
+                        <option value="price_desc" <?php echo $sort === 'price_desc' ? 'selected' : ''; ?>>Giá giảm dần</option>
                     </select>
                 </div>
                 <button type="submit" class="btn-search">

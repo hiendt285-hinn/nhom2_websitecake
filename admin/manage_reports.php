@@ -4,8 +4,8 @@ ob_start();
 require_once 'connect.php';
 
 // Lấy thống kê
-// Tổng doanh thu
-$revenue_query = "SELECT SUM(total_amount) as total_revenue FROM orders WHERE status = 'completed'";
+// Doanh thu: đơn đã giao hoặc hoàn thành (delivered / completed)
+$revenue_query = "SELECT SUM(total_amount) as total_revenue FROM orders WHERE status IN ('delivered', 'completed')";
 $revenue_result = $conn->query($revenue_query);
 $total_revenue = $revenue_result->fetch_assoc()['total_revenue'] ?? 0;
 
@@ -31,7 +31,7 @@ $monthly_revenue_query = "
         SUM(total_amount) as revenue,
         COUNT(*) as order_count
     FROM orders 
-    WHERE status = 'completed' 
+    WHERE status IN ('delivered', 'completed') 
         AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
     GROUP BY DATE_FORMAT(created_at, '%Y-%m')
     ORDER BY DATE_FORMAT(created_at, '%Y-%m') ASC
@@ -45,7 +45,7 @@ $daily_revenue_query = "
         SUM(total_amount) as revenue,
         COUNT(*) as order_count
     FROM orders 
-    WHERE status = 'completed' 
+    WHERE status IN ('delivered', 'completed') 
         AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
     GROUP BY DATE(created_at)
     ORDER BY day ASC
@@ -62,7 +62,7 @@ $top_products_query = "
     FROM order_items oi
     JOIN products p ON oi.product_id = p.id
     JOIN orders o ON oi.order_id = o.id
-    WHERE o.status = 'completed'
+    WHERE o.status IN ('delivered', 'completed')
     GROUP BY p.id
     ORDER BY total_sold DESC
     LIMIT 5
@@ -90,11 +90,15 @@ $category_revenue_query = "
     JOIN products p ON oi.product_id = p.id
     JOIN categories c ON p.category_id = c.id
     JOIN orders o ON oi.order_id = o.id
-    WHERE o.status = 'completed'
+    WHERE o.status IN ('delivered', 'completed')
     GROUP BY c.id
     ORDER BY revenue DESC
 ";
 $category_revenue = $conn->query($category_revenue_query);
+
+// Khách hàng mới (đăng ký trong 30 ngày gần nhất)
+$new_customers_result = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE role = 'customer' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+$new_customers_count = $new_customers_result && $row = $new_customers_result->fetch_assoc() ? (int)$row['cnt'] : 0;
 
 // Danh sách khách hàng đăng ký (mới nhất)
 $registered_customers_query = "SELECT id, username, email, full_name, phone, created_at FROM users WHERE role = 'customer' ORDER BY created_at DESC LIMIT 15";
@@ -106,31 +110,41 @@ $top_products_chart_query = "
     FROM order_items oi
     JOIN products p ON oi.product_id = p.id
     JOIN orders o ON oi.order_id = o.id
-    WHERE o.status = 'completed'
+    WHERE o.status IN ('delivered', 'completed')
     GROUP BY p.id
     ORDER BY total_sold DESC
     LIMIT 10
 ";
 $top_products_chart = $conn->query($top_products_chart_query);
 
-// Danh sách đơn hàng chi tiết trong ngày (lọc theo ngày)
-$order_date_param = isset($_GET['order_date']) ? trim($_GET['order_date']) : '';
-if ($order_date_param && preg_match('/^\d{4}-\d{2}-\d{2}$/', $order_date_param)) {
-    $order_filter_date = $order_date_param;
+// Danh sách đơn hàng chi tiết đã đặt (lọc theo khoảng thời gian)
+$orderDateFrom = isset($_GET['order_date_from']) ? trim($_GET['order_date_from']) : '';
+$orderDateTo   = isset($_GET['order_date_to'])   ? trim($_GET['order_date_to'])   : '';
+$dateValid = function($d) { return preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
+if ($orderDateFrom && $dateValid($orderDateFrom)) {
+    $order_filter_from = $orderDateFrom;
 } else {
-    $order_filter_date = date('Y-m-d');
+    $order_filter_from = date('Y-m-d', strtotime('-30 days'));
+}
+if ($orderDateTo && $dateValid($orderDateTo)) {
+    $order_filter_to = $orderDateTo;
+} else {
+    $order_filter_to = date('Y-m-d');
+}
+if (strtotime($order_filter_from) > strtotime($order_filter_to)) {
+    $order_filter_from = $order_filter_to;
 }
 $today_orders_stmt = $conn->prepare("
     SELECT o.id, o.full_name, o.phone, o.address, o.total_amount, o.status, o.created_at, o.payment_method
     FROM orders o
-    WHERE DATE(o.created_at) = ?
+    WHERE DATE(o.created_at) >= ? AND DATE(o.created_at) <= ?
     ORDER BY o.created_at DESC
 ");
-$today_orders_stmt->bind_param('s', $order_filter_date);
+$today_orders_stmt->bind_param('ss', $order_filter_from, $order_filter_to);
 $today_orders_stmt->execute();
 $today_orders = $today_orders_stmt->get_result();
 $today_orders_stmt->close();
-$today_date_display = date('d/m/Y', strtotime($order_filter_date));
+$order_range_display = date('d/m/Y', strtotime($order_filter_from)) . ' – ' . date('d/m/Y', strtotime($order_filter_to));
 ?>
 
 <style>
@@ -383,25 +397,25 @@ $today_date_display = date('d/m/Y', strtotime($order_filter_date));
 </style>
 
 <div class="report-header">
-    <h2>Báo cáo & Thống kê</h2>
-    <p>Tổng quan hoạt động kinh doanh của cửa hàng</p>
+    <h2><i class="fas fa-chart-line"></i> Báo cáo & Thống kê</h2>
+    <p>Doanh thu theo ngày/tháng · Sản phẩm bán chạy · Số lượng đơn hàng · Khách hàng mới</p>
 </div>
 
-<!-- Stats Cards -->
+<!-- Stats Cards: Doanh thu, Đơn hàng, Khách hàng, Khách hàng mới, Sản phẩm -->
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-info">
-            <h3>Tổng doanh thu</h3>
+            <h3>Doanh thu (đã giao)</h3>
             <div class="stat-number"><?php echo number_format($total_revenue, 0, ',', '.'); ?>đ</div>
         </div>
         <div class="stat-icon revenue-icon">
-            <i class="fas fa-chart-pie"></i>
+            <i class="fas fa-coins"></i>
         </div>
     </div>
 
     <div class="stat-card">
         <div class="stat-info">
-            <h3>Tổng đơn hàng</h3>
+            <h3>Số lượng đơn hàng</h3>
             <div class="stat-number"><?php echo number_format($total_orders); ?></div>
         </div>
         <div class="stat-icon orders-icon">
@@ -411,10 +425,20 @@ $today_date_display = date('d/m/Y', strtotime($order_filter_date));
 
     <div class="stat-card">
         <div class="stat-info">
-            <h3>Khách hàng</h3>
-            <div class="stat-number"><?php echo number_format($total_customers); ?></div>
+            <h3>Khách hàng mới (30 ngày)</h3>
+            <div class="stat-number"><?php echo number_format($new_customers_count); ?></div>
         </div>
         <div class="stat-icon customers-icon">
+            <i class="fas fa-user-plus"></i>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-info">
+            <h3>Tổng khách hàng</h3>
+            <div class="stat-number"><?php echo number_format($total_customers); ?></div>
+        </div>
+        <div class="stat-icon products-icon">
             <i class="fas fa-users"></i>
         </div>
     </div>
@@ -434,7 +458,7 @@ $today_date_display = date('d/m/Y', strtotime($order_filter_date));
 <div class="charts-row">
     <div class="chart-container">
         <div class="chart-header">
-            <h3>Biểu đồ doanh thu</h3>
+            <h3>Doanh thu theo ngày / tháng</h3>
             <div style="display:flex; align-items:center; gap:10px;">
                 <select id="revenueChartRange">
                     <option value="day">Doanh thu theo ngày</option>
@@ -553,19 +577,21 @@ $today_date_display = date('d/m/Y', strtotime($order_filter_date));
     </div>
 </div>
 
-<!-- Danh sách đơn hàng chi tiết trong ngày -->
+<!-- Danh sách đơn hàng chi tiết đã đặt (lọc theo khoảng thời gian) -->
 <div class="report-section">
     <div class="report-table report-table-full">
         <h3>
-            <i class="fas fa-list-alt"></i> Danh sách đơn hàng chi tiết trong ngày (<?php echo $today_date_display; ?>)
+            <i class="fas fa-list-alt"></i> Danh sách đơn hàng chi tiết đã đặt (<?php echo $order_range_display; ?>)
             <a href="?page=orders" class="view-all">Xem tất cả đơn hàng <i class="fas fa-arrow-right"></i></a>
         </h3>
         <form method="get" class="report-date-filter">
             <input type="hidden" name="page" value="reports">
-            <label for="order_date">Lọc theo ngày:</label>
-            <input type="date" id="order_date" name="order_date" value="<?php echo htmlspecialchars($order_filter_date); ?>">
-            <button type="submit" class="admin-btn admin-btn-primary admin-btn-sm"><i class="fas fa-filter"></i> Lọc</button>
-            <a href="?page=reports" class="admin-btn admin-btn-secondary admin-btn-sm" style="text-decoration:none; margin-left:6px;">Hôm nay</a>
+            <label for="order_date_from">Từ ngày:</label>
+            <input type="date" id="order_date_from" name="order_date_from" value="<?php echo htmlspecialchars($order_filter_from); ?>">
+            <label for="order_date_to" style="margin-left:12px;">Đến ngày:</label>
+            <input type="date" id="order_date_to" name="order_date_to" value="<?php echo htmlspecialchars($order_filter_to); ?>">
+            <button type="submit" class="admin-btn admin-btn-primary admin-btn-sm" style="margin-left:8px;"><i class="fas fa-filter"></i> Lọc</button>
+            <a href="?page=reports" class="admin-btn admin-btn-secondary admin-btn-sm" style="text-decoration:none; margin-left:6px;">30 ngày gần nhất</a>
         </form>
         <table>
             <thead>
@@ -604,7 +630,7 @@ $today_date_display = date('d/m/Y', strtotime($order_filter_date));
                 <?php endwhile; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d;">Không có đơn hàng nào trong ngày hôm nay.</td>
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #7f8c8d;">Không có đơn hàng nào trong khoảng thời gian đã chọn.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -616,7 +642,7 @@ $today_date_display = date('d/m/Y', strtotime($order_filter_date));
 <div class="report-section">
     <div class="report-table report-table-full">
         <h3>
-            Danh sách khách hàng đăng ký
+            Khách hàng mới (đăng ký gần đây)
             <a href="?page=customers" class="view-all">Xem tất cả <i class="fas fa-arrow-right"></i></a>
         </h3>
         <table>

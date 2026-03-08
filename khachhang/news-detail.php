@@ -43,12 +43,15 @@ if (!$item) {
         .news-detail-content p { margin-bottom: 16px; }
         .back-link { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; color: var(--main-brown, #5D4037); font-weight: 600; text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
+        .back-link-top { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; color: var(--main-brown, #5D4037); font-weight: 600; text-decoration: none; font-size: 14px; }
+        .back-link-top:hover { text-decoration: underline; color: var(--brown-light, #8B7355); }
     </style>
 </head>
 <body>
 <?php include 'header.php'; ?>
 
 <div class="news-detail-page">
+    <a href="news.php" class="back-link-top"><i class="fas fa-arrow-left"></i> Quay lại tin tức</a>
     <article>
         <header class="news-detail-header">
             <h1 class="news-detail-title"><?php echo htmlspecialchars($item['title']); ?></h1>

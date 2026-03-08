@@ -11,6 +11,24 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Bắt buộc đăng nhập để thêm sản phẩm vào giỏ
+if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
+    $returnUrl = isset($_POST['return_url']) ? $_POST['return_url'] : '';
+    if ($returnUrl === '' && isset($_SERVER['HTTP_REFERER'])) {
+        $returnUrl = $_SERVER['HTTP_REFERER'];
+    }
+    $loginUrl = 'login.php';
+    if ($returnUrl !== '') {
+        $loginUrl .= '?return=' . urlencode($returnUrl);
+    }
+    echo json_encode([
+        'success' => false,
+        'message' => 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.',
+        'login_url' => $loginUrl
+    ]);
+    exit;
+}
+
 $productId = isset($_POST['product_id']) ? (int)$_POST['product_id'] : 0;
 $quantity = isset($_POST['quantity']) ? max(1, (int)$_POST['quantity']) : 1;
 $size = trim($_POST['size'] ?? ''); 

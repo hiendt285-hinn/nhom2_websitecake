@@ -28,8 +28,8 @@ if (!$product) {
     exit;
 }
 
-// 3b. Lấy tổng đã bán (đơn hoàn thành)
-$sold_stmt = $conn->prepare("SELECT COALESCE(SUM(oi.quantity), 0) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE oi.product_id = ? AND o.status = 'completed'");
+// 3b. Lấy tổng đã bán (đơn đã giao / hoàn thành)
+$sold_stmt = $conn->prepare("SELECT COALESCE(SUM(oi.quantity), 0) AS total_sold FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE oi.product_id = ? AND o.status IN ('completed', 'delivered')");
 $total_sold = 0;
 if ($sold_stmt) {
     $sold_stmt->bind_param("i", $product_id);
@@ -51,6 +51,9 @@ $message = '';
 if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
     $message = '<div class="alert-success" style="margin-bottom: 20px; padding: 15px; background: #d4edda; color: #155724; border-radius: 5px;">Sản phẩm đã được thêm vào giỏ hàng thành công!</div>';
 }
+
+$isLoggedIn = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+$loginReturnUrl = 'product-detail.php?id=' . $product_id;
 ?>
 
 <!DOCTYPE html>
@@ -67,6 +70,7 @@ if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
 <?php include 'header.php'; ?>
 
 <div class="container product-detail-page">
+    <a href="products.php" class="back-link-top"><i class="fas fa-arrow-left"></i> Quay lại sản phẩm</a>
     <?php echo $message; ?>
 
     <div class="product-detail-wrapper">
@@ -124,12 +128,18 @@ if (isset($_GET['added']) && (int)$_GET['added'] === 1) {
                 </div>
 
                 <div class="action-buttons">
+                    <?php if ($isLoggedIn): ?>
                     <button type="submit" class="btn-add-to-cart" name="action" value="cart">
                         <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
                     </button>
                     <button type="button" class="btn-checkout" id="btn-order-now" title="Thêm vào giỏ và chuyển đến thanh toán">
                         <i class="fas fa-credit-card"></i> Đặt hàng
                     </button>
+                    <?php else: ?>
+                    <a href="login.php?return=<?php echo urlencode($loginReturnUrl); ?>" class="btn-add-to-cart" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+                        <i class="fas fa-lock"></i> Đăng nhập để thêm vào giỏ hàng
+                    </a>
+                    <?php endif; ?>
                 </div>
             </form>
             
@@ -158,7 +168,11 @@ document.getElementById('add-to-cart-form')?.addEventListener('submit', function
         if (data.success) {
             window.location.href = 'product-detail.php?id=' + <?php echo $product_id; ?> + '&added=1';
         } else {
-            alert('Lỗi: ' + (data.message || 'Không thể thêm sản phẩm vào giỏ hàng.'));
+            if (data.login_url) {
+                window.location.href = data.login_url;
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể thêm sản phẩm vào giỏ hàng.'));
+            }
         }
     })
     .catch(error => {
@@ -182,7 +196,11 @@ document.getElementById('btn-order-now')?.addEventListener('click', function() {
         if (data.success) {
             window.location.href = 'checkout.php';
         } else {
-            alert('Lỗi: ' + (data.message || 'Không thể thêm sản phẩm vào giỏ hàng.'));
+            if (data.login_url) {
+                window.location.href = data.login_url;
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể thêm sản phẩm vào giỏ hàng.'));
+            }
         }
     })
     .catch(error => {
@@ -197,6 +215,21 @@ document.getElementById('btn-order-now')?.addEventListener('click', function() {
     padding: 40px 20px;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+.back-link-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: var(--main-brown, #5D4037);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 14px;
+}
+.back-link-top:hover {
+    text-decoration: underline;
+    color: var(--brown-light, #8B7355);
 }
 
 .product-detail-wrapper {

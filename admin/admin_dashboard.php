@@ -92,7 +92,6 @@
                 <li><a href="admin_dashboard.php?page=products"><i class="fas fa-cake-candles"></i> Quản lý sản phẩm</a></li>
                 <li><a href="admin_dashboard.php?page=customers"><i class="fas fa-users"></i> Quản lý khách hàng</a></li>
                 <li><a href="admin_dashboard.php?page=orders"><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</a></li>
-                <li><a href="admin_dashboard.php?page=auto_orders"><i class="fas fa-sync-alt"></i> Tự động cập nhật đơn</a></li>
                 <li><a href="admin_dashboard.php?page=shipping"><i class="fas fa-truck"></i> Quản lý giao hàng</a></li>
                 <li><a href="admin_dashboard.php?page=contact"><i class="fas fa-envelope"></i> Quản lý liên hệ</a></li>
                 <li><a href="admin_dashboard.php?page=news"><i class="fas fa-newspaper"></i> Quản lý tin tức</a></li>
@@ -123,8 +122,8 @@
                         case 'orders':
                         include 'manage_orders.php';
                         break;
-                        case 'auto_orders':
-                        include 'auto_update_orders.php';
+                        case 'order_detail':
+                        include 'order_detail.php';
                         break;
                         case 'shipping':
                         include 'manage_shipping.php';

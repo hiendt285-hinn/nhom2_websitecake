@@ -33,11 +33,11 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
         </div>
 
         <div class="topbar-right d-flex flex-wrap align-items-center gap-3">
-            <?php if (isset($_SESSION['user'])): ?>
-                <span class="topbar-link"><i class="bi bi-person-check"></i>
-                    Xin chào, <?php echo $_SESSION['user']['username']; ?>
-                </span>
-                <a href="logout.php" class="topbar-link">Đăng xuất</a>
+            <?php if (!empty($_SESSION['user_id']) || !empty($_SESSION['username'])): ?>
+                <a href="account.php" class="topbar-link"><i class="bi bi-person-check"></i>
+                    Xin chào, <?php echo htmlspecialchars($_SESSION['username'] ?? 'Khách'); ?>
+                </a>
+                <a href="logout.php" class="topbar-link"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
             <?php else: ?>
                 <a href="account.php" class="topbar-link"><i class="bi bi-person"></i> Tài khoản</a>
                 <a href="login.php" class="topbar-link">Đăng nhập</a>

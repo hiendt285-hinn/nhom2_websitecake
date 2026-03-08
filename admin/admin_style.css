@@ -30,7 +30,7 @@ body {
 }
 
 .admin-page-title {
-    color: #2c3e50;
+    color: #9a7b5a;
     font-size: 22px;
     margin: 0;
     font-weight: 700;
@@ -51,7 +51,7 @@ body {
 }
 
 .admin-card h2 {
-    color: #2c3e50;
+    color: #9a7b5a;
     font-size: 17px;
     margin-bottom: 16px;
     padding-bottom: 10px;
@@ -95,7 +95,7 @@ body {
     background: #f5f6f7;
 }
 
-/* Nút - giống btn */
+/* Nút - giống btn - kích thước đồng nhất */
 .admin-btn {
     padding: 10px 18px;
     border: none;
@@ -106,8 +106,10 @@ body {
     transition: all 0.2s;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     text-decoration: none;
+    min-width: 110px;
 }
 
 .admin-btn-primary {
@@ -229,7 +231,7 @@ a.admin-link:hover {
     border-left: 4px solid #9a7b5a;
 }
 
-/* ========== Edit Modal (dùng chung cho Customers, Sizes, Flavors, Product type) ========== */
+
 .edit-modal,
 .admin-modal-overlay {
     position: fixed;
@@ -269,7 +271,7 @@ a.admin-link:hover {
 .admin-modal-title {
     font-size: 18px;
     font-weight: 700;
-    color: #2c3e50;
+    color: #9a7b5a;
     margin: 0;
 }
 
@@ -378,6 +380,12 @@ a.admin-link:hover {
 .admin-btn-sm {
     padding: 6px 12px;
     font-size: 13px;
+    min-width: 90px;
+}
+
+.admin-btn-fixed {
+    min-width: 90px;
+    justify-content: center;
 }
 
 .admin-btn-danger {
