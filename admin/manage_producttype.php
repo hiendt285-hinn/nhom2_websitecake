@@ -85,6 +85,8 @@ $hasCategories = $result && $result->num_rows > 0;
         align-items: center;
         gap: 10px;
     }
+    .header-actions { margin-top: 14px; }
+    .add-modal-trigger { min-width: 180px; }
 
     .admin-page-title i {
         font-size: 28px;
@@ -440,6 +442,7 @@ $hasCategories = $result && $result->num_rows > 0;
         justify-content: flex-end;
         margin-top: 25px;
     }
+    .add-category-modal .admin-modal-box { max-width: 760px; width: 95%; }
 
     /* Empty State */
     .empty-state {
@@ -491,6 +494,11 @@ $hasCategories = $result && $result->num_rows > 0;
             <i class="fas fa-list"></i>
             Quản lý danh mục sản phẩm
         </h1>
+        <div class="header-actions">
+            <button type="button" class="admin-btn admin-btn-primary add-modal-trigger" onclick="openAddCategoryModal()">
+                <i class="fas fa-plus-circle"></i> Thêm danh mục mới
+            </button>
+        </div>
     </div>
 
     <!-- Messages -->
@@ -514,64 +522,6 @@ $hasCategories = $result && $result->num_rows > 0;
             Cập nhật danh mục thành công!
         </div>
     <?php endif; ?>
-
-    <!-- Add Category Card -->
-    <div class="admin-card">
-        <h2>
-            <i class="fas fa-plus-circle"></i>
-            Thêm danh mục mới
-        </h2>
-        
-        <form method="post">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="add_name">
-                        <i class="fas fa-tag"></i>
-                        Tên danh mục <span class="required">*</span>
-                    </label>
-                    <input type="text" 
-                           id="add_name" 
-                           name="name" 
-                           class="form-control" 
-                           placeholder="VD: Bánh kem sinh nhật" 
-                           required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="add_slug">
-                        <i class="fas fa-link"></i>
-                        Slug
-                    </label>
-                    <input type="text" 
-                           id="add_slug" 
-                           name="slug" 
-                           class="form-control" 
-                           placeholder="banh-kem-sinh-nhat">
-                    <div class="info-text">
-                        <i class="fas fa-info-circle"></i>
-                        Slug tự động tạo từ tên nếu để trống
-                    </div>
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="add_description">
-                        <i class="fas fa-align-left"></i>
-                        Mô tả
-                    </label>
-                    <textarea id="add_description" 
-                              name="description" 
-                              class="form-control" 
-                              placeholder="Mô tả chi tiết về danh mục..."
-                              rows="3"></textarea>
-                </div>
-            </div>
-            
-            <button type="submit" name="add_category" class="admin-btn admin-btn-primary">
-                <i class="fas fa-save"></i>
-                Thêm danh mục
-            </button>
-        </form>
-    </div>
 
     <!-- Categories List Card -->
     <div class="admin-card">
@@ -646,12 +596,44 @@ $hasCategories = $result && $result->num_rows > 0;
             <div class="empty-state">
                 <i class="fas fa-folder-open"></i>
                 <p>Chưa có danh mục nào.</p>
-                <button class="admin-btn admin-btn-primary" onclick="document.getElementById('add_name').focus()">
+                <button class="admin-btn admin-btn-primary" onclick="openAddCategoryModal()">
                     <i class="fas fa-plus-circle"></i>
                     Thêm danh mục đầu tiên
                 </button>
             </div>
         <?php endif; ?>
+    </div>
+
+    <div id="addCategoryModal" class="edit-modal add-category-modal" style="display:none;">
+        <div class="admin-modal-box">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title"><i class="fas fa-plus-circle"></i> Thêm danh mục mới</h2>
+                <button type="button" class="admin-modal-close" onclick="closeAddCategoryModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form method="post">
+                <div class="admin-modal-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="add_name"><i class="fas fa-tag"></i>Tên danh mục <span class="required">*</span></label>
+                            <input type="text" id="add_name" name="name" class="form-control" placeholder="VD: Bánh kem sinh nhật" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="add_slug"><i class="fas fa-link"></i>Slug</label>
+                            <input type="text" id="add_slug" name="slug" class="form-control" placeholder="banh-kem-sinh-nhat">
+                            <div class="info-text"><i class="fas fa-info-circle"></i>Slug tự động tạo từ tên nếu để trống</div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="add_description"><i class="fas fa-align-left"></i>Mô tả</label>
+                            <textarea id="add_description" name="description" class="form-control" placeholder="Mô tả chi tiết về danh mục..." rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="admin-modal-actions">
+                        <button type="button" class="admin-btn admin-btn-secondary" onclick="closeAddCategoryModal()"><i class="fas fa-times"></i> Hủy</button>
+                        <button type="submit" name="add_category" class="admin-btn admin-btn-primary"><i class="fas fa-save"></i> Thêm danh mục</button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Edit Modal -->
@@ -745,10 +727,20 @@ $hasCategories = $result && $result->num_rows > 0;
     function closeEditCategory() { 
         modal.style.display = 'none'; 
     }
+    function openAddCategoryModal() {
+        var addModal = document.getElementById('addCategoryModal');
+        if (addModal) addModal.style.display = 'flex';
+    }
+    function closeAddCategoryModal() {
+        var addModal = document.getElementById('addCategoryModal');
+        if (addModal) addModal.style.display = 'none';
+    }
     
-    window.onclick = function(e) { 
-        if (e.target === modal) closeEditCategory(); 
-    };
+    window.addEventListener('click', function(e) {
+        var addModal = document.getElementById('addCategoryModal');
+        if (e.target === modal) closeEditCategory();
+        if (addModal && e.target === addModal) closeAddCategoryModal();
+    });
     
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'flex') {
@@ -781,5 +773,7 @@ $hasCategories = $result && $result->num_rows > 0;
     
     window.openEditCategory = openEditCategory;
     window.closeEditCategory = closeEditCategory;
+    window.openAddCategoryModal = openAddCategoryModal;
+    window.closeAddCategoryModal = closeAddCategoryModal;
 })();
 </script>

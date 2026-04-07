@@ -90,21 +90,10 @@ $result = $conn->query($sql);
 <div class="admin-content">
     <div class="admin-page-header">
         <h1 class="admin-page-title"><i class="fas fa-expand-arrows-alt"></i> Quản lý <?php echo $attribute_name; ?></h1>
+        <button type="button" class="admin-btn admin-btn-primary" onclick="openAddModal()"><i class="fas fa-plus-circle"></i> Thêm <?php echo $attribute_name; ?></button>
     </div>
     <?php if ($message): ?><div class="admin-message admin-message-success"><?php echo htmlspecialchars($message); ?></div><?php endif; ?>
     <?php if ($error): ?><div class="admin-message admin-message-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-    <div class="admin-card">
-        <h2><i class="fas fa-plus-circle"></i> Thêm <?php echo $attribute_name; ?> mới</h2>
-        <form method="POST" class="admin-add-form">
-            <div class="admin-form-row">
-                <div class="admin-form-group">
-                    <label for="new_name">Tên <?php echo $attribute_name; ?></label>
-                    <input type="text" id="new_name" name="new_name" placeholder="Ví dụ: 20cm" required>
-                </div>
-                <button type="submit" class="admin-btn admin-btn-primary">Thêm</button>
-            </div>
-        </form>
-    </div>
 
     <div class="admin-card">
         <table class="admin-table">
@@ -155,6 +144,29 @@ $result = $conn->query($sql);
             </form>
         </div>
     </div>
+    
+    <div id="addModal" class="edit-modal" style="display:none;">
+        <div class="admin-modal-box">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title">Thêm <?php echo $attribute_name; ?> mới</h2>
+                <button type="button" class="admin-modal-close" onclick="closeAddModal()" aria-label="Đóng">&times;</button>
+            </div>
+            <form method="POST">
+                <div class="admin-modal-body">
+                    <div class="admin-form-group">
+                        <label for="new_name">Tên <?php echo $attribute_name; ?></label>
+                        <input type="text" id="new_name" name="new_name" placeholder="Ví dụ: 20cm" required>
+                    </div>
+                    <div class="admin-modal-actions">
+                        <button type="button" class="admin-btn admin-btn-secondary" onclick="closeAddModal()">Hủy</button>
+                        <button type="submit" class="admin-btn admin-btn-primary">Thêm</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
 <script>
 (function() {
     var modal = document.getElementById("editModal");
@@ -164,9 +176,13 @@ $result = $conn->query($sql);
         modal.style.display = "flex";
     }
     function closeEditModal() { modal.style.display = "none"; }
-    window.onclick = function(e) { if (e.target === modal) closeEditModal(); };
+    function openAddModal(){ var m=document.getElementById("addModal"); if(m) m.style.display="flex"; }
+    function closeAddModal(){ var m=document.getElementById("addModal"); if(m) m.style.display="none"; }
+    window.addEventListener("click", function(e){ var add=document.getElementById("addModal"); if (e.target === modal) closeEditModal(); if(add && e.target===add) closeAddModal(); });
     window.openEditModal = openEditModal;
     window.closeEditModal = closeEditModal;
+    window.openAddModal = openAddModal;
+    window.closeAddModal = closeAddModal;
 })();
 </script>
 </div>

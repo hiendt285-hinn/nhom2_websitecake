@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sweet Cake Admin - Quản lý sản phẩm</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Be+Vietnam+Pro:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#fffcff",
+                        "on-secondary": "#ffffff",
+                        "on-surface": "#1b1c1b",
+                        "on-tertiary-container": "#fffcff",
+                        "on-secondary-fixed-variant": "#4c4542",
+                        "secondary-container": "#ece0dc",
+                        "surface-container-high": "#eae8e6",
+                        "surface-variant": "#e4e2e0",
+                        "surface-tint": "#785740",
+                        "on-surface-variant": "#504441",
+                        "tertiary-fixed-dim": "#cfc5b4",
+                        "outline-variant": "#d4c3be",
+                        "surface": "#fbf9f7",
+                        "on-primary-fixed": "#2d1604",
+                        "tertiary-container": "#7b7465",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "surface-container": "#efedec",
+                        "tertiary": "#625b4d",
+                        "surface-container-highest": "#e4e2e0",
+                        "tertiary-fixed": "#ebe1cf",
+                        "primary-fixed": "#ffdcc5",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "background": "#fbf9f7",
+                        "on-background": "#1b1c1b",
+                        "secondary-fixed-dim": "#cfc4c0",
+                        "inverse-on-surface": "#f2f0ee",
+                        "on-tertiary-fixed": "#1f1b10",
+                        "on-primary": "#ffffff",
+                        "outline": "#827470",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#916d55",
+                        "surface-dim": "#dbdad8",
+                        "on-secondary-container": "#6b6360",
+                        "surface-container-low": "#f5f3f1",
+                        "inverse-primary": "#e9bea1",
+                        "primary": "#76553e",
+                        "secondary": "#655d5a",
+                        "inverse-surface": "#30302f",
+                        "primary-fixed-dim": "#e9bea1",
+                        "on-tertiary-fixed-variant": "#4c4639",
+                        "surface-bright": "#fbf9f7",
+                        "secondary-fixed": "#ece0dc",
+                        "on-secondary-fixed": "#201a18",
+                        "on-primary-fixed-variant": "#5e402a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Noto Serif"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .font-serif { font-family: 'Noto Serif', serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col h-screen w-64 bg-[#f5f3f1] dark:bg-stone-900 p-4 space-y-2 border-r-0 z-40">
+<div class="px-4 py-6 mb-4">
+<span class="text-xl font-serif font-bold text-[#76553e] tracking-tight">Sweet Cake</span>
+<p class="text-[10px] uppercase tracking-widest text-secondary mt-1 opacity-70">Admin Studio</p>
+</div>
+<div class="flex items-center space-x-3 px-4 py-3 mb-6 bg-surface-container-lowest rounded-xl">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-primary-fixed">
+<img alt="Admin Avatar" class="w-full h-full object-cover" data-alt="professional male admin avatar portrait with warm studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXMFLzqoqogiswdon5-XLRZpuEgXdbQtnxfFbVfz5PS_M6Gwn0rnX_Jv-rrDJQIk0KazSrfUn6bnAh_JOvzYNeleFvMb9K-5sMWKBHMcwlA6zDpxb80vmA3dlPDGDUDV844KY0yTEPHGveQBatsYrJL-bDVSkBXIr0Y3mcSIwShEf11xOqy3BfQkn1dV4j1Sp8X9Hi02V2aQp2yWBdU9wThmeppqJ24okhoVImrUcjnkg95ulDtU66lcQGKzSjfVMohdFo2kIbG_Os"/>
+</div>
+<div class="flex flex-col overflow-hidden">
+<span class="text-sm font-bold text-on-surface truncate">Quản trị viên</span>
+<span class="text-[11px] text-secondary truncate">Sweet Cake Studio</span>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center space-x-3 px-4 py-3 text-[#655d5a] dark:text-stone-400 hover:bg-[#eae8e6] dark:hover:bg-stone-800 rounded-xl hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-sm font-medium">Tổng quan</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 bg-[#76553e] text-white rounded-xl shadow-sm scale-[0.98] transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="bakery_dining">bakery_dining</span>
+<span class="text-sm font-medium">Sản phẩm</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-[#655d5a] dark:text-stone-400 hover:bg-[#eae8e6] dark:hover:bg-stone-800 rounded-xl hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="text-sm font-medium">Danh mục</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-[#655d5a] dark:text-stone-400 hover:bg-[#eae8e6] dark:hover:bg-stone-800 rounded-xl hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="straighten">straighten</span>
+<span class="text-sm font-medium">Quản lý cỡ bánh</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-[#655d5a] dark:text-stone-400 hover:bg-[#eae8e6] dark:hover:bg-stone-800 rounded-xl hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="palette">palette</span>
+<span class="text-sm font-medium">Quản lý hương vị</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-[#655d5a] dark:text-stone-400 hover:bg-[#eae8e6] dark:hover:bg-stone-800 rounded-xl hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-sm font-medium">Đơn hàng</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-[#655d5a] dark:text-stone-400 hover:bg-[#eae8e6] dark:hover:bg-stone-800 rounded-xl hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-sm font-medium">Khách hàng</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-outline-variant/20 space-y-1">
+<a class="flex items-center space-x-3 px-4 py-3 text-[#655d5a] dark:text-stone-400 hover:bg-[#eae8e6] dark:hover:bg-stone-800 rounded-xl hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm font-medium">Cài đặt</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-error/80 hover:bg-error-container/20 rounded-xl hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-sm font-medium">Đăng xuất</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface overflow-y-auto">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-30 bg-[#fbf9f7]/80 dark:bg-stone-950/80 backdrop-blur-xl flex justify-between items-center w-full px-8 py-4">
+<div>
+<h1 class="text-2xl font-serif font-bold text-[#76553e] tracking-tight">Quản lý sản phẩm</h1>
+<p class="text-xs text-secondary italic font-serif">Danh sách bánh thủ công cao cấp</p>
+</div>
+<div class="flex items-center space-x-4">
+<div class="relative hidden sm:block">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-secondary text-sm" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-full text-sm focus:ring-1 focus:ring-primary w-64 transition-all" placeholder="Tìm kiếm sản phẩm..." type="text"/>
+</div>
+<button class="flex items-center space-x-2 bg-primary text-on-primary px-5 py-2.5 rounded-full shadow-lg shadow-primary/10 hover:shadow-primary/20 scale-100 active:scale-95 transition-all text-sm font-medium">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+<span>Thêm sản phẩm mới</span>
+</button>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto w-full space-y-8">
+<!-- Stats Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-container-low p-6 rounded-2xl flex flex-col justify-between">
+<span class="text-xs font-medium text-secondary uppercase tracking-widest">Tổng sản phẩm</span>
+<div class="mt-4 flex items-baseline justify-between">
+<span class="text-3xl font-serif font-bold text-primary">124</span>
+<span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-lg">+12%</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-2xl flex flex-col justify-between">
+<span class="text-xs font-medium text-secondary uppercase tracking-widest">Đang kinh doanh</span>
+<div class="mt-4 flex items-baseline justify-between">
+<span class="text-3xl font-serif font-bold text-primary">118</span>
+<span class="material-symbols-outlined text-primary-container opacity-40" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-2xl flex flex-col justify-between">
+<span class="text-xs font-medium text-secondary uppercase tracking-widest">Hết hàng</span>
+<div class="mt-4 flex items-baseline justify-between">
+<span class="text-3xl font-serif font-bold text-error">6</span>
+<span class="material-symbols-outlined text-error opacity-40" data-icon="error">error</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-6 rounded-2xl flex flex-col justify-between">
+<span class="text-xs font-medium text-secondary uppercase tracking-widest">Doanh thu tháng</span>
+<div class="mt-4 flex items-baseline justify-between">
+<span class="text-3xl font-serif font-bold text-primary">45.2M</span>
+<span class="text-xs text-primary font-medium">VNĐ</span>
+</div>
+</div>
+</div>
+<!-- Filters Bar -->
+<div class="flex flex-wrap items-center justify-between gap-4 py-2">
+<div class="flex items-center space-x-2">
+<button class="px-4 py-2 rounded-full bg-primary-container text-white text-xs font-medium">Tất cả</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-secondary text-xs font-medium hover:bg-secondary-container transition-colors">Bánh Kem</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-secondary text-xs font-medium hover:bg-secondary-container transition-colors">Bánh Mì</button>
+<button class="px-4 py-2 rounded-full bg-surface-container-high text-secondary text-xs font-medium hover:bg-secondary-container transition-colors">Macarons</button>
+</div>
+<div class="flex items-center space-x-3">
+<span class="text-xs text-secondary font-medium">Sắp xếp:</span>
+<select class="text-xs border-none bg-surface-container-low rounded-full py-2 pl-4 pr-10 focus:ring-1 focus:ring-primary appearance-none cursor-pointer">
+<option>Mới nhất</option>
+<option>Giá cao đến thấp</option>
+<option>Giá thấp đến cao</option>
+<option>Bán chạy nhất</option>
+</select>
+</div>
+</div>
+<!-- Product Table -->
+<div class="bg-surface-container-lowest rounded-[2rem] overflow-hidden shadow-sm border border-outline-variant/10">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-8 py-5 text-[11px] font-bold text-secondary uppercase tracking-widest">ID</th>
+<th class="px-6 py-5 text-[11px] font-bold text-secondary uppercase tracking-widest">Hình ảnh</th>
+<th class="px-6 py-5 text-[11px] font-bold text-secondary uppercase tracking-widest">Sản phẩm</th>
+<th class="px-6 py-5 text-[11px] font-bold text-secondary uppercase tracking-widest">Danh mục</th>
+<th class="px-6 py-5 text-[11px] font-bold text-secondary uppercase tracking-widest">Giá</th>
+<th class="px-6 py-5 text-[11px] font-bold text-secondary uppercase tracking-widest">Đã bán</th>
+<th class="px-8 py-5 text-[11px] font-bold text-secondary uppercase tracking-widest text-right">Thao tác</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-low">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-6 text-sm font-medium text-secondary">#SC-001</td>
+<td class="px-6 py-6">
+<div class="w-16 h-16 rounded-2xl overflow-hidden bg-surface-container">
+<img alt="Chocolate Dream" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="exquisite multi-layered dark chocolate cake with gold leaf decorations on a marble stand" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWo6Shp688mQYn7M1xP_I9YrxtRWwm2F60WcOHkfB3bnoCAOATASykT5R7BC_SWlDUElDd_NsRxurCyUDY10wWjyjaqs9iHC_CZy5xyab5VQTObyKNjuiimAs3HZHbgCp75wy1HjxQqmULsSR99KeX89IwVxEO2U7iYM8LGGfk-EfbrwKy3RnjDHTf8XFXXvHTlCQZz5P9jOJDKq5wSWyioRJ6pO-U4lZsyyQ1WmP6acjXSCUKVPiEPhZoSuFC8MIR_s5WaRZcEeB4"/>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Bánh Chocolate Hoàng Gia</span>
+<span class="text-[11px] text-primary/70 italic font-serif">Sô cô la Bỉ 70%</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary-container text-on-secondary-container">BÁNH KEM</span>
+</td>
+<td class="px-6 py-6 font-medium text-sm">450.000đ</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-2">
+<span class="text-sm font-semibold">1,240</span>
+<span class="material-symbols-outlined text-[14px] text-green-500" data-icon="trending_up">trending_up</span>
+</div>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-6 text-sm font-medium text-secondary">#SC-002</td>
+<td class="px-6 py-6">
+<div class="w-16 h-16 rounded-2xl overflow-hidden bg-surface-container">
+<img alt="Macaron Box" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="delicate pastel macarons in various colors arranged artistically on a white ceramic plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAax8_1vfUaT541I2ayzdKTzhNRNVNomJWPwUb705UUBE2K7yw5D_Uydbo9iq3qVBviUDq8PPyKzN0v66s4Yt7flpgUD78JIEIFkbxybGiDezkKIDVomw4ZAFB968_VfIBZCwtF2weT_YYB-R11IvpgG0LHvKkG6kyRaPv2MeusKqe6gdROlamy41eirlk97iFNu7jsqjMk_IYDXJQLUsCIgTfcLO9Bv8m4n-L6_LYm4Dfyq3BBHLY-mkF8C5H_zhvMn50JmmvfbVsd"/>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Set Macaron Paris</span>
+<span class="text-[11px] text-primary/70 italic font-serif">Hộp 12 viên cao cấp</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-tertiary-fixed text-on-tertiary-fixed-variant">MACARONS</span>
+</td>
+<td class="px-6 py-6 font-medium text-sm">280.000đ</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-2">
+<span class="text-sm font-semibold">856</span>
+<span class="material-symbols-outlined text-[14px] text-green-500" data-icon="trending_up">trending_up</span>
+</div>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group">
+<td class="px-8 py-6 text-sm font-medium text-secondary">#SC-003</td>
+<td class="px-6 py-6">
+<div class="w-16 h-16 rounded-2xl overflow-hidden bg-surface-container">
+<img alt="Red Velvet" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="freshly baked red velvet cake with creamy frosting and strawberry garnish on top" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9T9Of7rm-hT5faVxTLwwEQ9SdA6JZfxfZsbh-d3scO-mGTr7jIzfWeRl-4NFqJy4arbL_alq7EQ4NS6XH_2sQF4fhY-v_PXw7lFkeu86U7qtEZinH3zzNAcDymVKv_IfxAVUbRu-HBoliK5Q-ZGBD-AKJket0LZ48UlqGu6bzoFyeCH3cwlHijoutfWk8jqDTZ-gh80o62Y-0SYEIZ6xZo77widBrni6ZtRPWT_-Se2xC7I7VWgPHEx9q4iNxTO3Nl0zc6l6dwdS5"/>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Red Velvet Tình Yêu</span>
+<span class="text-[11px] text-primary/70 italic font-serif">Kem phô mai cao cấp</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary-container text-on-secondary-container">BÁNH KEM</span>
+</td>
+<td class="px-6 py-6 font-medium text-sm">390.000đ</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-2">
+<span class="text-sm font-semibold">2,105</span>
+<span class="material-symbols-outlined text-[14px] text-green-500" data-icon="trending_up">trending_up</span>
+</div>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/30 transition-colors group bg-error/5">
+<td class="px-8 py-6 text-sm font-medium text-secondary">#SC-004</td>
+<td class="px-6 py-6">
+<div class="w-16 h-16 rounded-2xl overflow-hidden bg-surface-container grayscale opacity-60">
+<img alt="Sourdough" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="artisan sourdough bread loaves with perfect crust and flour dust on a rustic wooden table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNrQ5ah2UnFQDs2htMrV19Fth14xzT2FaVz1yEBtJ2yfbbxUDfy7uVoFWPr8CxvkDT-9l2m7rD2D0nuLabqgtxXJH2a_x3APkppG7bVx55ll3Y2G9DsH5NJ2z_dXOyw8TC0FW5JCS2s9HHcR1_TuAR8X2wACozF4FnePbL2nSn7JMW6yQSDtUGN-9YiVq8KrJBoqD8-Og39gwevVKQIWG7SpppBumY25AuAYJM2DyFIQ8Dyf4hKpFLwOM44aE2BA51g-6rxWBXx4gn"/>
+</div>
+</td>
+<td class="px-6 py-6">
+<div class="flex flex-col">
+<div class="flex items-center space-x-2">
+<span class="text-sm font-bold text-on-surface opacity-60">Bánh Mì Sourdough</span>
+<span class="px-1.5 py-0.5 bg-error/10 text-error text-[9px] font-bold rounded uppercase">Hết hàng</span>
+</div>
+<span class="text-[11px] text-primary/70 italic font-serif">Men tự nhiên 48h</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-surface-container-high text-secondary">BÁNH MÌ</span>
+</td>
+<td class="px-6 py-6 font-medium text-sm opacity-60">65.000đ</td>
+<td class="px-6 py-6">
+<div class="flex items-center space-x-2 opacity-60">
+<span class="text-sm font-semibold">4,320</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="horizontal_rule">horizontal_rule</span>
+</div>
+</td>
+<td class="px-8 py-6 text-right">
+<div class="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-error hover:bg-error/10 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-8 py-5 bg-surface-container-low/30 flex items-center justify-between">
+<span class="text-xs text-secondary">Hiển thị 1 - 4 của 124 sản phẩm</span>
+<div class="flex items-center space-x-1">
+<button class="p-2 rounded-lg hover:bg-surface-container-high transition-colors disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary text-xs font-bold">1</button>
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high text-xs font-bold transition-colors">2</button>
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high text-xs font-bold transition-colors">3</button>
+<span class="px-2 text-xs text-secondary">...</span>
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container-high text-xs font-bold transition-colors">31</button>
+<button class="p-2 rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Section -->
+<footer class="w-full py-12 flex flex-col md:flex-row justify-between items-center border-t border-[#eae8e6]/30">
+<p class="text-sm font-sans text-[#655d5a]">© 2024 Sweet Cake - Nghệ thuật bánh thủ công</p>
+<div class="flex space-x-6 mt-4 md:mt-0">
+<a class="text-sm font-sans text-[#655d5a] hover:text-[#76553e] transition-colors" href="#">Về chúng tôi</a>
+<a class="text-sm font-sans text-[#655d5a] hover:text-[#76553e] transition-colors" href="#">Bảo mật</a>
+<a class="text-sm font-sans text-[#655d5a] hover:text-[#76553e] transition-colors" href="#">Điều khoản</a>
+</div>
+</footer>
+</div>
+</main>
+</div>
+</body></html>

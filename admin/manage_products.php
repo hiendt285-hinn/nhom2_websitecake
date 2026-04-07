@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['admin'])) {
     header('Location: login_admin.php');
     exit();
@@ -7,6 +9,51 @@ if (!isset($_SESSION['admin'])) {
 
 
 require_once 'connect.php';
+
+mysqli_report(MYSQLI_REPORT_OFF);
+$addError = '';
+$addSuccess = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
+    $name = trim($_POST['name'] ?? '');
+    $price = intval($_POST['price'] ?? 0);
+    $description = trim($_POST['description'] ?? '');
+    $shortDescription = trim($_POST['short_description'] ?? '');
+    $categoryId = intval($_POST['category_id'] ?? 0);
+    $isFeatured = isset($_POST['is_featured']) ? 1 : 0;
+    $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+    if (empty($name) || $price < 0 || $categoryId <= 0) {
+        $addError = 'Vui lòng điền Tên sản phẩm, Giá và chọn Danh mục.';
+    } elseif (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        $fileName = basename($_FILES['image']['name']);
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExt, true)) {
+            $addError = 'Chỉ chấp nhận định dạng ảnh: jpg, jpeg, png, gif, webp.';
+        } else {
+            $newFileName = uniqid() . '.' . $ext;
+            $targetDir = realpath(__DIR__ . '/../images') . '/';
+            $targetFile = $targetDir . $newFileName;
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+                $stmt = $conn->prepare("INSERT INTO products (name, price, image, description, short_description, category_id, is_featured, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                if ($stmt) {
+                    $stmt->bind_param('sisssiii', $name, $price, $newFileName, $description, $shortDescription, $categoryId, $isFeatured, $isActive);
+                    if ($stmt->execute()) {
+                        header('Location: admin_dashboard.php?page=products&added=1');
+                        exit();
+                    }
+                    $stmt->close();
+                }
+                $addError = 'Lỗi khi thêm sản phẩm.';
+            } else {
+                $addError = 'Lỗi khi upload ảnh.';
+            }
+        }
+    } else {
+        $addError = 'Vui lòng chọn ảnh sản phẩm.';
+    }
+}
 
 // Xử lý xóa sản phẩm (nếu có)
 if (isset($_GET['delete_id'])) {
@@ -98,11 +145,11 @@ $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
 if (!in_array($sort, ['newest', 'sold_desc', 'sold_asc'], true)) {
     $sort = 'newest';
 }
-$orderBy = 'p.created_at DESC';
+$orderBy = 'p.id DESC';
 if ($sort === 'sold_desc') {
-    $orderBy = 'total_sold DESC, p.created_at DESC';
+    $orderBy = 'total_sold DESC, p.id DESC';
 } elseif ($sort === 'sold_asc') {
-    $orderBy = 'total_sold ASC, p.created_at DESC';
+    $orderBy = 'total_sold ASC, p.id DESC';
 }
 $sortParam = '&sort=' . urlencode($sort);
 
@@ -117,411 +164,215 @@ $sql = "SELECT p.*, c.name AS category_name,
         ORDER BY " . $orderBy . "
         LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
 $result = $conn->query($sql);
+if ($result === false) {
+    $fallbackSql = "SELECT p.*, c.name AS category_name, 0 AS total_sold
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            ORDER BY p.id DESC
+            LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
+    $result = $conn->query($fallbackSql);
+}
 ?>
-
+<?php
+$activeProducts = 0;
+$outOfStockProducts = 0;
+$monthlyRevenue = 0;
+$activeResult = $conn->query("SELECT COUNT(*) AS total FROM products");
+if ($activeResult) {
+    $activeProducts = (int)$activeResult->fetch_assoc()['total'];
+}
+$stockResult = $conn->query("SELECT COUNT(*) AS total FROM products WHERE quantity <= 0");
+if ($stockResult) {
+    $outOfStockProducts = (int)$stockResult->fetch_assoc()['total'];
+}
+$revenueResult = $conn->query("SELECT COALESCE(SUM(total_price), 0) AS total FROM orders");
+if ($revenueResult) {
+    $monthlyRevenue = (float)$revenueResult->fetch_assoc()['total'];
+}
+$categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
+?>
 <style>
-/* Đồng bộ button với các trang quản lý khác */
-.admin-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    text-decoration: none;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 100px;
-    height: 38px;
-    white-space: nowrap;
+.product-layout{color:#1b1c1b}
+.product-topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.product-title{margin:0;font-family:'Noto Serif',serif;font-size:34px;line-height:1.1;color:#76553e}
+.product-subtitle{margin-top:4px;color:#74645d;font-size:13px}
+.h-input{background:#f5f3f1;border:none;border-radius:999px;padding:11px 14px;width:280px}
+.h-btn{border:none;border-radius:999px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;font-weight:600;text-decoration:none;cursor:pointer}
+.h-btn-primary{background:#76553e;color:#fff}
+.h-btn-primary:hover{background:#674633}
+.product-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.stat-card{background:#f1edeb;border-radius:16px;padding:16px}
+.stat-card .label{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#74645d;font-weight:700}
+.stat-row{margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+.stat-num{font-family:'Noto Serif',serif;font-size:38px;color:#76553e;font-weight:700}
+.stat-num.error{color:#ba1a1a}
+.chip-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.chip-tab{padding:8px 14px;border-radius:999px;background:#ece7e4;color:#645b58;font-size:12px;text-decoration:none;font-weight:600}
+.chip-tab.active{background:#916d55;color:#fff}
+.filters{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.sort-select{border:none;background:#f5f3f1;border-radius:999px;padding:10px 14px}
+.product-card{background:#fff;border-radius:24px;overflow:hidden;border:1px solid #efe8e5}
+.product-table{width:100%;border-collapse:collapse}
+.product-table th{padding:18px 16px;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#7f716a;background:#f8f5f3}
+.product-table td{padding:16px;border-top:1px solid #f1edeb;vertical-align:middle}
+.row-img{width:58px;height:58px;border-radius:14px;object-fit:cover;background:#efedec}
+.badge{font-size:10px;padding:5px 9px;background:#ece0dc;color:#5a504d;border-radius:999px;font-weight:700}
+.price{font-weight:700;color:#533a27}
+.table-actions{display:flex;justify-content:flex-end;gap:8px}
+.icon-btn{
+    width:36px;
+    height:36px;
+    border-radius:10px;
+    border:none;
+    background:#f4efec;
+    color:#76553e;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    padding:0;
+    line-height:1;
+    flex:0 0 36px;
 }
-
-.admin-btn i {
-    font-size: 14px;
+.icon-btn.danger{color:#ba1a1a}
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#faf8f7;border-top:1px solid #f1edeb;gap:10px;flex-wrap:wrap}
+.pages{display:flex;align-items:center;gap:6px}
+.p-btn{min-width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;text-decoration:none;background:#f0ece9;color:#6b615e;font-size:13px;font-weight:700}
+.p-btn.active{background:#76553e;color:#fff}
+.empty{text-align:center;padding:56px 16px;color:#7f716a}
+.admin-modal-overlay{position:fixed;inset:0;background:rgba(30,21,16,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:9999}
+.admin-modal{background:#fff;border-radius:18px;max-width:860px;width:100%;max-height:90vh;overflow:auto;padding:18px 18px 14px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.modal-title{font-family:'Noto Serif',serif;color:#76553e;font-size:24px;margin:0}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-grid .full{grid-column:1/-1}
+.modal-input,.modal-select,.modal-textarea{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid #dfd7d4;
+    border-radius:10px;
+    background:#faf7f5;
+    font:inherit;
+    box-sizing:border-box;
 }
-
-.admin-btn-sm {
-    min-width: 90px;
-    height: 36px;
-    padding: 6px 12px;
-    font-size: 13px;
+.modal-input,.modal-select{height:44px}
+.modal-select{
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b615e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    padding-right:36px;
 }
-
-.admin-btn-primary {
-    background: #9a7b5a;
-    color: white;
-}
-
-.admin-btn-primary:hover {
-    background: #A0522D;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(139,69,19,0.2);
-}
-
-.admin-btn-secondary {
-    background: #95a5a6;
-    color: white;
-}
-
-.admin-btn-secondary:hover {
-    background: #7f8c8d;
-    transform: translateY(-2px);
-}
-
-.admin-btn-danger {
-    background: #e74c3c;
-    color: white;
-}
-
-.admin-btn-danger:hover {
-    background: #c0392b;
-    transform: translateY(-2px);
-}
-
-/* Action Cell */
-.admin-action-cell {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-    min-width: 200px;
-}
-
-/* Product Image */
-.product-img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid #f0f0f0;
-    transition: all 0.3s ease;
-}
-
-.product-img:hover {
-    transform: scale(1.1);
-    border-color: #9a7b5a;
-}
-
-/* Page Header */
-.admin-page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.admin-page-title {
-    font-size: 24px;
-    color: #9a7b5a;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Card */
-.admin-card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    padding: 20px;
-    overflow-x: auto;
-}
-
-/* Table */
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 1000px;
-}
-
-.admin-table th {
-    background: #9a7b5a;
-    color: white;
-    font-weight: 600;
-    padding: 15px 12px;
-    font-size: 14px;
-    text-align: left;
-    white-space: nowrap;
-}
-
-.admin-table td {
-    padding: 15px 12px;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 14px;
-    vertical-align: middle;
-}
-
-.admin-table tbody tr:hover td {
-    background: #f9f6f2;
-}
-
-/* Pagination */
-.admin-pagination {
-    margin-top: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 15px;
-    padding: 15px 0;
-    border-top: 2px solid #f0f0f0;
-}
-
-.pagination-info {
-    font-size: 13px;
-    color: #7f8c8d;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.pagination-buttons {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-/* Category Badge */
-.category-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: #f0f0f0;
-    color: #555;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-/* Price */
-.price {
-    font-weight: 600;
-    color: #8B4513;
-    font-size: 15px;
-}
-
-.sold-count {
-    display: inline-block;
-    padding: 4px 8px;
-    background: #e8f5e9;
-    color: #27ae60;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-/* Responsive */
-@media (max-width: 992px) {
-    .admin-action-cell {
-        flex-direction: column;
-        min-width: auto;
-    }
-    
-    .admin-btn-sm {
-        width: 100%;
-        min-width: 100%;
-    }
-    
-    .pagination-buttons {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-@media (max-width: 768px) {
-    .admin-page-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .admin-pagination {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .admin-table {
-        display: block;
-        overflow-x: auto;
-    }
-}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+@media (max-width: 740px){.modal-grid{grid-template-columns:1fr}}
+@media (max-width: 1080px){.product-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width: 640px){.product-stats{grid-template-columns:1fr}.h-input{width:100%}}
 </style>
 
-<div class="admin-content">
+<div class="product-layout">
     <?php if (!empty($_GET['delete_error'])): ?>
-    <div class="admin-message admin-message-error">Không thể xóa sản phẩm đang có trong đơn hàng chưa giao. Bạn có thể ẩn sản phẩm (tắt Hiển thị) hoặc đợi đơn giao xong.</div>
+    <div class="admin-message admin-message-error">Không thể xóa sản phẩm đang có trong đơn hàng chưa giao. Bạn có thể ẩn sản phẩm hoặc đợi đơn giao xong.</div>
     <?php endif; ?>
     <?php if (!empty($_GET['deleted_hidden'])): ?>
-    <div class="admin-message admin-message-success">Sản phẩm đã được ẩn (vì có trong đơn đã giao, hệ thống giữ lại để lưu lịch sử đơn hàng).</div>
+    <div class="admin-message admin-message-success">Sản phẩm đã được ẩn để giữ lịch sử đơn hàng.</div>
     <?php endif; ?>
-    <div class="admin-page-header">
-        <h1 class="admin-page-title">
-            <i class="fas fa-cake-candles"></i> 
-            Quản lý sản phẩm
-        </h1>
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <span class="pagination-info">
-                <i class="fas fa-box"></i>
-                Tổng <?php echo number_format($totalProducts); ?> sản phẩm — 
-                Trang <?php echo $currentPage; ?>/<?php echo $totalPages; ?>
-            </span>
-            <a href="upload_image.php" class="admin-btn admin-btn-primary">
-                <i class="fas fa-plus-circle"></i> Thêm sản phẩm mới
-            </a>
+    <?php if (!empty($_GET['added'])): ?>
+    <div class="admin-message admin-message-success">Thêm sản phẩm thành công.</div>
+    <?php endif; ?>
+    <?php if (!empty($addError)): ?>
+    <div class="admin-message admin-message-error"><?php echo htmlspecialchars($addError); ?></div>
+    <?php endif; ?>
+
+    <div class="product-topbar">
+        <div>
+            <h1 class="product-title">Quản lý sản phẩm</h1>
+            <div class="product-subtitle">Danh sách bánh thủ công cao cấp</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <input class="h-input" type="text" placeholder="Tìm kiếm sản phẩm..." />
+            <button type="button" class="h-btn h-btn-primary" onclick="openAddProductModal()"><i class="fas fa-plus"></i> Thêm sản phẩm mới</button>
         </div>
     </div>
-    
-    <!-- Bộ lọc sắp xếp -->
-    <div class="admin-filter-bar" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
-        <span style="font-size:13px; color:#666;">Sắp xếp:</span>
-        <a href="admin_dashboard.php?page=products<?php echo $sort === 'newest' ? '' : '&sort=newest'; ?>#products" 
-           class="admin-btn <?php echo $sort === 'newest' ? 'admin-btn-primary' : 'admin-btn-secondary'; ?> admin-btn-sm">
-            <i class="fas fa-clock"></i> Mới nhất
-        </a>
-        <a href="admin_dashboard.php?page=products&sort=sold_desc#products" 
-           class="admin-btn <?php echo $sort === 'sold_desc' ? 'admin-btn-primary' : 'admin-btn-secondary'; ?> admin-btn-sm">
-            <i class="fas fa-sort-amount-down-alt"></i> Đã bán nhiều nhất
-        </a>
-        <a href="admin_dashboard.php?page=products&sort=sold_asc#products" 
-           class="admin-btn <?php echo $sort === 'sold_asc' ? 'admin-btn-primary' : 'admin-btn-secondary'; ?> admin-btn-sm">
-            <i class="fas fa-sort-amount-up"></i> Đã bán ít nhất
-        </a>
+
+    <div class="product-stats">
+        <div class="stat-card"><span class="label">Tổng sản phẩm</span><div class="stat-row"><span class="stat-num"><?php echo number_format($totalProducts); ?></span></div></div>
+        <div class="stat-card"><span class="label">Đang kinh doanh</span><div class="stat-row"><span class="stat-num"><?php echo number_format($activeProducts); ?></span></div></div>
+        <div class="stat-card"><span class="label">Hết hàng</span><div class="stat-row"><span class="stat-num error"><?php echo number_format($outOfStockProducts); ?></span></div></div>
+        <div class="stat-card"><span class="label">Doanh thu tháng</span><div class="stat-row"><span class="stat-num"><?php echo number_format($monthlyRevenue / 1000000, 1); ?>M</span><span>VNĐ</span></div></div>
     </div>
-    
-    <div class="admin-card">
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Sản phẩm</th>
-                    <th>Danh mục</th>
-                    <th>Giá</th>
-                    <th>Đã bán</th>
-                    <th>Hình ảnh</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($result && $result->num_rows > 0): ?>
-                    <?php while($row = $result->fetch_assoc()): ?>
-                        <tr id="row-<?php echo $row['id']; ?>">
-                            <td><strong>#<?php echo $row['id']; ?></strong></td>
-                            <td>
-                                <span style="font-weight: 500;"><?php echo htmlspecialchars($row['name']); ?></span>
-                            </td>
-                            <td>
-                                <span class="category-badge">
-                                    <i class="fas fa-tag" style="color: #8B4513;"></i>
-                                    <?php echo htmlspecialchars($row['category_name'] ?: 'Chưa phân loại'); ?>
-                                </span>
-                            </td>
-                            <td>
-                                <span class="price">
-                                    <i class="fas fa-dollar-sign" style="font-size: 12px;"></i>
-                                    <?php echo number_format($row['price'], 0, ',', '.'); ?>₫
-                                </span>
-                            </td>
-                            <td>
-                                <span class="sold-count">
-                                    <i class="fas fa-chart-line"></i>
-                                    <?php echo number_format((int)($row['total_sold'] ?? 0)); ?>
-                                </span>
-                            </td>
-                            <td>
-                                <?php if (!empty($row['image'])): ?>
-                                    <img src="../images/<?php echo htmlspecialchars($row['image']); ?>" 
-                                         alt="" 
-                                         class="product-img"
-                                         onerror="this.src='../images/no-image.png'">
-                                <?php else: ?>
-                                    <span class="category-badge">Không có ảnh</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="admin-action-cell">
-                                <!-- Button Sửa - fixed size -->
-                                <a href="edit_product.php?id=<?php echo $row['id']; ?>" 
-                                   class="admin-btn admin-btn-primary admin-btn-sm"
-                                   title="Chỉnh sửa sản phẩm">
-                                    <i class="fas fa-edit"></i> Sửa
-                                </a>
-                                
-                                <!-- Button Xóa - fixed size -->
-                                <button type="button" 
-                                        class="admin-btn admin-btn-danger admin-btn-sm" 
-                                        onclick="deleteProduct(<?php echo $row['id']; ?>)"
-                                        title="Xóa sản phẩm">
-                                    <i class="fas fa-trash-alt"></i> Xóa
-                                </button>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
+
+    <div class="filters">
+        <div class="chip-tabs">
+            <a class="chip-tab active" href="#">Tất cả</a>
+            <a class="chip-tab" href="#">Bánh Kem</a>
+            <a class="chip-tab" href="#">Bánh Mì</a>
+            <a class="chip-tab" href="#">Macarons</a>
+        </div>
+        <div>
+            <span style="font-size:12px;color:#7f716a;margin-right:8px;">Sắp xếp:</span>
+            <select class="sort-select" onchange="if(this.value){window.location.href=this.value;}">
+                <option value="admin_dashboard.php?page=products&sort=newest#products" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
+                <option value="admin_dashboard.php?page=products&sort=sold_desc#products" <?php echo $sort === 'sold_desc' ? 'selected' : ''; ?>>Đã bán nhiều nhất</option>
+                <option value="admin_dashboard.php?page=products&sort=sold_asc#products" <?php echo $sort === 'sold_asc' ? 'selected' : ''; ?>>Đã bán ít nhất</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="product-card" id="products">
+        <div style="overflow-x:auto;">
+            <table class="product-table">
+                <thead>
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 60px 20px;">
-                            <i class="fas fa-box-open" style="font-size: 48px; color: #ddd; margin-bottom: 15px; display: block;"></i>
-                            <p style="color: #7f8c8d; font-size: 16px; margin: 0;">Không có sản phẩm nào trong danh mục.</p>
-                            <a href="upload_image.php" class="admin-btn admin-btn-primary" style="margin-top: 20px;">
-                                <i class="fas fa-plus-circle"></i> Thêm sản phẩm đầu tiên
-                            </a>
-                        </td>
+                        <th>ID</th><th>Hình ảnh</th><th>Sản phẩm</th><th>Danh mục</th><th>Giá</th><th>Đã bán</th><th style="text-align:right;">Thao tác</th>
                     </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-
-        <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
-            <div class="admin-pagination">
-                <div class="pagination-info">
-                    <i class="fas fa-eye"></i>
-                    Hiển thị 
-                    <strong><?php echo $result && $result->num_rows ? (($currentPage - 1) * $perPage + 1) : 0; ?></strong>
-                    – 
-                    <strong><?php echo $result ? min($currentPage * $perPage, $totalProducts) : 0; ?></strong>
-                    / <strong><?php echo number_format($totalProducts); ?></strong> sản phẩm
-                </div>
-                
-                <div class="pagination-buttons">
-                    <?php if ($currentPage > 1): ?>
-                        <a href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage - 1; ?>#products" 
-                           class="admin-btn admin-btn-secondary admin-btn-sm"
-                           title="Trang trước">
-                            <i class="fas fa-chevron-left"></i> Trước
-                        </a>
+                </thead>
+                <tbody>
+                    <?php if ($result && $result->num_rows > 0): ?>
+                        <?php while($row = $result->fetch_assoc()): ?>
+                            <tr id="row-<?php echo $row['id']; ?>">
+                                <td>#SC-<?php echo str_pad((string)$row['id'], 3, '0', STR_PAD_LEFT); ?></td>
+                                <td>
+                                    <?php if (!empty($row['image'])): ?>
+                                        <img src="../images/<?php echo htmlspecialchars($row['image']); ?>" alt="" class="row-img" onerror="this.src='../images/no-image.png'">
+                                    <?php else: ?>
+                                        <span class="badge">Không ảnh</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><strong><?php echo htmlspecialchars($row['name']); ?></strong></td>
+                                <td><span class="badge"><?php echo htmlspecialchars($row['category_name'] ?: 'Chưa phân loại'); ?></span></td>
+                                <td><span class="price"><?php echo number_format($row['price'], 0, ',', '.'); ?>đ</span></td>
+                                <td><?php echo number_format((int)($row['total_sold'] ?? 0)); ?></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a class="icon-btn" href="edit_product.php?id=<?php echo $row['id']; ?>" title="Sửa"><i class="fas fa-pen"></i></a>
+                                        <button class="icon-btn danger" type="button" onclick="deleteProduct(<?php echo $row['id']; ?>)" title="Xóa"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
+                        <tr><td class="empty" colspan="7">Không có sản phẩm nào trong danh mục.</td></tr>
                     <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
 
-                    <?php
-                    // Hiển thị tối đa 5 trang
-                    $startPage = max(1, min($currentPage - 2, $totalPages - 4));
-                    $endPage = min($totalPages, $startPage + 4);
-                    
-                    for ($i = $startPage; $i <= $endPage; $i++):
-                        if ($i == $currentPage): ?>
-                            <span class="admin-btn admin-btn-primary admin-btn-sm" 
-                                  style="pointer-events:none; min-width: 40px;">
-                                <?php echo $i; ?>
-                            </span>
-                        <?php else: ?>
-                            <a href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $i; ?>#products" 
-                               class="admin-btn admin-btn-secondary admin-btn-sm"
-                               style="min-width: 40px;">
-                                <?php echo $i; ?>
-                            </a>
-                        <?php endif;
-                    endfor; ?>
-
+        <?php if ($totalPages > 1): ?>
+            <div class="pagination">
+                <div>Hiển thị <?php echo $result && $result->num_rows ? (($currentPage - 1) * $perPage + 1) : 0; ?> - <?php echo $result ? min($currentPage * $perPage, $totalProducts) : 0; ?> / <?php echo number_format($totalProducts); ?> sản phẩm</div>
+                <div class="pages">
+                    <?php if ($currentPage > 1): ?>
+                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage - 1; ?>#products"><i class="fas fa-angle-left"></i></a>
+                    <?php endif; ?>
+                    <?php $startPage = max(1, min($currentPage - 2, $totalPages - 4)); $endPage = min($totalPages, $startPage + 4); ?>
+                    <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                        <a class="p-btn <?php echo $i === $currentPage ? 'active' : ''; ?>" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $i; ?>#products"><?php echo $i; ?></a>
+                    <?php endfor; ?>
                     <?php if ($currentPage < $totalPages): ?>
-                        <a href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage + 1; ?>#products" 
-                           class="admin-btn admin-btn-secondary admin-btn-sm"
-                           title="Trang sau">
-                            Sau <i class="fas fa-chevron-right"></i>
-                        </a>
+                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage + 1; ?>#products"><i class="fas fa-angle-right"></i></a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -529,51 +380,76 @@ $result = $conn->query($sql);
     </div>
 </div>
 
-<script>
-function deleteProduct(id) {
-    if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác.')) {
-        // Gửi AJAX request
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'manage_products.php?delete_id=' + id, true);
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                try {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        // Xóa dòng thành công
-                        var row = document.getElementById('row-' + id);
-                        if (row) {
-                            row.style.transition = 'all 0.3s ease';
-                            row.style.opacity = '0';
-                            setTimeout(function() {
-                                row.remove();
-                                // Reload lại trang để cập nhật số thứ tự ID
-                                location.reload();
-                            }, 300);
-                        }
-                    } else {
-                        alert(response.error || 'Lỗi khi xóa sản phẩm.');
-                    }
-                } catch(e) {
-                    alert('Lỗi xử lý dữ liệu từ server.');
-                }
-            } else {
-                alert('Lỗi kết nối server. Vui lòng thử lại.');
-            }
-        };
-        
-        xhr.onerror = function() {
-            alert('Không thể kết nối đến server.');
-        };
-        
-        xhr.send();
-    }
-}
+<div id="addProductModal" class="admin-modal-overlay" onclick="if(event.target===this){closeAddProductModal();}">
+    <div class="admin-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Thêm sản phẩm mới</h2>
+            <button type="button" class="icon-btn" onclick="closeAddProductModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="add_product" value="1">
+            <div class="modal-grid">
+                <div>
+                    <label>Tên sản phẩm</label>
+                    <input class="modal-input" type="text" name="name" required>
+                </div>
+                <div>
+                    <label>Danh mục</label>
+                    <select class="modal-select" name="category_id" required>
+                        <option value="">-- Chọn danh mục --</option>
+                        <?php if ($categoryResult): while ($cat = $categoryResult->fetch_assoc()): ?>
+                            <option value="<?php echo (int)$cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
+                        <?php endwhile; endif; ?>
+                    </select>
+                </div>
+                <div>
+                    <label>Giá (VNĐ)</label>
+                    <input class="modal-input" type="number" min="0" step="1000" name="price" required>
+                </div>
+                <div>
+                    <label>Ảnh sản phẩm</label>
+                    <input class="modal-input" type="file" name="image" accept="image/*" required>
+                </div>
+                <div class="full">
+                    <label>Mô tả ngắn</label>
+                    <input class="modal-input" type="text" name="short_description">
+                </div>
+                <div class="full">
+                    <label>Mô tả chi tiết</label>
+                    <textarea class="modal-textarea" rows="4" name="description"></textarea>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="h-btn" onclick="closeAddProductModal()">Hủy</button>
+                <button type="submit" class="h-btn h-btn-primary">Thêm sản phẩm</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-// Thêm hiệu ứng fade out khi xóa
-document.addEventListener('DOMContentLoaded', function() {
-    // Có thể thêm các hiệu ứng khác nếu cần
-});
+<script>
+function openAddProductModal(){ document.getElementById('addProductModal').style.display='flex'; }
+function closeAddProductModal(){ document.getElementById('addProductModal').style.display='none'; }
+function deleteProduct(id) {
+    if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác.')) return;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'manage_products.php?delete_id=' + id, true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.onload = function() {
+        if (xhr.status !== 200) return alert('Lỗi kết nối server. Vui lòng thử lại.');
+        try {
+            var response = JSON.parse(xhr.responseText);
+            if (!response.success) return alert(response.error || 'Lỗi khi xóa sản phẩm.');
+            var row = document.getElementById('row-' + id);
+            if (!row) return location.reload();
+            row.style.transition = 'all .25s ease';
+            row.style.opacity = '0';
+            setTimeout(function(){ row.remove(); location.reload(); }, 250);
+        } catch (e) {
+            alert('Lỗi xử lý dữ liệu từ server.');
+        }
+    };
+    xhr.onerror = function() { alert('Không thể kết nối đến server.'); };
+    xhr.send();
+}
 </script>
