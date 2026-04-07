@@ -116,24 +116,6 @@ $subtotal = $order['total_amount'] + ($order['discount_amount'] ?? 0);
             margin: 0 auto;
         }
 
-        /* Header */
-        .order-detail-admin .od-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .order-detail-admin .od-header h1 {
-            font-size: 28px;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
         /* Button Styles - Tất cả button có kích thước bằng nhau */
         .order-detail-admin .btn {
             display: inline-flex;
@@ -445,11 +427,6 @@ $subtotal = $order['total_amount'] + ($order['discount_amount'] ?? 0);
         }
 
         @media (max-width: 768px) {
-            .order-detail-admin .od-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
             .order-detail-admin .info-grid {
                 grid-template-columns: 1fr;
             }
@@ -480,8 +457,8 @@ $subtotal = $order['total_amount'] + ($order['discount_amount'] ?? 0);
 <div class="admin-content order-detail-admin">
     <div class="od-container">
         <!-- Header -->
-        <div class="od-header">
-            <h1>
+        <div class="admin-page-header od-header">
+            <h1 class="admin-page-title">
                 <i class="fas fa-file-invoice"></i>
                 Chi tiết đơn hàng #<?php echo $order['id']; ?>
             </h1>

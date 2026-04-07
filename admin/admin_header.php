@@ -16,7 +16,7 @@ if (!isset($_SESSION['admin'])) {
     display:flex;
     align-items:center;
     justify-content:space-between;
-    font-family:'Open Sans',sans-serif;">
+    font-family:'Be Vietnam Pro',sans-serif;">
     <div style="display:flex;align-items:center;gap:10px;">
         <img src="../images/35-mau-thiet-ke-logo-tiem-banh-dep-5-removebg-preview.png" alt="Logo" style="height:38px;">
         <a href="admin_dashboard.php" style="color:#9a7b5a; text-decoration:none; font-weight:700;">Sweet Cake Admin</a>

@@ -201,25 +201,6 @@ if ($filterStatus !== '') {
     margin: 0;
 }
 
-/* Page Header */
-.admin-page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.admin-page-title {
-    font-size: 24px;
-    color: #9a7b5a;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 /* Table */
 .admin-table {
     width: 100%;
@@ -349,11 +330,6 @@ if ($filterStatus !== '') {
 
 @media (max-width: 768px) { 
     .order-address { max-width: 100px; } 
-    
-    .admin-page-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
     
     .order-filter {
         flex-direction: column;

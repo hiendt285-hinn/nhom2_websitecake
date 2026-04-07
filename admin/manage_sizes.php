@@ -101,7 +101,7 @@ $result = $conn->query($sql);
                 <tr>
                     <th>ID</th>
                     <th>Tên <?php echo $attribute_name; ?></th>
-                    <th>Thao tác</th>
+                    <th class="admin-action-col">Thao tác</th>
                 </tr>
             </thead>
             <tbody>

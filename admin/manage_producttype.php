@@ -69,31 +69,8 @@ $hasCategories = $result && $result->num_rows > 0;
         background: #f5f5f5;
     }
 
-    .admin-page-header {
-        background: #ffffff
-        padding: 25px 30px;
-        border-radius: 12px;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 15px rgba(154, 123, 90, 0.3);
-    }
-
-    .admin-page-title {
-        font-size: 24px;
-        color: #9a7b5a;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
     .header-actions { margin-top: 14px; }
     .add-modal-trigger { min-width: 180px; }
-
-    .admin-page-title i {
-        font-size: 28px;
-        background: rgba(251, 251, 251, 0.2);
-        padding: 10px;
-        border-radius: 10px;
-    }
 
     .admin-card {
         background: white;

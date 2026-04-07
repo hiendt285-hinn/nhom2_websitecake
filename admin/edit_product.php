@@ -129,29 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $productId > 0 && $product) {
             padding: 20px 24px;
         }
 
-        /* Page Header */
-        .admin-page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .admin-page-title {
-            font-size: 26px;
-            color: var(--primary-color);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .admin-page-title i {
-            font-size: 32px;
-        }
-
         /* Card */
         .admin-card {
             background: white;
@@ -409,11 +386,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $productId > 0 && $product) {
             .product-form-grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
-            }
-
-            .admin-page-header {
-                flex-direction: column;
-                align-items: flex-start;
             }
 
             .product-form-actions {

@@ -194,8 +194,6 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
 <style>
 .product-layout{color:#1b1c1b}
 .product-topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
-.product-title{margin:0;font-family:'Noto Serif',serif;font-size:34px;line-height:1.1;color:#76553e}
-.product-subtitle{margin-top:4px;color:#74645d;font-size:13px}
 .h-input{background:#f5f3f1;border:none;border-radius:999px;padding:11px 14px;width:280px}
 .h-btn{border:none;border-radius:999px;padding:10px 18px;display:inline-flex;align-items:center;gap:8px;font-weight:600;text-decoration:none;cursor:pointer}
 .h-btn-primary{background:#76553e;color:#fff}
@@ -288,8 +286,8 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
 
     <div class="product-topbar">
         <div>
-            <h1 class="product-title">Quản lý sản phẩm</h1>
-            <div class="product-subtitle">Danh sách bánh thủ công cao cấp</div>
+            <h1 class="admin-page-title">Quản lý sản phẩm</h1>
+            <div class="admin-page-subtitle">Danh sách bánh thủ công cao cấp</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <input class="h-input" type="text" placeholder="Tìm kiếm sản phẩm..." />

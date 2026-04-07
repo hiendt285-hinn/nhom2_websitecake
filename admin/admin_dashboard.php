@@ -51,8 +51,6 @@ html, body { margin: 0; min-height: 100%; background: #fbf9f7; font-family: 'Be 
 .admin-footer { border-top: 1px solid #ebe5e2; padding: 14px 24px; font-size: 13px; color: #7f716a; }
 .overview-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
 .overview-card { background: #fff; border: 1px solid #efe8e5; border-radius: 16px; padding: 16px; }
-.overview-title { font-family: 'Noto Serif', serif; color: #76553e; font-size: 28px; margin: 0 0 6px; }
-.overview-sub { color: #7f716a; margin-bottom: 16px; }
 .metric-label { font-size: 12px; color: #7f716a; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
 .metric-num { font-family: 'Noto Serif', serif; font-size: 30px; color: #76553e; margin-top: 6px; }
 .overview-charts { margin-top: 14px; display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
@@ -233,8 +231,8 @@ html, body { margin: 0; min-height: 100%; background: #fbf9f7; font-family: 'Be 
                             LIMIT 15
                         ");
                         ?>
-                        <h1 class="overview-title">Tổng quan quản trị</h1>
-                        <div class="overview-sub">Theo dõi nhanh dữ liệu chính của hệ thống Sweet Cake.</div>
+                        <h1 class="admin-page-title">Tổng quan quản trị</h1>
+                        <div class="admin-page-subtitle">Theo dõi nhanh dữ liệu chính của hệ thống Sweet Cake.</div>
                         <div class="overview-grid">
                             <div class="overview-card">
                                 <div class="metric-label">Tổng sản phẩm</div>

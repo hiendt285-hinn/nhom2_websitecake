@@ -322,25 +322,6 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
     background: #f9f6f2;
 }
 
-/* Page Header */
-.admin-page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.admin-page-title {
-    font-size: 24px;
-    color: #9a7b5a;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 /* Messages */
 .admin-message {
     padding: 15px 20px;
@@ -365,11 +346,6 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
 
 /* Responsive */
 @media (max-width: 768px) {
-    .admin-page-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
     .admin-action-cell {
         flex-direction: column;
     }
