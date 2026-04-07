@@ -355,7 +355,7 @@ a.admin-link:hover {
     min-width: 100px;
 }
 
-/* Add form (Thêm mới) - card nhỏ gọn */
+
 .admin-add-form .admin-form-row {
     display: flex;
     gap: 10px;
@@ -369,7 +369,6 @@ a.admin-link:hover {
     min-width: 180px;
 }
 
-/* Table action cells - nút Sửa/Xóa thống nhất */
 .admin-table .admin-action-cell {
     display: flex;
     gap: 8px;

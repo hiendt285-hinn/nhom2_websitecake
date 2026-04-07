@@ -97,8 +97,12 @@ $category_revenue_query = "
 $category_revenue = $conn->query($category_revenue_query);
 
 // Khách hàng mới (đăng ký trong 30 ngày gần nhất)
-$new_customers_result = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE role = 'customer' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
-$new_customers_count = $new_customers_result && $row = $new_customers_result->fetch_assoc() ? (int)$row['cnt'] : 0;
+$new_customers_count = 0;
+$new_customers_result = $conn->query("SELECT COUNT(*) FROM users WHERE role = 'customer' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+if ($new_customers_result && ($row = $new_customers_result->fetch_row())) {
+    $new_customers_count = (int)$row[0];
+}
+$new_customers_result = null;
 
 // Danh sách khách hàng đăng ký (mới nhất)
 $registered_customers_query = "SELECT id, username, email, full_name, phone, created_at FROM users WHERE role = 'customer' ORDER BY created_at DESC LIMIT 15";
@@ -426,7 +430,7 @@ $order_range_display = date('d/m/Y', strtotime($order_filter_from)) . ' – ' . 
     <div class="stat-card">
         <div class="stat-info">
             <h3>Khách hàng mới (30 ngày)</h3>
-            <div class="stat-number"><?php echo number_format($new_customers_count); ?></div>
+            <div class="stat-number"><?php echo number_format((int)$new_customers_count); ?></div>
         </div>
         <div class="stat-icon customers-icon">
             <i class="fas fa-user-plus"></i>
@@ -625,7 +629,7 @@ $order_range_display = date('d/m/Y', strtotime($order_filter_from)) . ' – ' . 
                         <td><?php echo date('H:i d/m/Y', strtotime($ord['created_at'])); ?></td>
                         <td class="text-right amount"><?php echo number_format($ord['total_amount'], 0, ',', '.'); ?>đ</td>
                         <td><span class="badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($statusText); ?></span></td>
-                        <td><a href="?page=orders" class="view-all">Xem</a></td>
+                        <td><a href="?page=order_detail&id=<?php echo (int)$ord['id']; ?>" class="view-all">Xem</a></td>
                     </tr>
                 <?php endwhile; ?>
                 <?php else: ?>

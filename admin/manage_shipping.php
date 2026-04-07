@@ -20,11 +20,11 @@ function orderStatusLabel($status) {
 
 function orderStatusClass($status) {
     $map = [
-        'pending'   => 'status-pending',
-        'confirmed' => 'status-confirmed',
-        'shipping'  => 'status-shipping',
-        'delivered' => 'status-delivered',
-        'cancelled' => 'status-cancelled',
+        'pending'   => 'order-badge-pending',
+        'confirmed' => 'order-badge-confirmed',
+        'shipping'  => 'order-badge-shipping',
+        'delivered' => 'order-badge-delivered',
+        'cancelled' => 'order-badge-cancelled',
     ];
     return $map[$status] ?? '';
 }
@@ -70,337 +70,301 @@ if ($filterStatus !== '') {
 ?>
 
 <style>
-    /* Variables */
-    :root {
-        --primary-color: #9a7b5a;
-        --primary-light: #A0522D;
-        --success-color: #27ae60;
-        --warning-color: #f39c12;
-        --info-color: #3498db;
-        --shipping-color: #9b59b6;
-        --danger-color: #e74c3c;
-        --dark-color: #9a7b5a;
-        --border-color: #e0e0e0;
-        --bg-light: #f8f9fa;
-    }
+/* Status Badges */
+.order-badge { 
+    display: inline-block; 
+    padding: 4px 10px; 
+    border-radius: 20px; 
+    font-size: 11px; 
+    font-weight: 600; 
+    white-space: nowrap;
+}
+.order-badge-pending   { background: #f39c12; color: #fff; }
+.order-badge-confirmed { background: #3498db; color: #fff; }
+.order-badge-shipping  { background: #9b59b6; color: #fff; }
+.order-badge-delivered { background: #27ae60; color: #fff; }
+.order-badge-cancelled { background: #e74c3c; color: #fff; }
 
-    .status-badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        text-align: center;
-        min-width: 100px;
-    }
+/* Filter Section */
+.order-filter { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    flex-wrap: wrap; 
+    margin-bottom: 16px; 
+}
+.order-filter a { 
+    padding: 6px 14px; 
+    border-radius: 8px; 
+    text-decoration: none; 
+    font-size: 13px; 
+    font-weight: 500; 
+    background: #f0f0f0; 
+    color: #2c3e50; 
+    transition: all 0.3s ease;
+}
+.order-filter a:hover { background: #e0e0e0; }
+.order-filter a.active { background: #9a7b5a; color: #fff; }
 
-    .status-pending {
-        background: #fff3e0;
-        color: #e65100;
-        border-left: 3px solid var(--warning-color);
-    }
+.order-address { 
+    max-width: 150px; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    white-space: nowrap; 
+}
 
-    .status-confirmed {
-        background: #e3f2fd;
-        color: #0d47a1;
-        border-left: 3px solid var(--info-color);
-    }
+/* Action Container */
+.order-actions { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+    flex-wrap: nowrap; 
+    white-space: nowrap;
+}
 
-    .status-shipping {
-        background: #f3e5f5;
-        color: #4a0072;
-        border-left: 3px solid var(--shipping-color);
-    }
+/* Button Styles - Đồng bộ với manage_orders */
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 70px;
+    height: 32px;
+    white-space: nowrap;
+}
 
-    .status-delivered {
-        background: #e8f5e9;
-        color: #1b5e20;
-        border-left: 3px solid var(--success-color);
-    }
+.admin-btn i {
+    font-size: 12px;
+}
 
-    .status-cancelled {
-        background: #ffebee;
-        color: #b71c1c;
-        border-left: 3px solid var(--danger-color);
-    }
+.admin-btn-sm {
+    min-width: 60px;
+    height: 30px;
+    padding: 4px 8px;
+    font-size: 11px;
+}
 
-    /* Filter Section */
-    .filter-section {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        flex-wrap: wrap;
-        margin-bottom: 20px;
-        padding: 15px;
-        background: var(--bg-light);
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-    }
+.admin-btn-primary {
+    background: #9a7b5a;
+    color: white;
+}
 
-    .filter-label {
-        font-weight: 600;
-        color: var(--dark-color);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
+.admin-btn-primary:hover {
+    background: #A0522D;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(139,69,19,0.2);
+}
 
-    .filter-buttons {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
+.admin-btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
 
-    .filter-btn {
-        padding: 8px 20px;
-        border-radius: 25px;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 500;
-        background: white;
-        color: var(--dark-color);
-        border: 1px solid var(--border-color);
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
+.admin-btn-secondary:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
 
-    .filter-btn:hover {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-    }
+/* Select Box - Cân đối với button */
+.order-status-select {
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 2px solid #e0e0e0;
+    font-size: 12px;
+    min-width: 110px;
+    width: 110px;
+    height: 32px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
 
-    .filter-btn.active {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-    }
+.order-status-select:focus {
+    outline: none;
+    border-color: #9a7b5a;
+    box-shadow: 0 0 0 3px rgba(139,69,19,0.1);
+}
 
-    /* Table Styles */
-    .table-responsive {
-        overflow-x: auto;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-    }
+/* Form Actions */
+.order-actions form {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
 
+/* Page Header */
+.admin-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.admin-page-title {
+    font-size: 24px;
+    color: #9a7b5a;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Table */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.admin-table th {
+    background: #9a7b5a;
+    color: white;
+    font-weight: 600;
+    padding: 12px 8px;
+    font-size: 13px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.admin-table tbody tr:hover td {
+    background: #f9f6f2;
+}
+
+.admin-link {
+    color: #8B4513;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.admin-link:hover {
+    text-decoration: underline;
+}
+
+/* Card */
+.admin-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    overflow-x: auto;
+}
+
+/* Payment method icon + text */
+.payment-method {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.payment-method i {
+    color: #8B4513;
+    font-size: 12px;
+    width: 16px;
+}
+
+/* Amount */
+.amount {
+    font-weight: 600;
+    color: #8B4513;
+    white-space: nowrap;
+}
+
+/* Date */
+.order-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.order-date i {
+    color: #8B4513;
+    font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
     .admin-table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        min-width: 1200px;
+        display: block;
+        overflow-x: auto;
     }
-
-    .admin-table th {
-        background: var(--primary-color);
-        color: white;
-        font-weight: 600;
-        padding: 15px 12px;
-        font-size: 14px;
-        text-align: left;
-        white-space: nowrap;
+    
+    .order-address { 
+        max-width: 120px; 
     }
-
-    .admin-table td {
-        padding: 15px 12px;
-        border-bottom: 1px solid var(--border-color);
-        font-size: 14px;
-        vertical-align: middle;
+    
+    .order-status-select {
+        min-width: 100px;
+        width: 100px;
     }
-
-    .admin-table tbody tr:hover td {
-        background: #f9f6f2;
+    
+    .admin-btn {
+        min-width: 60px;
+        padding: 6px 8px;
     }
+}
 
-    /* Order Info */
-    .order-link {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
+@media (max-width: 992px) {
+    .order-actions {
+        flex-direction: column;
+        align-items: stretch;
         gap: 4px;
     }
-
-    .order-link:hover {
-        text-decoration: underline;
+    
+    .order-actions form {
+        flex-direction: column;
+        width: 100%;
     }
-
-    .order-address {
-        max-width: 200px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        color: #666;
+    
+    .admin-btn-sm {
+        width: 100%;
+        min-width: 100%;
     }
-
-    .payment-method {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 8px;
-        background: #f5f5f5;
-        border-radius: 4px;
-        font-size: 12px;
+    
+    .order-status-select {
+        width: 100%;
+        min-width: 100%;
     }
+}
 
-    .amount {
-        font-weight: 600;
-        color: var(--primary-color);
+@media (max-width: 768px) { 
+    .order-address { max-width: 100px; } 
+    
+    .admin-page-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
-
-    /* Action Buttons - Tất cả button có kích thước bằng nhau */
-    .action-buttons {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
+    
+    .order-filter {
+        flex-direction: column;
+        align-items: flex-start;
     }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 500;
-        text-decoration: none;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-width: 100px;
-        height: 38px;
-        white-space: nowrap;
-    }
-
-    .btn i {
-        font-size: 14px;
-    }
-
-    .btn-sm {
-        min-width: 100px;
-        height: 38px;
-        padding: 8px 12px;
-    }
-
-    .btn-primary {
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-light);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(139, 69, 19, 0.2);
-    }
-
-    .btn-secondary {
-        background: #95a5a6;
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background: #7f8c8d;
-        transform: translateY(-2px);
-    }
-
-    .btn-success {
-        background: var(--success-color);
-        color: white;
-    }
-
-    .btn-success:hover {
-        background: #219a52;
-        transform: translateY(-2px);
-    }
-
-    .btn-info {
-        background: var(--info-color);
-        color: white;
-    }
-
-    .btn-info:hover {
-        background: #2980b9;
-        transform: translateY(-2px);
-    }
-
-    /* Status Form */
-    .status-form {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-
-    .status-select {
-        padding: 8px 12px;
-        border-radius: 6px;
-        border: 1px solid var(--border-color);
-        font-size: 13px;
-        min-width: 140px;
-        height: 38px;
-        background: white;
-        cursor: pointer;
-    }
-
-    .status-select:focus {
-        outline: none;
-        border-color: var(--primary-color);
-    }
-
-    /* Empty State */
-    .empty-state {
+    
+    .order-filter a {
+        width: 100%;
         text-align: center;
-        padding: 40px 20px;
-        color: #7f8c8d;
     }
-
-    .empty-state i {
-        font-size: 48px;
-        margin-bottom: 15px;
-        color: var(--border-color);
-    }
-
-    .empty-state p {
-        margin: 0;
-        font-size: 16px;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .filter-section {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .filter-buttons {
-            width: 100%;
-        }
-
-        .filter-btn {
-            flex: 1;
-            text-align: center;
-            justify-content: center;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
-        }
-
-        .status-form {
-            width: 100%;
-        }
-
-        .status-select {
-            width: 100%;
-        }
-    }
+}
 </style>
 
 <div class="admin-content">
@@ -409,33 +373,19 @@ if ($filterStatus !== '') {
             <i class="fas fa-truck"></i> 
             Quản lý giao hàng
         </h1>
-        <a href="admin_dashboard.php?page=orders" class="btn btn-secondary">
-            <i class="fas fa-shopping-cart"></i> 
-            Xem tất cả đơn hàng
+        <a href="admin_dashboard.php?page=orders" class="admin-btn admin-btn-secondary">
+            <i class="fas fa-shopping-cart"></i> Xem tất cả đơn hàng
         </a>
     </div>
 
-    <!-- Filter Section -->
-    <div class="filter-section">
-        <div class="filter-label">
-            <i class="fas fa-filter"></i>
-            Lọc theo trạng thái:
+    <div class="admin-card">
+        <div class="order-filter">
+            <span style="font-weight: 600; color: #2c3e50;">Lọc theo trạng thái:</span>
+            <a href="admin_dashboard.php?page=shipping" class="<?php echo $filterStatus === '' ? 'active' : ''; ?>">Tất cả</a>
+            <a href="admin_dashboard.php?page=shipping&filter_status=confirmed" class="<?php echo $filterStatus === 'confirmed' ? 'active' : ''; ?>">Đã xác nhận</a>
+            <a href="admin_dashboard.php?page=shipping&filter_status=shipping" class="<?php echo $filterStatus === 'shipping' ? 'active' : ''; ?>">Đang giao</a>
         </div>
-        <div class="filter-buttons">
-            <a href="admin_dashboard.php?page=shipping" class="filter-btn <?php echo $filterStatus === '' ? 'active' : ''; ?>">
-                <i class="fas fa-list"></i> Tất cả
-            </a>
-            <a href="admin_dashboard.php?page=shipping&filter_status=confirmed" class="filter-btn <?php echo $filterStatus === 'confirmed' ? 'active' : ''; ?>">
-                <i class="fas fa-check-circle"></i> Đã xác nhận
-            </a>
-            <a href="admin_dashboard.php?page=shipping&filter_status=shipping" class="filter-btn <?php echo $filterStatus === 'shipping' ? 'active' : ''; ?>">
-                <i class="fas fa-truck"></i> Đang giao
-            </a>
-        </div>
-    </div>
 
-    <!-- Table -->
-    <div class="table-responsive">
         <table class="admin-table">
             <thead>
                 <tr>
@@ -447,111 +397,73 @@ if ($filterStatus !== '') {
                     <th>Tổng tiền</th>
                     <th>Trạng thái</th>
                     <th>Ngày tạo</th>
-                    <th>Thao tác</th>
+                    <th style="min-width: 250px;">Hành động</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if ($orders && $orders->num_rows > 0): ?>
-                    <?php while ($row = $orders->fetch_assoc()): ?>
-                    <tr>
-                        <td>
-                            <a href="admin_dashboard.php?page=order_detail&id=<?php echo (int)$row['id']; ?>" class="order-link">
-                                <i class="fas fa-hashtag"></i>
-                                <?php echo (int)$row['id']; ?>
+                <?php if ($orders && $orders->num_rows > 0): while ($row = $orders->fetch_assoc()): ?>
+                <tr>
+                    <td><a href="admin_dashboard.php?page=order_detail&id=<?php echo (int)$row['id']; ?>" class="admin-link">#<?php echo (int)$row['id']; ?></a></td>
+                    <td><?php echo htmlspecialchars($row['full_name']); ?></td>
+                    <td><?php echo htmlspecialchars($row['phone']); ?></td>
+                    <td class="order-address" title="<?php echo htmlspecialchars($row['address']); ?>"><?php echo htmlspecialchars($row['address']); ?></td>
+                    <td>
+                        <span class="payment-method">
+                            <i class="fas <?php 
+                                echo $row['payment_method'] == 'cod' ? 'fa-money-bill' : 
+                                    ($row['payment_method'] == 'banking' ? 'fa-university' : 'fa-mobile-alt'); 
+                            ?>"></i>
+                            <?php echo paymentMethodLabel($row['payment_method']); ?>
+                        </span>
+                    </td>
+                    <td class="amount">
+                        <?php echo number_format((float)$row['total_amount'], 0, ',', '.'); ?> ₫
+                    </td>
+                    <td>
+                        <span class="order-badge <?php echo orderStatusClass($row['status']); ?>">
+                            <?php echo orderStatusLabel($row['status']); ?>
+                        </span>
+                    </td>
+                    <td>
+                        <span class="order-date">
+                            <i class="far fa-calendar-alt"></i>
+                            <?php echo date('d/m/Y', strtotime($row['created_at'])); ?>
+                            <i class="far fa-clock" style="margin-left: 2px;"></i>
+                            <?php echo date('H:i', strtotime($row['created_at'])); ?>
+                        </span>
+                    </td>
+                    <td>
+                        <div class="order-actions">
+                            <a href="admin_dashboard.php?page=order_detail&id=<?php echo (int)$row['id']; ?>" 
+                               class="admin-btn admin-btn-secondary"
+                               title="Xem chi tiết đơn hàng">
+                                <i class="fas fa-eye"></i> Chi tiết
                             </a>
-                        </td>
-                        <td>
-                            <strong><?php echo htmlspecialchars($row['full_name']); ?></strong>
-                        </td>
-                        <td>
-                            <span class="payment-method">
-                                <i class="fas fa-phone"></i>
-                                <?php echo htmlspecialchars($row['phone']); ?>
-                            </span>
-                        </td>
-                        <td class="order-address" title="<?php echo htmlspecialchars($row['address']); ?>">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <?php echo htmlspecialchars($row['address']); ?>
-                        </td>
-                        <td>
-                            <span class="payment-method">
-                                <i class="fas <?php 
-                                    echo $row['payment_method'] == 'cod' ? 'fa-money-bill' : 
-                                        ($row['payment_method'] == 'banking' ? 'fa-university' : 'fa-mobile-alt'); 
-                                ?>"></i>
-                                <?php echo paymentMethodLabel($row['payment_method']); ?>
-                            </span>
-                        </td>
-                        <td class="amount">
-                            <?php echo number_format((float)$row['total_amount'], 0, ',', '.'); ?> ₫
-                        </td>
-                        <td>
-                            <span class="status-badge <?php echo orderStatusClass($row['status']); ?>">
-                                <i class="fas <?php 
-                                    echo $row['status'] == 'shipping' ? 'fa-truck' : 
-                                        ($row['status'] == 'delivered' ? 'fa-check-circle' : 'fa-clock'); 
-                                ?>"></i>
-                                <?php echo orderStatusLabel($row['status']); ?>
-                            </span>
-                        </td>
-                        <td>
-                            <span class="payment-method">
-                                <i class="far fa-calendar-alt"></i>
-                                <?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?>
-                            </span>
-                        </td>
-                        <td>
-                            <div class="action-buttons">
-                                <!-- Button Xem chi tiết -->
-                                <a href="admin_dashboard.php?page=order_detail&id=<?php echo (int)$row['id']; ?>" 
-                                   class="btn btn-info btn-sm" 
-                                   title="Xem chi tiết đơn hàng">
-                                    <i class="fas fa-eye"></i>
-                                    <span>Chi tiết</span>
-                                </a>
-
-                                <!-- Form cập nhật trạng thái -->
-                                <form method="post" class="status-form" style="display: inline;">
-                                    <input type="hidden" name="order_id" value="<?php echo (int)$row['id']; ?>">
-                                    <select name="status" class="status-select" title="Chọn trạng thái">
-                                        <option value="confirmed" <?php if ($row['status'] === 'confirmed') echo 'selected'; ?>>
-                                            <i class="fas fa-check-circle"></i> Đã xác nhận
-                                        </option>
-                                        <option value="shipping"  <?php if ($row['status'] === 'shipping')  echo 'selected'; ?>>
-                                            <i class="fas fa-truck"></i> Đang giao
-                                        </option>
-                                        <option value="delivered" <?php if ($row['status'] === 'delivered') echo 'selected'; ?>>
-                                            <i class="fas fa-check-double"></i> Đã giao
-                                        </option>
-                                    </select>
-                                    <button type="submit" name="update_status" class="btn btn-primary btn-sm" 
-                                            title="Cập nhật trạng thái đơn hàng"
-                                            onclick="return confirm('Xác nhận cập nhật trạng thái đơn hàng?')">
-                                        <i class="fas fa-sync-alt"></i>
-                                        <span>Cập nhật</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="9">
-                            <div class="empty-state">
-                                <i class="fas <?php echo $filterStatus ? 'fa-filter' : 'fa-truck'; ?>"></i>
-                                <p>
-                                    <?php 
-                                    if ($filterStatus) {
-                                        echo 'Không có đơn hàng nào với trạng thái "' . orderStatusLabel($filterStatus) . '"';
-                                    } else {
-                                        echo 'Chưa có đơn hàng nào đang chờ giao (Đã xác nhận / Đang giao)';
-                                    }
-                                    ?>
-                                </p>
-                            </div>
-                        </td>
-                    </tr>
+                            <form method="post" class="order-actions">
+                                <input type="hidden" name="order_id" value="<?php echo (int)$row['id']; ?>">
+                                <select name="status" class="order-status-select" title="Chọn trạng thái">
+                                    <option value="confirmed" <?php if ($row['status'] === 'confirmed') echo 'selected'; ?>><?php echo orderStatusLabel('confirmed'); ?></option>
+                                    <option value="shipping"  <?php if ($row['status'] === 'shipping')  echo 'selected'; ?>><?php echo orderStatusLabel('shipping'); ?></option>
+                                    <option value="delivered" <?php if ($row['status'] === 'delivered') echo 'selected'; ?>><?php echo orderStatusLabel('delivered'); ?></option>
+                                </select>
+                                <button type="submit" name="update_status" class="admin-btn admin-btn-primary"
+                                        title="Cập nhật trạng thái đơn hàng"
+                                        onclick="return confirm('Xác nhận cập nhật trạng thái đơn hàng?')">
+                                    <i class="fas fa-sync-alt"></i> Cập nhật
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <?php endwhile; else: ?>
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 40px; color: #7f8c8d;">
+                        <i class="fas fa-truck" style="font-size: 48px; margin-bottom: 15px; display: block; opacity: 0.3;"></i>
+                        <p style="margin: 0; font-size: 16px;">
+                            <?php echo $filterStatus ? 'Không có đơn hàng nào với trạng thái "' . orderStatusLabel($filterStatus) . '"' : 'Chưa có đơn hàng nào đang chờ giao (Đã xác nhận / Đang giao)'; ?>
+                        </p>
+                    </td>
+                </tr>
                 <?php endif; ?>
             </tbody>
         </table>

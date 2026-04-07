@@ -22,13 +22,22 @@ $box_collection_id = 7;
 $hoatoc_id = 3;          
 $mousse_id = 5;          
 
+// Sản phẩm nổi bật (is_featured = 1)
+$featured_products = null;
+$featured_stmt = $conn->prepare("SELECT id, name, price, image, short_description FROM products WHERE is_featured = 1 AND is_active = 1 ORDER BY id DESC LIMIT 8");
+if ($featured_stmt) {
+    $featured_stmt->execute();
+    $featured_products = $featured_stmt->get_result();
+    $featured_stmt->close();
+}
+
 // === THỰC HIỆN TRUY VẤN DỮ LIỆU ===
 $box_products = getProductsByCategory($conn, $box_collection_id);
 $hoatoc_products = getProductsByCategory($conn, $hoatoc_id);
 $mousse_products = getProductsByCategory($conn, $mousse_id);
 
 ?>
-<div class="content-wrapper"> 
+<div class="content-wrapper page-container"> 
   
 <section class="hero">
   <div class="hero-content">
@@ -39,6 +48,43 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
   <div class="hero-imgs">
     <img src="../images/AE2CDC01-6F2C-4BE5-AF72-3C24605224B9.png" alt="Bánh">
   </div>
+</section>
+
+<section class="section-featured product-category-block">
+    <div class="product-category-inner">
+        <h2 class="product-category-title">| Sản phẩm nổi bật</h2>
+        <p class="section-featured-desc">Những món bánh được yêu thích nhất tại Sweet Cake</p>
+        <div class="products-grid">
+            <?php if ($featured_products && $featured_products->num_rows > 0): ?>
+                <?php while($row = $featured_products->fetch_assoc()): ?>
+                <div class="product-card">
+                    <a href="product-detail.php?id=<?php echo $row['id']; ?>">
+                        <img src="../images/<?php echo htmlspecialchars($row['image']); ?>" alt="<?php echo htmlspecialchars($row['name']); ?>">
+                    </a>
+                    <div class="product-info">
+                        <h3>
+                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
+                                <?php echo htmlspecialchars($row['name']); ?>
+                            </a>
+                        </h3>
+                        <div class="product-price"><?php echo number_format($row['price'], 0, ',', '.'); ?>₫</div>
+                        <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
+                        <div class="product-actions">
+                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p class="product-category-empty">Chưa có sản phẩm nổi bật. <a href="products.php">Xem tất cả sản phẩm</a></p>
+            <?php endif; ?>
+        </div>
+        <?php if ($featured_products && $featured_products->num_rows > 0): ?>
+        <div class="section-featured-cta">
+            <a href="products.php" class="btn-outline">Xem tất cả sản phẩm</a>
+        </div>
+        <?php endif; ?>
+    </div>
 </section>
 
 <section class="why-choose">
@@ -70,40 +116,38 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
     <h2 class="collection-title">Premium Box Collection<br><span>Open The Delight</span></h2>
     <p class="collection-desc">
         Khám phá bộ sưu tập bánh hộp cao cấp độc đáo từ Sweet Cake với những tuyệt phẩm Tiramisu, Matcha và Chocolate. 
-        Mỗi chiếc hộp tinh tế là lời mời gọi "open the delight" – mở ra niềm vui với từng tầng hương vị đậm đà, nơi rượu rum 
-        Captain Morgan hòa quyện cùng các nguyên liệu thượng hạng, mang đến một trải nghiệm ẩm thực xa xỉ và đậm chất nghệ thuật.
+        Mỗi chiếc hộp tinh tế là lời mời gọi "open the delight" – mở ra niềm vui với từng tầng hương vị đậm đà.
     </p>
 
-    <h3 class="box-subtitle">| Bánh hộp thiếc</h3>
-
-    <div class="product-grid products-grid">
-        <?php if ($box_products && $box_products->num_rows > 0): ?>
-            <?php while($row = $box_products->fetch_assoc()): ?>
-            <div class="product-card">
-                <a href="product-detail.php?id=<?php echo $row['id']; ?>">
-                    <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
-                </a>
-                <div class="product-info">
-                    <h3>
-                        <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
-                            <?php echo htmlspecialchars($row['name']) ?>
+    <div class="product-category-block">
+        <div class="product-category-inner">
+            <h2 class="product-category-title">| Bánh hộp thiếc</h2>
+            <div class="products-grid">
+                <?php if ($box_products && $box_products->num_rows > 0): ?>
+                    <?php while($row = $box_products->fetch_assoc()): ?>
+                    <div class="product-card">
+                        <a href="product-detail.php?id=<?php echo $row['id']; ?>">
+                            <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
                         </a>
-                    </h3>
-                    <div class="product-price">
-                        <?php echo number_format($row['price'], 0, ',', '.') ?>₫
+                        <div class="product-info">
+                            <h3>
+                                <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
+                                    <?php echo htmlspecialchars($row['name']) ?>
+                                </a>
+                            </h3>
+                            <div class="product-price"><?php echo number_format($row['price'], 0, ',', '.') ?>₫</div>
+                            <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
+                            <div class="product-actions">
+                                <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
-                    <div class="product-actions">
-                        <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                            <i class="fas fa-eye"></i> Xem chi tiết
-                        </a>
-                    </div>
-                </div>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <p class="product-category-empty">Hiện không có sản phẩm trong bộ sưu tập này.</p>
+                <?php endif; ?>
             </div>
-            <?php endwhile; ?>
-        <?php else: ?>
-            <p style="text-align:center; width:100%; color:#999;">Hiện không có sản phẩm trong bộ sưu tập này.</p>
-        <?php endif; ?>
+        </div>
     </div>
 </section>
 <section class="ship-fast">
@@ -121,37 +165,36 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
     </div>
 </section>
 
-<h3 class="box-subtitle">| Bánh kem hỏa tốc 1H</h3>
-
-<div class="product-grid products-grid">
-    <?php if ($hoatoc_products && $hoatoc_products->num_rows > 0): ?>
-      <?php while($row = $hoatoc_products->fetch_assoc()): ?>
-      <div class="product-card">
-        <a href="product-detail.php?id=<?php echo $row['id']; ?>">
-          <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
-        </a>
-        <div class="product-info">
-          <h3>
-            <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
-              <?php echo htmlspecialchars($row['name']) ?>
-            </a>
-          </h3>
-          <div class="product-price">
-            <?php echo number_format($row['price'], 0, ',', '.') ?>₫
-          </div>
-          <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
-          <div class="product-actions">
-            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                <i class="fas fa-eye"></i> Xem chi tiết
-            </a>
-          </div>
+<section class="product-category-block">
+    <div class="product-category-inner">
+        <h2 class="product-category-title">| Bánh kem hỏa tốc 1H</h2>
+        <div class="products-grid">
+            <?php if ($hoatoc_products && $hoatoc_products->num_rows > 0): ?>
+                <?php while($row = $hoatoc_products->fetch_assoc()): ?>
+                <div class="product-card">
+                    <a href="product-detail.php?id=<?php echo $row['id']; ?>">
+                        <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
+                    </a>
+                    <div class="product-info">
+                        <h3>
+                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
+                                <?php echo htmlspecialchars($row['name']) ?>
+                            </a>
+                        </h3>
+                        <div class="product-price"><?php echo number_format($row['price'], 0, ',', '.') ?>₫</div>
+                        <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
+                        <div class="product-actions">
+                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p class="product-category-empty">Hiện không có sản phẩm bánh kem hỏa tốc nào.</p>
+            <?php endif; ?>
         </div>
-      </div>
-      <?php endwhile; ?>
-    <?php else: ?>
-      <p style="text-align:center; width:100%; color:#999;">Hiện không có sản phẩm bánh kem hỏa tốc nào.</p>
-    <?php endif; ?>
-</div>
+    </div>
+</section>
 <section class="mousse-section">
     <div class="mousse-container">
     <div class="mousse-images">
@@ -171,36 +214,36 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
   </div>
 </section>
 
-<h3 class="box-subtitle">| Bánh lạnh Mousse</h3>
-<div class="product-grid products-grid">
-    <?php if ($mousse_products && $mousse_products->num_rows > 0): ?>
-      <?php while($row = $mousse_products->fetch_assoc()): ?>
-      <div class="product-card">
-        <a href="product-detail.php?id=<?php echo $row['id']; ?>">
-          <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
-        </a>
-        <div class="product-info">
-          <h3>
-            <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
-              <?php echo htmlspecialchars($row['name']) ?>
-            </a>
-          </h3>
-          <div class="product-price">
-            <?php echo number_format($row['price'], 0, ',', '.') ?>₫
-          </div>
-          <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div> 
-          <div class="product-actions">
-            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view">
-                <i class="fas fa-eye"></i> Xem chi tiết
-            </a>
-          </div>
+<section class="product-category-block">
+    <div class="product-category-inner">
+        <h2 class="product-category-title">| Bánh lạnh Mousse</h2>
+        <div class="products-grid">
+            <?php if ($mousse_products && $mousse_products->num_rows > 0): ?>
+                <?php while($row = $mousse_products->fetch_assoc()): ?>
+                <div class="product-card">
+                    <a href="product-detail.php?id=<?php echo $row['id']; ?>">
+                        <img src="../images/<?php echo htmlspecialchars($row['image']) ?>" alt="<?php echo htmlspecialchars($row['name']) ?>">
+                    </a>
+                    <div class="product-info">
+                        <h3>
+                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" style="color:inherit;text-decoration:none;">
+                                <?php echo htmlspecialchars($row['name']) ?>
+                            </a>
+                        </h3>
+                        <div class="product-price"><?php echo number_format($row['price'], 0, ',', '.') ?>₫</div>
+                        <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
+                        <div class="product-actions">
+                            <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p class="product-category-empty">Hiện không có sản phẩm bánh Mousse nào.</p>
+            <?php endif; ?>
         </div>
-      </div>
-      <?php endwhile; ?>
-    <?php else: ?>
-      <p style="text-align:center; width:100%; color:#999;">Hiện không có sản phẩm bánh Mousse nào.</p>
-    <?php endif; ?>
-</div>
+    </div>
+</section>
 <section class="store-intro">
   <div class="intro-container">
     <div class="intro-text">

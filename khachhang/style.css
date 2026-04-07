@@ -185,13 +185,17 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 /* Banner chính */
 .hero {
   position: relative;
-  height: 400px;     
+  height: 400px;
   padding: 40px 20px;
   overflow: hidden;
   background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url() center/cover;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid rgba(154, 123, 90, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
 }
 
 .hero-content {
@@ -257,9 +261,12 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   display: flex;
   flex-wrap: wrap;
   padding: 60px 40px;
-  background-color: #faf9f6;
+  background-color: var(--light-beige);
   gap: 30px;
-  
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
 }
 
 .why-left {
@@ -288,7 +295,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 .why-card {
   width: calc(50% - 10px);
-  background-color: #FFFFFF;
+  background-color: var(--white);
   border: 1px solid #f0f0f0;
   border-radius: 4px;
   padding: 20px;
@@ -331,9 +338,13 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 /* Box Collection */
 .box-collection {
-  background-color: #FFFFFF;
-  padding: 60px 40px;  
+  background-color: var(--light-beige);
+  padding: 48px 0 0;
   text-align: center;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
 }
 
 .collection-title {
@@ -357,10 +368,10 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 .collection-desc {
   font-size: 14px;
   max-width: 900px;
-  margin: 15px auto 30px;
-  color: #999;
+  margin: 15px auto 36px;
+  color: #666;
   line-height: 1.6;
-  font-weight: 400;
+  padding: 0 24px;
 }
 
 .box-subtitle {
@@ -371,10 +382,136 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   font-weight: 700;
 }
 
+/* ----- Ba block sản phẩm giống nhau: Bánh hộp thiếc, Bánh kem hỏa tốc 1H, Bánh lạnh Mousse ----- */
+.page-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
 
-/* ================================================= */
-/* === SẢN PHẨM & GRID LAYOUT (ĐỒNG BỘ VỚI products.php) === */
-/* ================================================= */
+.product-category-block {
+  padding: 40px 0 48px;
+  background: var(--light-beige, #faf9f6);
+  width: 100%;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.box-collection .product-category-block {
+  background: var(--light-beige);
+  padding-bottom: 48px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+}
+
+.product-category-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.product-category-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--main-brown, #9a7b5a);
+  margin: 0 0 24px 0;
+  padding: 0;
+  text-align: left;
+  font-family: 'Open Sans', 'Montserrat', sans-serif;
+}
+
+.product-category-block .products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.product-category-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #888;
+  padding: 32px 16px;
+  margin: 0;
+  font-size: 15px;
+}
+
+/* Sản phẩm nổi bật - mô tả & nút CTA */
+.section-featured-desc {
+  font-size: 15px;
+  color: #666;
+  margin: -8px 0 20px 0;
+  padding: 0;
+}
+
+.section-featured-cta {
+  text-align: center;
+  margin-top: 28px;
+}
+
+.btn-outline {
+  display: inline-block;
+  padding: 12px 28px;
+  border: 2px solid var(--main-brown, #9a7b5a);
+  color: var(--main-brown, #9a7b5a);
+  background: transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+  background: var(--main-brown, #9a7b5a);
+  color: #fff;
+}
+
+.product-category-empty a {
+  color: var(--main-brown, #9a7b5a);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.product-category-empty a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1200px) {
+  .product-category-block .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .product-category-block .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .product-category-block {
+    padding: 28px 0 36px;
+  }
+  .product-category-inner {
+    padding: 0 16px;
+  }
+  .product-category-title {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-category-block .products-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .products-container {
     padding: 20px 0;
@@ -435,6 +572,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     min-height: 44px; /* Đảm bảo chiều cao thống nhất */
     font-family: 'Montserrat', sans-serif; /* Đồng bộ font */
@@ -564,10 +702,13 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 /* Ship Fast */
 .ship-fast {
   text-align: center;
-  background: #FFFFFF;
+  background: var(--light-beige);
   padding: 40px 20px;
-  border-radius: 0;
+  border-radius: 12px;
   margin-top: 0;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
 }
 
 .ship-fast h2 {
@@ -617,7 +758,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .box-subtitle {
-  background: #faf9f6;
+  background: var(--light-beige);
   padding: 40px 20px;
   text-align: left;
   font-family: 'Inter', sans-serif;
@@ -627,8 +768,12 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 /* Mousse Section */
 .mousse-section {
-  background-color: #FFFFFF;
+  background-color: var(--light-beige);
   padding: 60px 20px;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
 }
 
 .mousse-container {
@@ -732,12 +877,15 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 
 /* Fruit Section */
 .fruit-section {
-  background: #FFFFFF;
+  background: var(--light-beige);
   padding: 40px 20px;
   text-align: center;
   font-family: 'Inter', sans-serif;
-  border-radius: 0;
+  border-radius: 12px;
   margin-top: 0;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
 }
 
 .fruit-section h2 {
@@ -783,12 +931,14 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 /* Cake Options and Size */
 .cake-options, .cake-size {
   text-align: center;
-  background-color: #faf9f6;
+  background-color: var(--light-beige);
   padding: 40px 20px;
-  border-radius: 0;     /* bỏ bo góc nếu muốn full width liền mạch */
-  margin: 40px 0;       /* bỏ auto để sát lề trái/phải */
-  width: 100%;          /* chiếm toàn bộ chiều ngang */
+  border-radius: 12px;
+  margin: 24px 0;
+  width: 100%;
   max-width: none;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .cake-options h2, .cake-size h2 {
@@ -808,7 +958,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .type-card {
-  background: #faf9f6;
+  background: var(--light-beige);
   border-radius: 20px;
   padding: 20px;
   width: 180px;
@@ -841,7 +991,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .flavor {
-  background: #faf9f6;
+  background: var(--light-beige);
   padding: 10px 20px;
   border-radius: 30px;
   font-weight: 600;
@@ -892,17 +1042,25 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
   transform: scale(1.05);
 }
 
-/* Policy Section (Tách background riêng, ví dụ thay đổi thành #f9f9f9) */
+/* Policy Section */
 .policy-section {
   text-align: center;
-  background-color: #FFFFFF;
+  background-color: var(--light-beige);
   padding: 40px 20px;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
 }
 
 .store-system {
-  background-color: #FFFFFF;
+  background-color: var(--light-beige);
   padding: 40px 20px;
   text-align: center;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
 }
 
 .policy-section h2 {
@@ -939,7 +1097,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .policy-card {
-  background: #FFFFFF;
+  background: #fff;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   overflow: hidden;
@@ -997,7 +1155,7 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 
 .store-card {
-  background: #FFFFFF;
+  background: #fff;
   border-radius: 4px;
   padding: 20px;
   text-align: left;
@@ -1185,9 +1343,12 @@ input, textarea, select { font-family: 'Open Sans', sans-serif; }
 }
 /* --- Phần giới thiệu cửa hàng --- */
 .store-intro {
-  background: #FFFFFF;
-  border-radius: 0;
-  margin: 0;
+  background: var(--light-beige);
+  border-radius: 12px;
+  margin: 0 0 24px 0;
+  border: 1px solid rgba(154, 123, 90, 0.2);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  padding: 48px 24px;
 }
 
 .intro-container {

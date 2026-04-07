@@ -49,16 +49,23 @@ if (isset($_POST['auto_confirm_pending'])) {
     exit();
 }
 
-// Cập nhật trạng thái đơn hàng nếu có
+// Cập nhật trạng thái đơn hàng nếu có (không cho cập nhật khi đơn đã giao hoặc đã hủy)
 if (isset($_POST['update_status'])) {
     $orderId = (int)($_POST['order_id'] ?? 0);
     $status = $_POST['status'] ?? '';
     $allowed = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'];
     if ($orderId && in_array($status, $allowed, true)) {
-        $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
-        $stmt->bind_param("si", $status, $orderId);
-        $stmt->execute();
-        $stmt->close();
+        $check = $conn->prepare("SELECT id FROM orders WHERE id = ? AND status NOT IN ('delivered', 'cancelled') LIMIT 1");
+        $check->bind_param("i", $orderId);
+        $check->execute();
+        $canUpdate = $check->get_result()->num_rows > 0;
+        $check->close();
+        if ($canUpdate) {
+            $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
+            $stmt->bind_param("si", $status, $orderId);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
     $filterStatus = isset($_GET['filter_status']) ? '&filter_status=' . urlencode($_GET['filter_status']) : '';
     header("Location: admin_dashboard.php?page=orders" . $filterStatus);
@@ -87,8 +94,9 @@ if ($filterStatus !== '') {
     display: inline-block; 
     padding: 4px 10px; 
     border-radius: 20px; 
-    font-size: 12px; 
+    font-size: 11px; 
     font-weight: 600; 
+    white-space: nowrap;
 }
 .order-badge-pending   { background: #f39c12; color: #fff; }
 .order-badge-confirmed { background: #3498db; color: #fff; }
@@ -118,7 +126,7 @@ if ($filterStatus !== '') {
 .order-filter a.active { background: #9a7b5a; color: #fff; }
 
 .order-address { 
-    max-width: 180px; 
+    max-width: 150px; 
     overflow: hidden; 
     text-overflow: ellipsis; 
     white-space: nowrap; 
@@ -128,8 +136,9 @@ if ($filterStatus !== '') {
 .order-actions { 
     display: flex; 
     align-items: center; 
-    gap: 8px; 
-    flex-wrap: wrap; 
+    gap: 6px; 
+    flex-wrap: nowrap; 
+    white-space: nowrap;
 }
 
 /* Button Styles - Đồng bộ với các trang khác */
@@ -137,29 +146,29 @@ if ($filterStatus !== '') {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    padding: 8px 16px;
+    gap: 4px;
+    padding: 6px 12px;
     border-radius: 6px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     text-decoration: none;
     border: none;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 100px;
-    height: 38px;
+    min-width: 70px;
+    height: 32px;
     white-space: nowrap;
 }
 
 .admin-btn i {
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .admin-btn-sm {
-    min-width: 90px;
-    height: 36px;
-    padding: 6px 12px;
-    font-size: 13px;
+    min-width: 60px;
+    height: 30px;
+    padding: 4px 8px;
+    font-size: 11px;
 }
 
 .admin-btn-primary {
@@ -183,24 +192,15 @@ if ($filterStatus !== '') {
     transform: translateY(-2px);
 }
 
-.admin-btn-danger {
-    background: #e74c3c;
-    color: white;
-}
-
-.admin-btn-danger:hover {
-    background: #c0392b;
-    transform: translateY(-2px);
-}
-
 /* Select Box - Cân đối với button */
 .order-status-select {
-    padding: 8px 12px;
+    padding: 5px 8px;
     border-radius: 6px;
     border: 2px solid #e0e0e0;
-    font-size: 13px;
-    min-width: 140px;
-    height: 38px;
+    font-size: 12px;
+    min-width: 110px;
+    width: 110px;
+    height: 32px;
     background: white;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -216,7 +216,7 @@ if ($filterStatus !== '') {
 .order-actions form {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin: 0;
 }
 
@@ -259,22 +259,23 @@ if ($filterStatus !== '') {
 .admin-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: auto;
 }
 
 .admin-table th {
     background: #9a7b5a;
     color: white;
     font-weight: 600;
-    padding: 15px 12px;
-    font-size: 14px;
+    padding: 12px 8px;
+    font-size: 13px;
     text-align: left;
     white-space: nowrap;
 }
 
 .admin-table td {
-    padding: 15px 12px;
+    padding: 12px 8px;
     border-bottom: 1px solid #e0e0e0;
-    font-size: 14px;
+    font-size: 13px;
     vertical-align: middle;
 }
 
@@ -301,11 +302,68 @@ if ($filterStatus !== '') {
     overflow-x: auto;
 }
 
+/* Payment method icon + text */
+.payment-method {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.payment-method i {
+    color: #8B4513;
+    font-size: 12px;
+    width: 16px;
+}
+
+/* Amount */
+.amount {
+    font-weight: 600;
+    color: #8B4513;
+    white-space: nowrap;
+}
+
+/* Date */
+.order-date {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.order-date i {
+    color: #8B4513;
+    font-size: 12px;
+}
+
 /* Responsive */
+@media (max-width: 1200px) {
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .order-address { 
+        max-width: 120px; 
+    }
+    
+    .order-status-select {
+        min-width: 100px;
+        width: 100px;
+    }
+    
+    .admin-btn {
+        min-width: 60px;
+        padding: 6px 8px;
+    }
+}
+
 @media (max-width: 992px) {
     .order-actions {
         flex-direction: column;
         align-items: stretch;
+        gap: 4px;
     }
     
     .order-actions form {
@@ -325,7 +383,7 @@ if ($filterStatus !== '') {
 }
 
 @media (max-width: 768px) { 
-    .order-address { max-width: 120px; } 
+    .order-address { max-width: 100px; } 
     
     .admin-page-header {
         flex-direction: column;
@@ -340,11 +398,6 @@ if ($filterStatus !== '') {
     .order-filter a {
         width: 100%;
         text-align: center;
-    }
-    
-    .admin-table {
-        display: block;
-        overflow-x: auto;
     }
 }
 </style>
@@ -392,7 +445,7 @@ if ($filterStatus !== '') {
                     <th>Tổng tiền</th>
                     <th>Trạng thái</th>
                     <th>Ngày tạo</th>
-                    <th>Hành động</th>
+                    <th style="min-width: 250px;">Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -403,15 +456,15 @@ if ($filterStatus !== '') {
                     <td><?php echo htmlspecialchars($row['phone']); ?></td>
                     <td class="order-address" title="<?php echo htmlspecialchars($row['address']); ?>"><?php echo htmlspecialchars($row['address']); ?></td>
                     <td>
-                        <span style="display: flex; align-items: center; gap: 5px;">
+                        <span class="payment-method">
                             <i class="fas <?php 
                                 echo $row['payment_method'] == 'cod' ? 'fa-money-bill' : 
                                     ($row['payment_method'] == 'banking' ? 'fa-university' : 'fa-mobile-alt'); 
-                            ?>" style="color: #8B4513;"></i>
+                            ?>"></i>
                             <?php echo paymentMethodLabel($row['payment_method']); ?>
                         </span>
                     </td>
-                    <td style="font-weight: 600; color: #8B4513;">
+                    <td class="amount">
                         <?php echo number_format((float)$row['total_amount'], 0, ',', '.'); ?> ₫
                     </td>
                     <td>
@@ -420,22 +473,23 @@ if ($filterStatus !== '') {
                         </span>
                     </td>
                     <td>
-                        <span style="display: flex; align-items: center; gap: 5px;">
-                            <i class="far fa-calendar-alt" style="color: #8B4513;"></i>
-                            <?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?>
+                        <span class="order-date">
+                            <i class="far fa-calendar-alt"></i>
+                            <?php echo date('d/m/Y', strtotime($row['created_at'])); ?>
+                            <i class="far fa-clock" style="margin-left: 2px;"></i>
+                            <?php echo date('H:i', strtotime($row['created_at'])); ?>
                         </span>
                     </td>
                     <td>
                         <div class="order-actions">
-                            <!-- Button Chi tiết -->
                             <a href="admin_dashboard.php?page=order_detail&id=<?php echo (int)$row['id']; ?>" 
-                               class="admin-btn admin-btn-secondary admin-btn-sm"
+                               class="admin-btn admin-btn-secondary"
                                title="Xem chi tiết đơn hàng">
                                 <i class="fas fa-eye"></i> Chi tiết
                             </a>
-                            
-                            <!-- Form cập nhật trạng thái -->
-                            <form method="post" class="order-actions" style="display: inline-flex; align-items: center; gap: 8px;">
+                            <?php if ($row['status'] !== 'delivered' && $row['status'] !== 'cancelled'): ?>
+                            <!-- Form cập nhật trạng thái (ẩn khi đã giao hoặc đã hủy) -->
+                            <form method="post" class="order-actions">
                                 <input type="hidden" name="order_id" value="<?php echo (int)$row['id']; ?>">
                                 <select name="status" class="order-status-select" title="Chọn trạng thái">
                                     <option value="pending"   <?php if ($row['status'] === 'pending')   echo 'selected'; ?>><?php echo orderStatusLabel('pending'); ?></option>
@@ -444,13 +498,13 @@ if ($filterStatus !== '') {
                                     <option value="delivered" <?php if ($row['status'] === 'delivered') echo 'selected'; ?>><?php echo orderStatusLabel('delivered'); ?></option>
                                     <option value="cancelled" <?php if ($row['status'] === 'cancelled') echo 'selected'; ?>><?php echo orderStatusLabel('cancelled'); ?></option>
                                 </select>
-                                <!-- Button Cập nhật -->
-                                <button type="submit" name="update_status" class="admin-btn admin-btn-primary admin-btn-sm"
+                                <button type="submit" name="update_status" class="admin-btn admin-btn-primary"
                                         title="Cập nhật trạng thái đơn hàng"
                                         onclick="return confirm('Xác nhận cập nhật trạng thái đơn hàng?')">
                                     <i class="fas fa-sync-alt"></i> Cập nhật
                                 </button>
                             </form>
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>

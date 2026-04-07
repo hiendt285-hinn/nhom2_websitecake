@@ -58,7 +58,7 @@ if (isset($_GET['delete_id'])) {
         $errorMsg = $conn->error ?: 'Lỗi khi xóa sản phẩm.';
         $stmt->close();
     } else {
-        // Có trong đơn đã giao → chỉ ẩn sản phẩm (giữ FK cho lịch sử đơn)
+        // Có trong đơn đã giao → chỉ ẩn sản phẩm 
         $stmt = $conn->prepare("UPDATE products SET is_active = 0 WHERE id = ?");
         $stmt->bind_param('i', $delete_id);
         if ($stmt->execute()) {
@@ -93,7 +93,7 @@ $totalPages = $totalProducts > 0 ? (int)ceil($totalProducts / $perPage) : 1;
 $currentPage = min(max(1, $currentPage), $totalPages);
 $offset = ($currentPage - 1) * $perPage;
 
-// Bộ lọc sắp xếp: newest | sold_desc | sold_asc
+// Bộ lọc sắp xếp:
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'newest';
 if (!in_array($sort, ['newest', 'sold_desc', 'sold_asc'], true)) {
     $sort = 'newest';
@@ -106,7 +106,7 @@ if ($sort === 'sold_desc') {
 }
 $sortParam = '&sort=' . urlencode($sort);
 
-// Lấy danh sách sản phẩm với tên danh mục và tổng đã bán (giới hạn 20/trang)
+// Lấy danh sách sản phẩm với tên danh mục và tổng đã bán 
 $sql = "SELECT p.*, c.name AS category_name,
         COALESCE(SUM(CASE WHEN o.status IN ('completed', 'delivered') THEN oi.quantity ELSE 0 END), 0) AS total_sold
         FROM products p

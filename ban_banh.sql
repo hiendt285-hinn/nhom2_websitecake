@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Mar 08, 2026 at 05:13 PM
+-- Generation Time: Mar 09, 2026 at 03:54 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -75,7 +75,12 @@ CREATE TABLE `contacts` (
 INSERT INTO `contacts` (`id`, `user_id`, `name`, `email`, `phone`, `message`, `status`, `created_at`) VALUES
 (1, 6, 'Đỗ Quang Hưng', 'hung123@gmail.com', '0248384933', 'Bánh ngon', 'new', '2026-03-03 13:24:47'),
 (2, 3, 'Đỗ Thu Hiền', 'hien@gmail.com', '0900000001', 'Tôi muốn hỏi về bánh sinh nhật cho bé 1 tuổi', 'new', '2025-12-03 08:30:00'),
-(3, NULL, 'Lê Văn Nam', 'namlevan@gmail.com', '0933222111', 'Có giao hàng tận nơi ở Bình Dương không ạ?', 'read', '2025-12-02 15:45:00');
+(3, NULL, 'Lê Văn Nam', 'namlevan@gmail.com', '0933222111', 'Có giao hàng tận nơi ở Bình Dương không ạ?', 'read', '2025-12-02 15:45:00'),
+(4, 3, 'Đỗ Thu Hiền', 'hien@gmail.com', '0900000001', 'Bánh rất ngon, lần sau sẽ ghé tiếp', 'new', '2026-03-09 08:13:34'),
+(5, 3, 'Đỗ Thu Hiền', 'hien@gmail.com', '0900000001', 'Bánh rất ngon, lần sau sẽ ghé tiếp', 'new', '2026-03-09 08:13:41'),
+(6, 3, 'Đỗ Thu Hiền', 'hien@gmail.com', '0900000001', 'Bánh rất ngon, lần sau sẽ ghé tiếp', 'new', '2026-03-09 08:17:55'),
+(7, 3, 'Đỗ Thu Hiền', 'hien@gmail.com', '0900000001', 'Cảm ơn bạn rất nhiều', 'new', '2026-03-09 08:19:10'),
+(8, 8, 'Nguyễn Thanh Hương', 'huong123@gmail.com', '0834798273', 'Ngon', 'new', '2026-03-09 09:42:17');
 
 -- --------------------------------------------------------
 
@@ -159,7 +164,12 @@ INSERT INTO `orders` (`id`, `user_id`, `full_name`, `phone`, `address`, `note`, 
 (6, 5, 'Hồ Quỳnh Anh', '0420032044', 'Hà Nội', '', 408000.00, '0', 72000.00, 'delivered', 'cod', '2026-03-03 07:40:19'),
 (7, 5, 'Hồ Quỳnh Anh', '0420032044', 'Hà nội', '', 127500.00, '0', 22500.00, 'delivered', 'cod', '2026-03-03 07:48:57'),
 (8, 5, 'Hồ Quỳnh Anh', '0420032044', 'Hà nội', '', 140000.00, '0', 0.00, 'delivered', 'cod', '2026-03-06 14:57:31'),
-(9, 5, 'Hồ Quỳnh Anh', '0420032044', 'Hà Nội', '', 1100000.00, '0', 0.00, 'delivered', 'cod', '2026-03-08 09:57:42');
+(9, 5, 'Hồ Quỳnh Anh', '0420032044', 'Hà Nội', '', 1100000.00, '0', 0.00, 'delivered', 'cod', '2026-03-08 09:57:42'),
+(10, 8, 'Nguyễn Thanh Hương', '0834798274', 'Bình Dương', '', 754849.00, '0', 151.00, 'shipping', 'cod', '2026-03-08 16:57:34'),
+(11, 8, 'Nguyễn Thanh Hương', '0834798274', 'Bình Dương', '', 240000.00, '', 0.00, 'shipping', 'cod', '2026-03-09 00:49:36'),
+(12, 8, 'Nguyễn Thanh Hương', '0834798274', 'Bình Dương', '', 439912.00, 'GIAM20%', 88.00, 'delivered', 'banking', '2026-03-09 00:55:24'),
+(13, 3, 'Đỗ Thu Hiền', '0900000001', 'Hà Nội', '', 1339000.00, 'FREESHIP350', 30000.00, 'delivered', 'banking', '2026-03-09 00:56:51'),
+(14, 8, 'Nguyễn Thanh Hương', '0834798274', 'Bình Dương', '', 150000.00, '', 0.00, 'pending', 'cod', '2026-03-09 01:57:14');
 
 -- --------------------------------------------------------
 
@@ -189,7 +199,17 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `size`, `flavor`, `qu
 (5, 6, 40, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 480000.00),
 (6, 7, 42, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 150000.00),
 (7, 8, 43, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 140000.00),
-(8, 9, 33, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 5, 220000.00);
+(8, 9, 33, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 5, 220000.00),
+(9, 10, 43, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 205000.00),
+(10, 10, 37, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 550000.00),
+(11, 11, 36, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 240000.00),
+(12, 12, 32, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 220000.00),
+(13, 12, 35, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 220000.00),
+(14, 13, 36, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 240000.00),
+(15, 13, 25, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 450000.00),
+(16, 13, 10, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 150000.00),
+(17, 13, 18, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 529000.00),
+(18, 14, 42, '13cm x 6cm', 'Cốt Cà Phê + Kem Cà Phê', 1, 150000.00);
 
 -- --------------------------------------------------------
 
@@ -247,16 +267,16 @@ INSERT INTO `products` (`id`, `name`, `slug`, `price`, `image`, `description`, `
 (30, 'Set bánh cupcake tulip', NULL, 150000, '692e9d1664e8e.webp', 'Set bánh cupcake vị vani nhân mứt việt quất, trang trí tạo hình như những bó hoa tulip mini nhỏ xinh cùng bướm giấy và kẹo bi bạc trang trí', 'Set bánh cupcake vị vani nhân mứt việt quất, trang trí tạo hình như những bó hoa tulip...', 8, 0, 1, '2025-12-02 15:02:30', '2025-12-02 15:02:30'),
 (31, 'Mousse sữa chua việt quất', NULL, 220000, '692e9d8f67105.webp', 'Cốt vani xen kẽ các tầng bánh. Tầng dưới cùng là lớp mousse việt quất, tiếp theo là tầng mousse sữa chua và trên cùng là lớp thạch gelatin việt quất. Trang trí bằng việt quất, dâu tươi Đà Lạt, socola trắng và lá hương thảo', 'Cốt vani xen kẽ các tầng bánh. Tầng dưới cùng là lớp mousse việt quất, tiếp theo...', 5, 0, 1, '2025-12-02 15:04:31', '2025-12-02 15:04:31'),
 (32, 'Mousse bơ sữa dừa', NULL, 220000, '692e9dbb45914.webp', 'Chất bánh mousse mềm, mịn, ngọt bùi, kết hợp với 2 lớp mousse thơm ngậy của bơ và sữa dừa, bồng bềnh nhẹ nhàng như tan trong miệng. Trang trí thêm hoa quả bên trên, cùng một bông hoa nhỏ xinh ở giữa.', 'Chất bánh mousse mềm, mịn, ngọt bùi, kết hợp với 2 lớp mousse thơm ngậy của bơ và sữa dừa...', 5, 0, 1, '2025-12-02 15:05:15', '2025-12-02 15:05:15'),
-(33, 'Mousse Xoài', NULL, 220000, '692e9de25a845.webp', 'Bánh mousse mang đậm hương vị xoài ngọt mát dễ chịu, kem tươi whipping cream kết hợp cùng sữa chua cốt vani, trang trí thêm xoài trên mặt bánh để thêm đậm vị cùng socola', 'Bánh mousse mang đậm hương vị xoài ngọt mát dễ chịu, kem tươi whipping cream kết hợp cùng sữa...', 5, 0, 1, '2025-12-02 15:05:54', '2025-12-02 15:05:54'),
+(33, 'Mousse Xoài', NULL, 220000, '692e9de25a845.webp', 'Bánh mousse mang đậm hương vị xoài ngọt mát dễ chịu, kem tươi whipping cream kết hợp cùng sữa chua cốt vani, trang trí thêm xoài trên mặt bánh để thêm đậm vị cùng socola', '0', 5, 1, 1, '2025-12-02 15:05:54', '2026-03-09 00:09:37'),
 (34, 'Mousse việt quất socola', NULL, 220000, '692e9e0c221b7.webp', 'Gồm 2 lớp mousse việt quất xen cùng 2 lớp cốt bánh vị socola. Trên cùng là lớp thạch tráng gương vị việt quất, trang trí thêm dâu, việt quất và nho xanh tươi', 'Gồm 2 lớp mousse việt quất xen cùng 2 lớp cốt bánh vị socola...', 5, 0, 1, '2025-12-02 15:06:36', '2025-12-02 15:06:36'),
 (35, 'Mousse sữa chua dâu tây', NULL, 220000, '692e9e3226f6f.webp', 'Cốt vani xen kẽ các tầng bánh. Dưới cùng là tầng bánh mousse dâu tây, tiếp theo là tầng mousse sữa chua và trên cùng là lớp thạch gelatin dâu tây. Trang trí bằng dâu tươi Đà Lạt, việt quất và socola trắng', 'Cốt vani xen kẽ các tầng bánh. Dưới cùng là tầng bánh mousse dâu tây, tiếp theo ...', 5, 0, 1, '2025-12-02 15:07:14', '2025-12-02 15:07:14'),
-(36, 'Bánh Tiramisu Cacao', NULL, 240000, '692e9e5e1c803.webp', 'Bánh tiramisu sử dụng cốt bánh bông lan cà phê và bánh lady finger chuẩn vị, kết hợp hài hòa cùng rượu Rhum, café, pha thêm vị béo của kem tươi, phô mai Mascarpone Ý cùng lòng đỏ trứng. Tạo nên vị thanh ngọt nhẹ nhàng, hơi hơi nồng hương rượu rất hấp dẫn, bên trên phủ lớp kem topping vị cà phê cốt dừa và bột cacao nguyên chất.', 'Bánh tiramisu sử dụng cốt bánh bông lan cà phê và bánh lady finger chuẩn vị, kết hợp hài hòa ...', 5, 0, 1, '2025-12-02 15:07:58', '2025-12-02 15:07:58'),
-(37, 'Set bánh su kem Singapore hoa quả chữ nhật', NULL, 550000, '692e9ee20eaa0.webp', 'Phù hợp cho các dịp tổ chức sự kiện lớn, tổng kết năm học, v.v với số lượng 48 bánh/set. Lớp vỏ dai mềm kết hợp cùng nhân kem vani mát lạnh, béo ngậy từ kem whipping. Trang trí kem topping cùng hoa quả tươi, mang đến cảm giác tươi mát: nho xanh, việt quất, xoài cát ngọt và dâu tây', 'Phù hợp cho các dịp tổ chức sự kiện lớn, tổng kết năm học, v.v với số lượng 48 bánh/set....', 9, 0, 1, '2025-12-02 15:10:10', '2025-12-02 15:10:10'),
+(36, 'Bánh Tiramisu Cacao', NULL, 240000, '692e9e5e1c803.webp', 'Bánh tiramisu sử dụng cốt bánh bông lan cà phê và bánh lady finger chuẩn vị, kết hợp hài hòa cùng rượu Rhum, café, pha thêm vị béo của kem tươi, phô mai Mascarpone Ý cùng lòng đỏ trứng. Tạo nên vị thanh ngọt nhẹ nhàng, hơi hơi nồng hương rượu rất hấp dẫn, bên trên phủ lớp kem topping vị cà phê cốt dừa và bột cacao nguyên chất.', '0', 5, 1, 1, '2025-12-02 15:07:58', '2026-03-09 00:10:48'),
+(37, 'Set bánh su kem Singapore hoa quả chữ nhật', NULL, 550000, '692e9ee20eaa0.webp', 'Phù hợp cho các dịp tổ chức sự kiện lớn, tổng kết năm học, v.v với số lượng 48 bánh/set. Lớp vỏ dai mềm kết hợp cùng nhân kem vani mát lạnh, béo ngậy từ kem whipping. Trang trí kem topping cùng hoa quả tươi, mang đến cảm giác tươi mát: nho xanh, việt quất, xoài cát ngọt và dâu tây', '0', 9, 1, 1, '2025-12-02 15:10:10', '2026-03-09 00:10:37'),
 (38, 'Set bánh cốc mix (mousse, bông lan trứng muối, bánh kem bắp)', NULL, 120000, '692e9f078c645.webp', 'Set quà tinh tế, tiện lợi: Không cần chia cắt, mix nhiều vị đa dạng, tặng kèm thiệp 20/10 xinh xắn. Nhận Pre-order các đơn hàng đến hết 15/10 (khu vực TP HCM) và 17/10 (Khu vực Hà Nội).', 'Set quà tinh tế, tiện lợi: Không cần chia cắt, mix nhiều vị đa dạng, tặng kèm thiệp 20/10 xinh xắn...', 9, 0, 1, '2025-12-02 15:10:47', '2025-12-02 15:10:47'),
 (39, 'Bông lan trứng muối chữ nhật cắt miếng viết chữ', NULL, 480000, '692e9f8f1f937.webp', 'Cốt bánh vani, kết hợp cùng sốt phô mai và sốt bơ trứng thơm ngậy, bên trên trang trí ruốc gà cay, chà bông heo và trứng muối, các miếng bánh được chia sẵn tiện lợi và có thể viết chữ theo yêu cầu', 'Cốt bánh vani, kết hợp cùng sốt phô mai và sốt bơ trứng thơm ngậy, bên trên trang trí ruốc gà cay,...', 9, 0, 1, '2025-12-02 15:13:03', '2025-12-02 15:13:03'),
 (40, 'Bánh kem chữ nhật vẽ logo', NULL, 480000, '692e9fc2acfd0.webp', 'Kem tươi vị sữa chua, mứt việt quất, cốt vani. Trang trí thêm hoa quả tươi gồm nho, xoài, dâu tây, việt quất. Bánh chữ nhật nguyên khối chưa cắt miếng, chữ viết tùy chọn', 'Kem tươi vị sữa chua, mứt việt quất, cốt vani. Trang trí thêm hoa quả tươi gồm nho, xoài, dâu tây, việt quất...', 9, 0, 1, '2025-12-02 15:13:54', '2025-12-02 15:13:54'),
 (41, 'Set bánh su kem Singapore bó hoa', NULL, 160000, '692ea00d962a9.webp', 'Bánh su kem Singapore với lớp vỏ dai mềm kết hợp cùng kem vani mát lạnh và béo ngậy từ kem whipping. Trang trí tạo hình bó hoa với kem topping và kẹo bi bạc trang trí cùng chiếc nơ voan trắng xinh xắn.', '0', 2, 0, 1, '2025-12-02 15:15:09', '2026-03-07 01:20:59'),
-(42, 'Mousse sữa chua việt quất', NULL, 150000, '69a6834e9bf51.webp', 'Cốt vani xen kẽ các tầng bánh. Tầng dưới cùng là lớp mousse việt quất, tiếp theo là tầng mousse sữa chua và trên cùng là lớp thạch gelatin việt quất. Trang trí bằng việt quất, dâu tươi Đà Lạt, socola trắng và lá hương thảo', 'Cốt vani xen kẽ các tầng bánh. Tầng dưới cùng là lớp mousse việt quất, tiếp theo là tầng mousse sữa chua và trên cùng là lớp thạch gelatin việt quất. Trang trí bằng việt quất, dâu tươi Đà Lạt, socola trắng và lá hương thảo', 5, 0, 1, '2026-03-03 13:44:30', '2026-03-03 13:44:30'),
+(42, 'Mousse sữa chua việt quất', NULL, 150000, '69a6834e9bf51.webp', 'Cốt vani xen kẽ các tầng bánh. Tầng dưới cùng là lớp mousse việt quất, tiếp theo là tầng mousse sữa chua và trên cùng là lớp thạch gelatin việt quất. Trang trí bằng việt quất, dâu tươi Đà Lạt, socola trắng và lá hương thảo', '0', 5, 1, 1, '2026-03-03 13:44:30', '2026-03-09 00:09:52'),
 (43, 'Bánh bông lan', NULL, 205000, '69a6934ecfde7.webp', '', '0', 6, 1, 0, '2026-03-03 14:52:46', '2026-03-08 17:20:51');
 
 -- --------------------------------------------------------
@@ -283,9 +303,9 @@ CREATE TABLE `promotions` (
 --
 
 INSERT INTO `promotions` (`id`, `code`, `title`, `discount_type`, `discount_value`, `min_order_amount`, `valid_from`, `valid_to`, `is_active`, `created_at`) VALUES
-(1, 'SINHNHAT15', 'Giảm 15% bánh sinh nhật', 'percent', 15.00, 0.00, NULL, NULL, 1, '2026-03-03 04:16:54'),
 (2, 'FREESHIP350', 'Freeship đơn từ 350K', 'fixed', 30000.00, 350000.00, '2026-03-08 11:18:00', '2026-03-29 11:18:00', 1, '2026-03-03 04:16:54'),
-(3, 'SWEET10', 'Giảm 10% đơn hàng', 'percent', 10.00, 200000.00, '2026-03-02 11:18:00', '2026-03-15 11:18:00', 1, '2026-03-03 04:16:54');
+(3, 'SWEET10', 'Giảm 10% đơn hàng', 'percent', 10.00, 200000.00, '2026-03-02 11:18:00', '2026-03-15 11:18:00', 1, '2026-03-03 04:16:54'),
+(4, 'GIAM20%', 'Giảm 20% đơn hàng từ 150k', 'percent', 0.02, 150000.00, '2026-03-02 23:16:00', '2026-03-31 23:16:00', 1, '2026-03-08 23:16:54');
 
 -- --------------------------------------------------------
 
@@ -332,11 +352,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `full_name`, `phone`, `address`, `role`, `is_active`, `created_at`, `updated_at`) VALUES
-(3, 'hien123', 'hien@gmail.com', '$2y$10$X4xUKJon6RvDk9QcF8ZxiOMg3Ig59AkbgSrlRn/kxLUV8ZDO6VDVK', 'Đỗ Thu Hiền', '0900000001', NULL, 'customer', 1, '2025-11-11 17:53:24', '2025-11-24 13:14:45'),
+(3, 'hien123', 'hien@gmail.com', '$2y$10$X4xUKJon6RvDk9QcF8ZxiOMg3Ig59AkbgSrlRn/kxLUV8ZDO6VDVK', 'Đỗ Thu Hiền', '0900000001', 'Thường Tín, Hà Nội', 'customer', 1, '2025-11-11 17:53:24', '2026-03-09 08:19:45'),
 (4, 'admin', 'admin@savorcake.com', '$2y$10$5CTm9hLBUl56XMiPlfxeK.KUCEN/tJn5HLd0x9WpM5dAvTJb1HgJC', 'Quản trị viên', NULL, NULL, 'admin', 1, '2025-11-19 09:43:20', '2025-11-19 09:43:20'),
 (5, 'quynhanh', 'quynhanh123@gmail.com', '$2y$10$Y70EZ0Kz929SVs/7U3o3LeCIlsR1.k392FlgIj3z612/P6d28yOfi', 'Hồ Quỳnh Anh', '0420032044', NULL, 'customer', 1, '2025-11-24 13:14:25', '2025-11-24 13:14:25'),
 (6, 'hung', 'hung123@gmail.com', '$2y$10$w4MeA7QjJ3sD/twl6Yzx1.g7tqGrUJsUOXaWy36.ble9fUOqCocre', 'Đỗ Quang Hưng', '0248384933', 'Hà Nội', 'customer', 1, '2026-03-03 13:24:34', '2026-03-03 13:24:34'),
-(8, 'huong', 'huong123@gmail.com', '$2y$10$3NEJa9AgYZpddnFfPIvO.eTPv9NGqocWLrE5P5KltOUr9fbxnaukm', 'Nguyễn Thanh Hương', '0834798274', 'Bình Dương', 'customer', 1, '2026-03-08 17:14:05', '2026-03-08 17:14:05');
+(8, 'huong', 'huong123@gmail.com', '$2y$10$3NEJa9AgYZpddnFfPIvO.eTPv9NGqocWLrE5P5KltOUr9fbxnaukm', 'Nguyễn Thanh Hương', '0834798273', 'Bình Dương', 'customer', 1, '2026-03-08 17:14:05', '2026-03-09 08:58:56');
 
 --
 -- Indexes for dumped tables
@@ -424,19 +444,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `contacts`
 --
 ALTER TABLE `contacts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `flavors`
 --
 ALTER TABLE `flavors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `news`
@@ -448,13 +468,13 @@ ALTER TABLE `news`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -466,13 +486,13 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT for table `promotions`
 --
 ALTER TABLE `promotions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `sizes`
 --
 ALTER TABLE `sizes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`

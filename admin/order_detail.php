@@ -16,32 +16,7 @@ if ($orderId <= 0) {
     exit();
 }
 
-// Cập nhật trạng thái hoặc hủy đơn
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    $status = trim($_POST['status'] ?? '');
-    $allowedStatus = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'];
-    
-    if ($action === 'update_status' && in_array($status, $allowedStatus, true)) {
-        $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
-        $stmt->bind_param("si", $status, $orderId);
-        $stmt->execute();
-        $stmt->close();
-        header("Location: admin_dashboard.php?page=order_detail&id=" . $orderId . "&updated=1");
-        exit();
-    }
-    
-    if ($action === 'cancel_order') {
-        $stmt = $conn->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");
-        $stmt->bind_param("i", $orderId);
-        $stmt->execute();
-        $stmt->close();
-        header("Location: admin_dashboard.php?page=order_detail&id=" . $orderId . "&cancelled=1");
-        exit();
-    }
-}
-
-// Lấy thông tin đơn hàng
+// Lấy thông tin đơn hàng (cần sớm để kiểm tra khi xử lý POST)
 $order = null;
 $stmt = $conn->prepare("SELECT * FROM orders WHERE id = ? LIMIT 1");
 $stmt->bind_param("i", $orderId);
@@ -51,6 +26,33 @@ if ($result && $row = $result->fetch_assoc()) {
     $order = $row;
 }
 $stmt->close();
+
+// Cập nhật trạng thái hoặc hủy đơn (chỉ khi đơn chưa giao và chưa hủy)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $order) {
+    $action = $_POST['action'] ?? '';
+    $status = trim($_POST['status'] ?? '');
+    $allowedStatus = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'];
+    $readOnlyStatus = ['delivered', 'cancelled'];
+    $canUpdate = !in_array($order['status'], $readOnlyStatus, true);
+    
+    if ($canUpdate && $action === 'update_status' && in_array($status, $allowedStatus, true)) {
+        $stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
+        $stmt->bind_param("si", $status, $orderId);
+        $stmt->execute();
+        $stmt->close();
+        header("Location: admin_dashboard.php?page=order_detail&id=" . $orderId . "&updated=1");
+        exit();
+    }
+    
+    if ($canUpdate && $action === 'cancel_order') {
+        $stmt = $conn->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");
+        $stmt->bind_param("i", $orderId);
+        $stmt->execute();
+        $stmt->close();
+        header("Location: admin_dashboard.php?page=order_detail&id=" . $orderId . "&cancelled=1");
+        exit();
+    }
+}
 
 if (!$order) {
     header("Location: admin_dashboard.php?page=orders");
@@ -625,7 +627,24 @@ $subtotal = $order['total_amount'] + ($order['discount_amount'] ?? 0);
             </div>
 
             <!-- Actions với các button có kích thước bằng nhau -->
-            <?php if ($order['status'] !== 'cancelled'): ?>
+            <?php if ($order['status'] === 'cancelled'): ?>
+            <div class="cancelled-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                Đơn hàng này đã bị hủy. Không thể thực hiện thao tác nào khác.
+            </div>
+            <?php elseif ($order['status'] === 'delivered'): ?>
+            <div class="actions-container">
+                <div class="delivered-message" style="padding: 15px 20px; background: #e8f5e9; color: #2e7d32; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle" style="font-size: 20px;"></i>
+                    <span>Đơn hàng đã giao. Không thể cập nhật trạng thái hoặc hủy đơn.</span>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn btn-warning" onclick="window.print()">
+                        <i class="fas fa-print"></i> In đơn hàng
+                    </button>
+                </div>
+            </div>
+            <?php else: ?>
             <div class="actions-container">
                 <div class="actions-title">
                     <i class="fas fa-tools"></i>
@@ -672,11 +691,6 @@ $subtotal = $order['total_amount'] + ($order['discount_amount'] ?? 0);
                         <i class="fas fa-print"></i> In đơn hàng
                     </button>
                 </div>
-            </div>
-            <?php else: ?>
-            <div class="cancelled-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                Đơn hàng này đã bị hủy. Không thể thực hiện thao tác nào khác.
             </div>
             <?php endif; ?>
         </div>

@@ -166,53 +166,51 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
         }
 
         /* Form Groups */
-        .admin-form-group {
-            margin-bottom: 5px;
-        }
+    .admin-form-group {
+        margin-bottom: 5px;
+        width: 100%;
+    }
 
-        .admin-form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .admin-form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-        .admin-form-group input[type="text"],
-        .admin-form-group input[type="number"],
-        .admin-form-group select,
-        .admin-form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            background: white;
-        }
+    .admin-form-group input[type="text"],
+    .admin-form-group input[type="number"],
+    .admin-form-group select,
+    .admin-form-group textarea {
+        width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: white;
+    box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+    }
 
-        .admin-form-group input:focus,
-        .admin-form-group select:focus,
-        .admin-form-group textarea:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(139,69,19,0.1);
-        }
+/* Đảm bảo select box có cùng kích thước */
+.admin-form-group select {
+    width: 100%;
+    appearance: none; /* Tùy chỉnh giao diện select */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B4513' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px; /* Chừa chỗ cho icon mũi tên */
+}
 
-        .admin-form-group input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 2px dashed var(--border-color);
-            border-radius: 10px;
-            background: var(--bg-light);
-            cursor: pointer;
-        }
-
-        .admin-form-group input[type="file"]:hover {
-            border-color: var(--primary-color);
-        }
+/* Fix cho container của 2 ô đầu */
+.product-form-grid > .admin-form-group:first-child,
+.product-form-grid > .admin-form-group:nth-child(2) {
+    width: 100%;
+}
 
         /* Checkbox Styles */
         .checkbox-label {

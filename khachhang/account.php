@@ -107,6 +107,11 @@ function status_label($status) {
 
     <div class="user-info">
         <h2>Thông tin cá nhân</h2>
+        <?php if (isset($_GET['updated']) && $_GET['updated'] === '1'): ?>
+        <div class="admin-message admin-message-success" style="margin-bottom:16px; padding:12px 16px; border-radius:8px; background:#e8f5e9; color:#2e7d32;">
+            <i class="fas fa-check-circle"></i> Cập nhật thông tin thành công!
+        </div>
+        <?php endif; ?>
         <div class="info-grid">
             <div class="info-item">
                 <label>Họ và tên</label>
