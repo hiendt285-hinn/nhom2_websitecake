@@ -17,7 +17,7 @@ mysqli_report(MYSQLI_REPORT_OFF);
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="admin_style.css">
-<?php if ($currentPage === 'reports'): ?>
+<?php if ($currentPage === 'reports' || $currentPage === 'dashboard'): ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <?php endif; ?>
 <style>
@@ -55,6 +55,24 @@ html, body { margin: 0; min-height: 100%; background: #fbf9f7; font-family: 'Be 
 .overview-sub { color: #7f716a; margin-bottom: 16px; }
 .metric-label { font-size: 12px; color: #7f716a; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
 .metric-num { font-family: 'Noto Serif', serif; font-size: 30px; color: #76553e; margin-top: 6px; }
+.overview-charts { margin-top: 14px; display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+.chart-card { background: #fff; border: 1px solid #efe8e5; border-radius: 16px; padding: 16px; }
+.chart-title { margin: 0 0 12px; font-size: 16px; color: #76553e; font-weight: 700; }
+.chart-wrap { position: relative; width: 100%; min-height: 300px; }
+.overview-table-card { margin-top: 14px; background: #fff; border: 1px solid #efe8e5; border-radius: 16px; padding: 16px; }
+.overview-table-title { margin: 0 0 12px; font-size: 16px; color: #76553e; font-weight: 700; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.overview-filter { display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+.overview-filter input[type="date"] { padding:8px 10px; border:1px solid #ddd; border-radius:8px; }
+.overview-table { width:100%; border-collapse: collapse; }
+.overview-table th,.overview-table td { border-bottom:1px solid #f0ece9; padding:10px 8px; font-size:13px; text-align:left; }
+.overview-table th { color:#7f716a; font-size:12px; text-transform:uppercase; letter-spacing:.5px; }
+.status-badge { padding:4px 8px; border-radius:999px; font-size:12px; font-weight:600; display:inline-block; }
+.status-badge.done { background:#e8f5e9; color:#2e7d32; }
+.status-badge.progress { background:#e3f2fd; color:#1565c0; }
+.status-badge.pending { background:#fff3e0; color:#ef6c00; }
+.status-badge.cancel { background:#ffebee; color:#c62828; }
+.link-small { color:#9a7b5a; text-decoration:none; font-size:13px; }
+@media (max-width: 1200px) { .overview-grid { grid-template-columns: 1fr; } .overview-charts { grid-template-columns: 1fr; } }
 @media (max-width: 992px) {
     .admin-sidebar { width: 92px; padding: 12px 8px; }
     .admin-brand-sub, .admin-user-role, .admin-user-name, .admin-nav-link span { display: none; }
@@ -88,7 +106,6 @@ html, body { margin: 0; min-height: 100%; background: #fbf9f7; font-family: 'Be 
             <li><a class="admin-nav-link <?php echo $currentPage === 'customers' ? 'active' : ''; ?>" href="admin_dashboard.php?page=customers"><i class="fas fa-users"></i><span>Khách hàng</span></a></li>
         </ul>
         <div class="admin-sidebar-bottom">
-            <a class="admin-nav-link <?php echo $currentPage === 'reports' ? 'active' : ''; ?>" href="admin_dashboard.php?page=reports"><i class="fas fa-chart-line"></i><span>Báo cáo</span></a>
             <a class="admin-nav-link" href="logout_admin.php"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a>
         </div>
     </aside>
@@ -113,6 +130,108 @@ html, body { margin: 0; min-height: 100%; background: #fbf9f7; font-family: 'Be 
                             $qCustomers = $conn->query("SELECT COUNT(*) AS total FROM customers");
                             if ($qCustomers) { $totalCustomers = (int)$qCustomers->fetch_assoc()['total']; }
                         }
+                        $newCustomersCount = 0;
+                        $qNewCustomers = $conn->query("SELECT COUNT(*) AS total FROM users WHERE role='customer' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)");
+                        if ($qNewCustomers) {
+                            $newCustomersCount = (int)$qNewCustomers->fetch_assoc()['total'];
+                        }
+                        $revenueLabels = [];
+                        $revenueValues = [];
+                        $revenueQuery = "
+                            SELECT DATE_FORMAT(created_at, '%m/%Y') AS label, SUM(total_price) AS revenue
+                            FROM orders
+                            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                            GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                            ORDER BY DATE_FORMAT(created_at, '%Y-%m') ASC
+                        ";
+                        $revenueResult = $conn->query($revenueQuery);
+                        if (!$revenueResult) {
+                            $revenueQuery = "
+                                SELECT DATE_FORMAT(created_at, '%m/%Y') AS label, SUM(total_amount) AS revenue
+                                FROM orders
+                                WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                                GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                                ORDER BY DATE_FORMAT(created_at, '%Y-%m') ASC
+                            ";
+                            $revenueResult = $conn->query($revenueQuery);
+                        }
+                        if ($revenueResult) {
+                            while ($row = $revenueResult->fetch_assoc()) {
+                                $revenueLabels[] = $row['label'];
+                                $revenueValues[] = (float)($row['revenue'] ?? 0);
+                            }
+                        }
+                        if (!$revenueLabels) {
+                            $revenueLabels = ['Chưa có dữ liệu'];
+                            $revenueValues = [0];
+                        }
+
+                        $statusLabels = [];
+                        $statusValues = [];
+                        $statusResult = $conn->query("SELECT status, COUNT(*) AS total FROM orders GROUP BY status");
+                        if ($statusResult) {
+                            while ($row = $statusResult->fetch_assoc()) {
+                                $statusLabels[] = ucfirst((string)$row['status']);
+                                $statusValues[] = (int)$row['total'];
+                            }
+                        }
+                        if (!$statusLabels) {
+                            $statusLabels = ['No data'];
+                            $statusValues = [1];
+                        }
+
+                        $categoryLabels = [];
+                        $categoryValues = [];
+                        $categoryResult = $conn->query("
+                            SELECT c.name, COUNT(p.id) AS total
+                            FROM categories c
+                            LEFT JOIN products p ON p.category_id = c.id
+                            GROUP BY c.id, c.name
+                            ORDER BY total DESC
+                            LIMIT 5
+                        ");
+                        if ($categoryResult) {
+                            while ($row = $categoryResult->fetch_assoc()) {
+                                $categoryLabels[] = $row['name'] ?: 'Khác';
+                                $categoryValues[] = (int)$row['total'];
+                            }
+                        }
+                        if (!$categoryLabels) {
+                            $categoryLabels = ['Chưa có dữ liệu'];
+                            $categoryValues = [0];
+                        }
+
+                        $orderDateFrom = isset($_GET['order_date_from']) ? trim($_GET['order_date_from']) : '';
+                        $orderDateTo = isset($_GET['order_date_to']) ? trim($_GET['order_date_to']) : '';
+                        $dateValid = function ($d) { return (bool)preg_match('/^\d{4}-\d{2}-\d{2}$/', $d); };
+                        $orderFilterFrom = ($orderDateFrom && $dateValid($orderDateFrom)) ? $orderDateFrom : date('Y-m-d', strtotime('-30 days'));
+                        $orderFilterTo = ($orderDateTo && $dateValid($orderDateTo)) ? $orderDateTo : date('Y-m-d');
+                        if (strtotime($orderFilterFrom) > strtotime($orderFilterTo)) {
+                            $orderFilterFrom = $orderFilterTo;
+                        }
+
+                        $ordersInRange = false;
+                        $todayOrdersStmt = $conn->prepare("
+                            SELECT o.id, o.full_name, o.phone, o.address, o.total_amount, o.status, o.created_at
+                            FROM orders o
+                            WHERE DATE(o.created_at) >= ? AND DATE(o.created_at) <= ?
+                            ORDER BY o.created_at DESC
+                            LIMIT 30
+                        ");
+                        if ($todayOrdersStmt) {
+                            $todayOrdersStmt->bind_param('ss', $orderFilterFrom, $orderFilterTo);
+                            $todayOrdersStmt->execute();
+                            $ordersInRange = $todayOrdersStmt->get_result();
+                            $todayOrdersStmt->close();
+                        }
+
+                        $registeredCustomers = $conn->query("
+                            SELECT id, username, email, full_name, phone, created_at
+                            FROM users
+                            WHERE role = 'customer'
+                            ORDER BY created_at DESC
+                            LIMIT 15
+                        ");
                         ?>
                         <h1 class="overview-title">Tổng quan quản trị</h1>
                         <div class="overview-sub">Theo dõi nhanh dữ liệu chính của hệ thống Sweet Cake.</div>
@@ -129,7 +248,156 @@ html, body { margin: 0; min-height: 100%; background: #fbf9f7; font-family: 'Be 
                                 <div class="metric-label">Tổng khách hàng</div>
                                 <div class="metric-num"><?php echo number_format($totalCustomers); ?></div>
                             </div>
+                            <div class="overview-card">
+                                <div class="metric-label">Doanh thu (đã giao)</div>
+                                <div class="metric-num"><?php echo number_format(array_sum($revenueValues), 0, ',', '.'); ?>đ</div>
+                            </div>
+                            <div class="overview-card">
+                                <div class="metric-label">Khách hàng mới (30 ngày)</div>
+                                <div class="metric-num"><?php echo number_format($newCustomersCount); ?></div>
+                            </div>
                         </div>
+                        <div class="overview-charts">
+                            <div class="chart-card">
+                                <h3 class="chart-title">Doanh thu 6 tháng gần đây</h3>
+                                <div class="chart-wrap"><canvas id="dashboardRevenueChart"></canvas></div>
+                            </div>
+                            <div class="chart-card">
+                                <h3 class="chart-title">Trạng thái đơn hàng</h3>
+                                <div class="chart-wrap"><canvas id="dashboardStatusChart"></canvas></div>
+                            </div>
+                            <div class="chart-card" style="grid-column: 1 / -1;">
+                                <h3 class="chart-title">Top 5 danh mục theo số sản phẩm</h3>
+                                <div class="chart-wrap"><canvas id="dashboardCategoryChart"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="overview-table-card">
+                            <h3 class="overview-table-title">
+                                Danh sách đơn hàng chi tiết đã đặt
+                                <a class="link-small" href="admin_dashboard.php?page=orders">Xem tất cả</a>
+                            </h3>
+                            <form class="overview-filter" method="get">
+                                <input type="hidden" name="page" value="dashboard">
+                                <label for="order_date_from">Từ ngày</label>
+                                <input type="date" id="order_date_from" name="order_date_from" value="<?php echo htmlspecialchars($orderFilterFrom); ?>">
+                                <label for="order_date_to">Đến ngày</label>
+                                <input type="date" id="order_date_to" name="order_date_to" value="<?php echo htmlspecialchars($orderFilterTo); ?>">
+                                <button type="submit" class="admin-btn admin-btn-primary admin-btn-sm">Lọc</button>
+                                <a class="admin-btn admin-btn-secondary admin-btn-sm" href="admin_dashboard.php?page=dashboard">30 ngày gần nhất</a>
+                            </form>
+                            <table class="overview-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th><th>Khách hàng</th><th>SĐT</th><th>Địa chỉ</th><th>Thời gian</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $statusMap = ['pending' => 'pending', 'confirmed' => 'progress', 'processing' => 'progress', 'shipping' => 'progress', 'delivered' => 'done', 'completed' => 'done', 'cancelled' => 'cancel'];
+                                    $statusTextMap = ['pending' => 'Chờ xử lý', 'confirmed' => 'Đã xác nhận', 'processing' => 'Đang xử lý', 'shipping' => 'Đang giao', 'delivered' => 'Đã giao', 'completed' => 'Hoàn thành', 'cancelled' => 'Đã hủy'];
+                                    if ($ordersInRange && $ordersInRange->num_rows > 0):
+                                        while ($ord = $ordersInRange->fetch_assoc()):
+                                            $statusClass = $statusMap[$ord['status']] ?? 'pending';
+                                            $statusText = $statusTextMap[$ord['status']] ?? $ord['status'];
+                                    ?>
+                                    <tr>
+                                        <td>#<?php echo (int)$ord['id']; ?></td>
+                                        <td><?php echo htmlspecialchars($ord['full_name'] ?: '—'); ?></td>
+                                        <td><?php echo htmlspecialchars($ord['phone'] ?: '—'); ?></td>
+                                        <td><?php echo htmlspecialchars(mb_substr($ord['address'] ?? '—', 0, 40)); ?><?php echo mb_strlen($ord['address'] ?? '') > 40 ? '…' : ''; ?></td>
+                                        <td><?php echo date('H:i d/m/Y', strtotime($ord['created_at'])); ?></td>
+                                        <td><?php echo number_format((float)$ord['total_amount'], 0, ',', '.'); ?>đ</td>
+                                        <td><span class="status-badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($statusText); ?></span></td>
+                                        <td><a class="link-small" href="admin_dashboard.php?page=order_detail&id=<?php echo (int)$ord['id']; ?>">Xem</a></td>
+                                    </tr>
+                                    <?php endwhile; else: ?>
+                                    <tr><td colspan="8" style="text-align:center;color:#7f716a;">Không có đơn hàng nào trong khoảng thời gian đã chọn.</td></tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="overview-table-card">
+                            <h3 class="overview-table-title">
+                                Khách hàng mới (đăng ký gần đây)
+                                <a class="link-small" href="admin_dashboard.php?page=customers">Xem tất cả</a>
+                            </h3>
+                            <table class="overview-table">
+                                <thead>
+                                    <tr>
+                                        <th>STT</th><th>Họ tên</th><th>Username / Email</th><th>Số điện thoại</th><th>Ngày đăng ký</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php if ($registeredCustomers && $registeredCustomers->num_rows > 0): $stt = 1; while ($cust = $registeredCustomers->fetch_assoc()): ?>
+                                    <tr>
+                                        <td><?php echo $stt++; ?></td>
+                                        <td><?php echo htmlspecialchars($cust['full_name'] ?: '—'); ?></td>
+                                        <td><?php echo htmlspecialchars($cust['username']); ?><br><span style="font-size:12px;color:#7f716a;"><?php echo htmlspecialchars($cust['email']); ?></span></td>
+                                        <td><?php echo htmlspecialchars($cust['phone'] ?: '—'); ?></td>
+                                        <td><?php echo date('d/m/Y', strtotime($cust['created_at'])); ?></td>
+                                    </tr>
+                                    <?php endwhile; else: ?>
+                                    <tr><td colspan="5" style="text-align:center;color:#7f716a;">Chưa có khách hàng đăng ký.</td></tr>
+                                    <?php endif; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <script>
+                        (function () {
+                            if (typeof Chart === 'undefined') return;
+                            const revenueLabels = <?php echo json_encode($revenueLabels, JSON_UNESCAPED_UNICODE); ?>;
+                            const revenueValues = <?php echo json_encode($revenueValues); ?>;
+                            const statusLabels = <?php echo json_encode($statusLabels, JSON_UNESCAPED_UNICODE); ?>;
+                            const statusValues = <?php echo json_encode($statusValues); ?>;
+                            const categoryLabels = <?php echo json_encode($categoryLabels, JSON_UNESCAPED_UNICODE); ?>;
+                            const categoryValues = <?php echo json_encode($categoryValues); ?>;
+
+                            new Chart(document.getElementById('dashboardRevenueChart'), {
+                                type: 'line',
+                                data: {
+                                    labels: revenueLabels,
+                                    datasets: [{
+                                        label: 'Doanh thu',
+                                        data: revenueValues,
+                                        borderColor: '#76553e',
+                                        backgroundColor: 'rgba(118,85,62,0.12)',
+                                        tension: 0.35,
+                                        fill: true
+                                    }]
+                                },
+                                options: { responsive: true, maintainAspectRatio: false }
+                            });
+
+                            new Chart(document.getElementById('dashboardStatusChart'), {
+                                type: 'doughnut',
+                                data: {
+                                    labels: statusLabels,
+                                    datasets: [{
+                                        data: statusValues,
+                                        backgroundColor: ['#76553e', '#916d55', '#cfa88d', '#e8d4c7', '#8c7e77']
+                                    }]
+                                },
+                                options: { responsive: true, maintainAspectRatio: false }
+                            });
+
+                            new Chart(document.getElementById('dashboardCategoryChart'), {
+                                type: 'bar',
+                                data: {
+                                    labels: categoryLabels,
+                                    datasets: [{
+                                        label: 'Số sản phẩm',
+                                        data: categoryValues,
+                                        backgroundColor: '#916d55'
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                                }
+                            });
+                        })();
+                        </script>
                         <?php
                         break;
                     case 'customers': include 'manage_customers.php'; break;

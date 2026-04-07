@@ -102,8 +102,8 @@ $list = $conn->query("SELECT * FROM promotions ORDER BY id DESC");
                         <td><?php echo $r['valid_from'] ? date('d/m/Y', strtotime($r['valid_from'])) : '—'; ?> → <?php echo $r['valid_to'] ? date('d/m/Y', strtotime($r['valid_to'])) : '—'; ?></td>
                         <td><?php echo $r['is_active'] ? 'Bật' : 'Tắt'; ?></td>
                         <td class="admin-action-cell">
-                            <button type="button" class="admin-btn admin-btn-primary admin-btn-sm" onclick='editPromo(<?php echo json_encode($r); ?>)'><i class="fas fa-edit"></i> Sửa</button>
-                            <a href="admin_dashboard.php?page=promotions&delete_id=<?php echo (int)$r['id']; ?>" class="admin-btn admin-btn-danger admin-btn-sm" style="text-decoration:none;" onclick="return confirm('Xóa mã này?');"><i class="fas fa-trash-alt"></i> Xóa</a>
+                            <button type="button" class="admin-btn admin-btn-primary admin-icon-btn admin-tooltip" data-tooltip="Chỉnh sửa" onclick='editPromo(<?php echo json_encode($r); ?>)'><i class="fas fa-edit"></i></button>
+                            <a href="admin_dashboard.php?page=promotions&delete_id=<?php echo (int)$r['id']; ?>" class="admin-btn admin-btn-danger admin-icon-btn admin-tooltip" data-tooltip="Xóa" style="text-decoration:none;" onclick="return confirm('Xóa mã này?');"><i class="fas fa-trash-alt"></i></a>
                         </td>
                     </tr>
                     <?php endwhile; ?>

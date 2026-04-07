@@ -100,8 +100,8 @@ $result = $conn->query($sql);
                             <td><?php echo (int)$row['id']; ?></td>
                             <td><?php echo htmlspecialchars($row['name']); ?></td>
                             <td class="admin-action-cell">
-                                <button type="button" class="admin-btn admin-btn-primary admin-btn-sm" onclick="openEditModal(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>')"><i class="fas fa-edit"></i> Sửa</button>
-                                <a href="admin_dashboard.php?page=flavors&delete_id=<?php echo $row['id']; ?>" class="admin-btn admin-btn-danger admin-btn-sm" style="text-decoration:none;" onclick="return confirm('Bạn có chắc muốn xóa?');"><i class="fas fa-trash-alt"></i> Xóa</a>
+                                <button type="button" class="admin-btn admin-btn-primary admin-icon-btn admin-tooltip" data-tooltip="Chỉnh sửa" onclick="openEditModal(<?php echo $row['id']; ?>, '<?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>')"><i class="fas fa-edit"></i></button>
+                                <a href="admin_dashboard.php?page=flavors&delete_id=<?php echo $row['id']; ?>" class="admin-btn admin-btn-danger admin-icon-btn admin-tooltip" data-tooltip="Xóa" style="text-decoration:none;" onclick="return confirm('Bạn có chắc muốn xóa?');"><i class="fas fa-trash-alt"></i></a>
                             </td>
                         </tr>
                     <?php endwhile; ?>

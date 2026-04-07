@@ -66,14 +66,13 @@ $contacts = $conn->query("SELECT c.*, u.username FROM contacts c LEFT JOIN users
                             <td style="max-width: 280px;"><?php echo nl2br(htmlspecialchars(mb_substr($row['message'], 0, 150) . (mb_strlen($row['message']) > 150 ? '...' : ''))); ?></td>
                             <td><?php echo $row['status'] === 'read' ? 'Đã xem' : '<span style="color:#d32f2f;">Mới</span>'; ?></td>
                             <td><?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
-                            <td>
+                            <td class="admin-action-cell">
                                 <?php if ($row['status'] !== 'read'): ?>
-                                    <a href="admin_dashboard.php?page=contact&status_id=<?php echo $row['id']; ?>&status=read" class="admin-link">Đánh dấu đã xem</a>
+                                    <a href="admin_dashboard.php?page=contact&status_id=<?php echo $row['id']; ?>&status=read" class="admin-btn admin-btn-secondary admin-icon-btn admin-tooltip" data-tooltip="Đánh dấu đã xem"><i class="fas fa-check"></i></a>
                                 <?php else: ?>
-                                    <a href="admin_dashboard.php?page=contact&status_id=<?php echo $row['id']; ?>&status=new" class="admin-link">Đánh dấu mới</a>
+                                    <a href="admin_dashboard.php?page=contact&status_id=<?php echo $row['id']; ?>&status=new" class="admin-btn admin-btn-secondary admin-icon-btn admin-tooltip" data-tooltip="Đánh dấu mới"><i class="fas fa-bell"></i></a>
                                 <?php endif; ?>
-                                |
-                                <a href="admin_dashboard.php?page=contact&delete_id=<?php echo $row['id']; ?>" class="admin-link" style="color:#d32f2f;" onclick="return confirm('Xóa liên hệ này?');">Xóa</a>
+                                <a href="admin_dashboard.php?page=contact&delete_id=<?php echo $row['id']; ?>" class="admin-btn admin-btn-danger admin-icon-btn admin-tooltip" data-tooltip="Xóa" onclick="return confirm('Xóa liên hệ này?');"><i class="fas fa-trash-alt"></i></a>
                             </td>
                         </tr>
                     <?php endwhile; ?>

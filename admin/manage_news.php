@@ -96,7 +96,7 @@ if ($filterActive === '1') {
 .news-filter a { padding: 6px 14px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 500; background: #f0f0f0; color: #9a7b5a; }
 .news-filter a:hover { background: #e0e0e0; }
 .news-filter a.active { background: #9a7b5a; color: #fff; }
-.news-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.news-actions { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
 </style>
 
 <div class="admin-content">
@@ -143,8 +143,8 @@ if ($filterActive === '1') {
                             </td>
                             <td><?php echo date('d/m/Y H:i', strtotime($row['created_at'])); ?></td>
                             <td class="admin-action-cell news-actions">
-                                <a href="admin_dashboard.php?page=news&edit_id=<?php echo (int)$row['id']; ?>" class="admin-btn admin-btn-primary admin-btn-sm" style="text-decoration:none;"><i class="fas fa-edit"></i> Sửa</a>
-                                <a href="admin_dashboard.php?page=news&delete_id=<?php echo (int)$row['id']; ?>" class="admin-btn admin-btn-danger admin-btn-sm" style="text-decoration:none;" onclick="return confirm('Xóa bài viết này?');"><i class="fas fa-trash-alt"></i> Xóa</a>
+                                <a href="admin_dashboard.php?page=news&edit_id=<?php echo (int)$row['id']; ?>" class="admin-btn admin-btn-primary admin-icon-btn admin-tooltip" data-tooltip="Chỉnh sửa" style="text-decoration:none;"><i class="fas fa-edit"></i></a>
+                                <a href="admin_dashboard.php?page=news&delete_id=<?php echo (int)$row['id']; ?>" class="admin-btn admin-btn-danger admin-icon-btn admin-tooltip" data-tooltip="Xóa" style="text-decoration:none;" onclick="return confirm('Xóa bài viết này?');"><i class="fas fa-trash-alt"></i></a>
                             </td>
                         </tr>
                     <?php endwhile; ?>

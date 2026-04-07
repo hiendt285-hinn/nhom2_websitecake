@@ -577,14 +577,16 @@ $hasCategories = $result && $result->num_rows > 0;
                             </td>
                             <td class="admin-action-cell">
                                 <button type="button" 
-                                        class="admin-btn admin-btn-primary admin-btn-sm" 
+                                        class="admin-btn admin-btn-primary admin-icon-btn admin-tooltip" 
+                                        data-tooltip="Chỉnh sửa"
                                         onclick="openEditCategory(<?php echo (int)$row['id']; ?>, this)">
-                                    <i class="fas fa-edit"></i> Sửa
+                                    <i class="fas fa-edit"></i>
                                 </button>
                                 <a href="admin_dashboard.php?page=producttype&delete=<?php echo (int)$row['id']; ?>" 
-                                   class="admin-btn admin-btn-danger admin-btn-sm" 
+                                   class="admin-btn admin-btn-danger admin-icon-btn admin-tooltip"
+                                   data-tooltip="Xóa"
                                    onclick="return confirm('Bạn có chắc muốn xóa?');">
-                                    <i class="fas fa-trash-alt"></i> Xóa
+                                    <i class="fas fa-trash-alt"></i>
                                 </a>
                             </td>
                         </tr>

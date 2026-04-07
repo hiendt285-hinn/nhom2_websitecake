@@ -374,6 +374,7 @@ a.admin-link:hover {
     gap: 8px;
     align-items: center;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .admin-btn-sm {
@@ -394,4 +395,49 @@ a.admin-link:hover {
 
 .admin-btn-danger:hover {
     background: #b71c1c;
+}
+
+/* Compact action buttons with tooltip */
+.admin-icon-btn {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    padding: 0;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+
+.admin-icon-btn i {
+    font-size: 13px;
+}
+
+.admin-tooltip {
+    position: relative;
+}
+
+.admin-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 11px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .2s ease;
+    z-index: 50;
+}
+
+.admin-tooltip:hover::after {
+    opacity: 1;
+    visibility: visible;
 }

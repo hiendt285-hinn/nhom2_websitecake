@@ -199,6 +199,14 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
     padding: 8px 16px;
     font-size: 13px;
 }
+.btn-icon {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 8px;
+    gap: 0;
+}
 
 .btn-primary {
     background: #9a7b5a;
@@ -258,7 +266,27 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
     gap: 8px;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
 }
+
+.btn-tooltip { position: relative; }
+.btn-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 11px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.btn-tooltip:hover::after { opacity: 1; visibility: visible; }
 
 /* Table Styles */
 .admin-card {
@@ -433,17 +461,18 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
                             <td class="admin-action-cell">
                                 <!-- Button Sửa - fixed size -->
                                 <button type="button" 
-                                        class="btn btn-primary btn-sm" 
+                                        class="btn btn-primary btn-sm btn-icon btn-tooltip" 
+                                        data-tooltip="Chỉnh sửa"
                                         onclick="openForm('edit','<?php echo $row['id'];?>','<?php echo htmlspecialchars($row['username'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['email'], ENT_QUOTES);?>','<?php echo htmlspecialchars($row['phone'], ENT_QUOTES);?>')">
-                                    <i class="fas fa-edit"></i> Sửa
+                                    <i class="fas fa-edit"></i>
                                 </button>
                                 
                                 <!-- Button Xóa - fixed size -->
                                 <form style="display:inline" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khách hàng này? Hành động này không thể hoàn tác.');">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="<?php echo $row['id'];?>">
-                                    <button type="submit" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash-alt"></i> Xóa
+                                    <button type="submit" class="btn btn-danger btn-sm btn-icon btn-tooltip" data-tooltip="Xóa">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </form>
                             </td>
