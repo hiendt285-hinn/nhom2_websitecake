@@ -27,6 +27,9 @@ $where = [];
 $params = [];
 $types = '';
 
+// Chỉ hiển thị sản phẩm đang hoạt động trên cửa hàng
+$where[] = "p.is_active = 1";
+
 if ($search !== '') {
     $where[] = "p.name LIKE ?";
     $params[] = "%$search%";
@@ -138,21 +141,21 @@ if ($sort !== '') $baseQuery['sort'] = $sort;
         .sidebar-categories a {
             display: block;
             padding: 10px 14px;
-            color: #333;
+            color: var(--brown-dark-text, #5c4031);
             text-decoration: none;
             border-radius: 8px;
             font-size: 14px;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.22s ease, color 0.22s ease;
         }
 
         .sidebar-categories a:hover {
-            background: rgba(93, 64, 55, 0.08);
+            background: rgba(154, 123, 90, 0.07);
             color: var(--main-brown);
         }
 
         .sidebar-categories a.active {
-            background: var(--main-brown);
-            color: #fff;
+            background: rgba(154, 123, 90, 0.1);
+            color: var(--main-brown);
             font-weight: 600;
         }
 

@@ -88,26 +88,30 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
 </section>
 
 <section class="why-choose">
-  <div class="why-left">
-    <h2>Tại sao bạn nên lựa chọn<br>bánh Sweet Cake</h2>
-    <p>Hãy cùng tìm hiểu những đặc điểm nổi bật của Sweet Cake nhé!</p>
+  <div class="why-header">
+    <h2>Tại sao bạn nên lựa chọn bánh<br>Sweet Cake</h2>
+    <p>Chúng tôi không chỉ bán bánh, chúng tôi mang đến trải nghiệm ngọt ngào được chăm chút từ nguyên liệu đến dịch vụ.</p>
   </div>
-  <div class="why-right">
+  <div class="why-grid">
     <div class="why-card">
-      <div class="emoji">🍓🍇🥝</div>
-      <p><strong>Đa dạng hoa quả tươi nhất HN – 10 loại:</strong> nhãn, vải, nho, dâu, bơ, xoài, cherry, kiwi, chanh leo, việt quất</p>
+      <div class="why-icon"><i class="fas fa-seedling"></i></div>
+      <h3>Đa dạng hoa quả tươi nhất HN</h3>
+      <p>Tuyển chọn hoa quả theo mùa từ những trang trại organic uy tín nhất.</p>
     </div>
     <div class="why-card">
-      <div class="emoji">🛵</div>
-      <p>Làm và ship hỏa tốc chỉ 1h từ khi đặt bánh. COD không cần cọc. Freeship từ 350k</p>
+      <div class="why-icon"><i class="fas fa-tachometer-alt"></i></div>
+      <h3>Làm và ship hỏa tốc chỉ 1h</h3>
+      <p>Quy trình chuyên nghiệp giúp bạn nhận bánh tươi mới trong thời gian ngắn nhất.</p>
     </div>
     <div class="why-card">
-      <div class="emoji">🎂</div>
-      <p>Nhiều kích thước bánh cho 2-20 người. 150+ mẫu bánh sinh nhật, sự kiện, hộp thiếc</p>
+      <div class="why-icon"><i class="fas fa-users"></i></div>
+      <h3>Nhiều kích thước bánh cho 2-20 người</h3>
+      <p>Từ những bữa tiệc nhỏ ấm cúng đến các sự kiện lớn đông người tham dự.</p>
     </div>
     <div class="why-card">
-      <div class="emoji">✅</div>
-      <p>Chứng nhận <strong>ISO 22000:2018</strong>, đảm bảo VSATTP. Tổng đài xử lý mọi vấn đề 7-23h</p>
+      <div class="why-icon"><i class="fas fa-certificate"></i></div>
+      <h3>Chứng nhận ISO 22000:2018</h3>
+      <p>Cam kết tuyệt đối về an toàn vệ sinh thực phẩm cho sức khỏe gia đình bạn.</p>
     </div>
   </div>
 </section>

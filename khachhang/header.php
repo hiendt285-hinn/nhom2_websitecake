@@ -4,6 +4,9 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
+$nav_cur = basename($_SERVER['SCRIPT_NAME'] ?? '');
+$nav_products_active = in_array($nav_cur, ['products.php', 'product-detail.php'], true);
+
 $css_file = __DIR__ . '/style.css';
 $css_version = file_exists($css_file) ? filemtime($css_file) : time();
 ?>
@@ -55,13 +58,13 @@ $css_version = file_exists($css_file) ? filemtime($css_file) : time();
             <a href="index.php"><img src="../images/35-mau-thiet-ke-logo-tiem-banh-dep-5-removebg-preview.png" alt="Logo"></a>
         </div>
         <ul>
-            <li><a href="products.php">Sản phẩm</a></li>
-            <li><a href="news.php">Tin tức</a></li>
-            <li><a href="policy.php">Chính sách</a></li>
-            <li><a href="contact.php">Liên hệ</a></li>
-            <li><a href="promotion.php">Khuyến mãi</a></li>
+            <li><a href="products.php" class="<?php echo $nav_products_active ? 'is-active' : ''; ?>">Sản phẩm</a></li>
+            <li><a href="news.php" class="<?php echo $nav_cur === 'news.php' ? 'is-active' : ''; ?>">Tin tức</a></li>
+            <li><a href="policy.php" class="<?php echo $nav_cur === 'policy.php' ? 'is-active' : ''; ?>">Chính sách</a></li>
+            <li><a href="contact.php" class="<?php echo $nav_cur === 'contact.php' ? 'is-active' : ''; ?>">Liên hệ</a></li>
+            <li><a href="promotion.php" class="<?php echo $nav_cur === 'promotion.php' ? 'is-active' : ''; ?>">Khuyến mãi</a></li>
             <li>
-                <a href="cart.php">
+                <a href="cart.php" class="<?php echo $nav_cur === 'cart.php' ? 'is-active' : ''; ?>">
                     Giỏ hàng (<?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>)
                 </a>
             </li>

@@ -55,33 +55,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_product'])) {
+    $productId = (int) ($_POST['product_id'] ?? 0);
+    $name = trim($_POST['name'] ?? '');
+    $price = (int) ($_POST['price'] ?? 0);
+    $description = trim($_POST['description'] ?? '');
+    $shortDescription = trim($_POST['short_description'] ?? '');
+    $categoryId = (int) ($_POST['category_id'] ?? 0);
+    $isFeatured = isset($_POST['is_featured']) ? 1 : 0;
+    $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+    if ($productId <= 0 || $name === '' || $price < 0 || $categoryId <= 0) {
+        $addError = 'Dữ liệu cập nhật chưa hợp lệ. Vui lòng kiểm tra lại.';
+    } else {
+        $currentStmt = $conn->prepare("SELECT image FROM products WHERE id = ? LIMIT 1");
+        $currentStmt->bind_param('i', $productId);
+        $currentStmt->execute();
+        $currentResult = $currentStmt->get_result();
+        $currentProduct = $currentResult ? $currentResult->fetch_assoc() : null;
+        $currentStmt->close();
+
+        if (!$currentProduct) {
+            $addError = 'Không tìm thấy sản phẩm cần chỉnh sửa.';
+        } else {
+            $newImage = $currentProduct['image'] ?? '';
+            if (isset($_FILES['image']) && (int)($_FILES['image']['error'] ?? 4) === 0) {
+                $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                $fileName = basename($_FILES['image']['name']);
+                $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                if (!in_array($ext, $allowedExt, true)) {
+                    $addError = 'Chỉ chấp nhận định dạng ảnh: jpg, jpeg, png, gif, webp.';
+                } else {
+                    $newFileName = uniqid() . '.' . $ext;
+                    $targetDir = realpath(__DIR__ . '/../images') . '/';
+                    $targetFile = $targetDir . $newFileName;
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+                        if (!empty($newImage) && file_exists($targetDir . $newImage)) {
+                            @unlink($targetDir . $newImage);
+                        }
+                        $newImage = $newFileName;
+                    } else {
+                        $addError = 'Lỗi khi upload ảnh mới.';
+                    }
+                }
+            }
+
+            if ($addError === '') {
+                $stmt = $conn->prepare("UPDATE products SET name = ?, price = ?, image = ?, description = ?, short_description = ?, category_id = ?, is_featured = ?, is_active = ? WHERE id = ?");
+                if ($stmt) {
+                    $stmt->bind_param('sisssiiii', $name, $price, $newImage, $description, $shortDescription, $categoryId, $isFeatured, $isActive, $productId);
+                    if ($stmt->execute()) {
+                        $stmt->close();
+                        header('Location: admin_dashboard.php?page=products&edited=1');
+                        exit();
+                    }
+                    $stmt->close();
+                }
+                $addError = 'Lỗi khi cập nhật sản phẩm.';
+            }
+        }
+    }
+}
+
 // Xử lý xóa sản phẩm (nếu có)
 if (isset($_GET['delete_id'])) {
     $delete_id = intval($_GET['delete_id']);
     $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
-    // Kiểm tra sản phẩm có trong đơn hàng chưa giao không (chỉ chặn xóa khi còn đơn pending/processing/shipping...)
-    $checkPending = $conn->prepare("
-        SELECT COUNT(*) AS cnt FROM order_items oi
-        INNER JOIN orders o ON o.id = oi.order_id
-        WHERE oi.product_id = ? AND o.status NOT IN ('completed', 'delivered', 'cancelled')
-    ");
-    $checkPending->bind_param('i', $delete_id);
-    $checkPending->execute();
-    $inPendingOrders = (int) $checkPending->get_result()->fetch_assoc()['cnt'];
-    $checkPending->close();
-
-    if ($inPendingOrders > 0) {
-        if ($isAjax) {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['success' => false, 'error' => 'Không thể xóa sản phẩm đang có trong đơn hàng chưa giao. Bạn có thể ẩn sản phẩm (tắt Hiển thị) hoặc đợi đơn giao xong.']);
-            exit();
-        }
-        header('Location: admin_dashboard.php?page=products&delete_error=1');
-        exit();
-    }
-
-    // Kiểm tra sản phẩm có trong đơn đã giao hoặc không có trong đơn nào
+    // Có order_items → không xóa cứng (FK + lịch sử đơn), chỉ ẩn khỏi cửa hàng.
+    // Không chặn khi đơn còn pending/shipping: ẩn sản phẩm vẫn an toàn vì dòng đơn giữ nguyên product_id.
     $checkAnyOrder = $conn->prepare("SELECT COUNT(*) AS cnt FROM order_items WHERE product_id = ?");
     $checkAnyOrder->bind_param('i', $delete_id);
     $checkAnyOrder->execute();
@@ -105,14 +147,18 @@ if (isset($_GET['delete_id'])) {
         $errorMsg = $conn->error ?: 'Lỗi khi xóa sản phẩm.';
         $stmt->close();
     } else {
-        // Có trong đơn đã giao → chỉ ẩn sản phẩm 
+        // Có trong đơn hàng → chỉ ẩn sản phẩm
         $stmt = $conn->prepare("UPDATE products SET is_active = 0 WHERE id = ?");
         $stmt->bind_param('i', $delete_id);
         if ($stmt->execute()) {
             $stmt->close();
             if ($isAjax) {
                 header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['success' => true, 'hidden' => true]);
+                echo json_encode([
+                    'success' => true,
+                    'hidden' => true,
+                    'message' => 'Sản phẩm đã được ẩn khỏi cửa hàng. Dữ liệu trong đơn hàng vẫn được giữ nguyên.',
+                ]);
                 exit();
             }
             header('Location: admin_dashboard.php?page=products&deleted_hidden=1');
@@ -131,10 +177,12 @@ if (isset($_GET['delete_id'])) {
     exit();
 }
 
-// Phân trang: 20 sản phẩm / trang
+// Phân trang: 20 sản phẩm / trang (mặc định chỉ SP đang bán; ?show_inactive=1 để xem cả đã ẩn)
 $perPage = 20;
+$showInactive = isset($_GET['show_inactive']) && $_GET['show_inactive'] === '1';
 $currentPage = max(1, isset($_GET['pg']) ? (int)$_GET['pg'] : 1);
-$countResult = $conn->query("SELECT COUNT(*) AS total FROM products");
+$countSql = $showInactive ? 'SELECT COUNT(*) AS total FROM products' : 'SELECT COUNT(*) AS total FROM products WHERE is_active = 1';
+$countResult = $conn->query($countSql);
 $totalProducts = $countResult ? (int)$countResult->fetch_assoc()['total'] : 0;
 $totalPages = $totalProducts > 0 ? (int)ceil($totalProducts / $perPage) : 1;
 $currentPage = min(max(1, $currentPage), $totalPages);
@@ -152,6 +200,8 @@ if ($sort === 'sold_desc') {
     $orderBy = 'total_sold ASC, p.id DESC';
 }
 $sortParam = '&sort=' . urlencode($sort);
+$inactiveParam = $showInactive ? '&show_inactive=1' : '';
+$listWhereActive = $showInactive ? '' : ' WHERE p.is_active = 1 ';
 
 // Lấy danh sách sản phẩm với tên danh mục và tổng đã bán 
 $sql = "SELECT p.*, c.name AS category_name,
@@ -160,6 +210,7 @@ $sql = "SELECT p.*, c.name AS category_name,
         LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN order_items oi ON oi.product_id = p.id
         LEFT JOIN orders o ON o.id = oi.order_id
+        " . $listWhereActive . "
         GROUP BY p.id, c.name
         ORDER BY " . $orderBy . "
         LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
@@ -168,6 +219,7 @@ if ($result === false) {
     $fallbackSql = "SELECT p.*, c.name AS category_name, 0 AS total_sold
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
+            " . ($showInactive ? '' : ' WHERE p.is_active = 1 ') . "
             ORDER BY p.id DESC
             LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
     $result = $conn->query($fallbackSql);
@@ -177,7 +229,7 @@ if ($result === false) {
 $activeProducts = 0;
 $outOfStockProducts = 0;
 $monthlyRevenue = 0;
-$activeResult = $conn->query("SELECT COUNT(*) AS total FROM products");
+$activeResult = $conn->query("SELECT COUNT(*) AS total FROM products WHERE is_active = 1");
 if ($activeResult) {
     $activeProducts = (int)$activeResult->fetch_assoc()['total'];
 }
@@ -189,7 +241,13 @@ $revenueResult = $conn->query("SELECT COALESCE(SUM(total_price), 0) AS total FRO
 if ($revenueResult) {
     $monthlyRevenue = (float)$revenueResult->fetch_assoc()['total'];
 }
+$categories = [];
 $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name ASC");
+if ($categoryResult) {
+    while ($cat = $categoryResult->fetch_assoc()) {
+        $categories[] = $cat;
+    }
+}
 ?>
 <style>
 .product-layout{color:#1b1c1b}
@@ -272,13 +330,16 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
 
 <div class="product-layout">
     <?php if (!empty($_GET['delete_error'])): ?>
-    <div class="admin-message admin-message-error">Không thể xóa sản phẩm đang có trong đơn hàng chưa giao. Bạn có thể ẩn sản phẩm hoặc đợi đơn giao xong.</div>
+    <div class="admin-message admin-message-error">Không thể xóa hoặc ẩn sản phẩm. Vui lòng thử lại.</div>
     <?php endif; ?>
     <?php if (!empty($_GET['deleted_hidden'])): ?>
     <div class="admin-message admin-message-success">Sản phẩm đã được ẩn để giữ lịch sử đơn hàng.</div>
     <?php endif; ?>
     <?php if (!empty($_GET['added'])): ?>
     <div class="admin-message admin-message-success">Thêm sản phẩm thành công.</div>
+    <?php endif; ?>
+    <?php if (!empty($_GET['edited'])): ?>
+    <div class="admin-message admin-message-success">Cập nhật sản phẩm thành công.</div>
     <?php endif; ?>
     <?php if (!empty($addError)): ?>
     <div class="admin-message admin-message-error"><?php echo htmlspecialchars($addError); ?></div>
@@ -312,10 +373,15 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
         <div>
             <span style="font-size:12px;color:#7f716a;margin-right:8px;">Sắp xếp:</span>
             <select class="sort-select" onchange="if(this.value){window.location.href=this.value;}">
-                <option value="admin_dashboard.php?page=products&sort=newest#products" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
-                <option value="admin_dashboard.php?page=products&sort=sold_desc#products" <?php echo $sort === 'sold_desc' ? 'selected' : ''; ?>>Đã bán nhiều nhất</option>
-                <option value="admin_dashboard.php?page=products&sort=sold_asc#products" <?php echo $sort === 'sold_asc' ? 'selected' : ''; ?>>Đã bán ít nhất</option>
+                <option value="admin_dashboard.php?page=products&sort=newest<?php echo $inactiveParam; ?>#products" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
+                <option value="admin_dashboard.php?page=products&sort=sold_desc<?php echo $inactiveParam; ?>#products" <?php echo $sort === 'sold_desc' ? 'selected' : ''; ?>>Đã bán nhiều nhất</option>
+                <option value="admin_dashboard.php?page=products&sort=sold_asc<?php echo $inactiveParam; ?>#products" <?php echo $sort === 'sold_asc' ? 'selected' : ''; ?>>Đã bán ít nhất</option>
             </select>
+            <?php if ($showInactive): ?>
+                <a class="chip-tab" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>#products" style="margin-left:8px;">← Chỉ sản phẩm đang bán</a>
+            <?php else: ?>
+                <a class="chip-tab" href="admin_dashboard.php?page=products&show_inactive=1<?php echo $sort !== 'newest' ? $sortParam : ''; ?>#products" style="margin-left:8px;">Xem sản phẩm đã ẩn</a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -345,7 +411,21 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
                                 <td><?php echo number_format((int)($row['total_sold'] ?? 0)); ?></td>
                                 <td>
                                     <div class="table-actions">
-                                        <a class="icon-btn" href="edit_product.php?id=<?php echo $row['id']; ?>" title="Sửa"><i class="fas fa-pen"></i></a>
+                                        <button
+                                            class="icon-btn"
+                                            type="button"
+                                            title="Sửa"
+                                            onclick="openEditProductModal(this)"
+                                            data-id="<?php echo (int)$row['id']; ?>"
+                                            data-name="<?php echo htmlspecialchars($row['name'], ENT_QUOTES); ?>"
+                                            data-category-id="<?php echo (int)$row['category_id']; ?>"
+                                            data-price="<?php echo (int)$row['price']; ?>"
+                                            data-short-description="<?php echo htmlspecialchars((string)($row['short_description'] ?? ''), ENT_QUOTES); ?>"
+                                            data-description="<?php echo htmlspecialchars((string)($row['description'] ?? ''), ENT_QUOTES); ?>"
+                                            data-is-featured="<?php echo (int)$row['is_featured']; ?>"
+                                            data-is-active="<?php echo (int)$row['is_active']; ?>"
+                                            data-image="<?php echo htmlspecialchars((string)($row['image'] ?? ''), ENT_QUOTES); ?>"
+                                        ><i class="fas fa-pen"></i></button>
                                         <button class="icon-btn danger" type="button" onclick="deleteProduct(<?php echo $row['id']; ?>)" title="Xóa"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </td>
@@ -363,14 +443,14 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
                 <div>Hiển thị <?php echo $result && $result->num_rows ? (($currentPage - 1) * $perPage + 1) : 0; ?> - <?php echo $result ? min($currentPage * $perPage, $totalProducts) : 0; ?> / <?php echo number_format($totalProducts); ?> sản phẩm</div>
                 <div class="pages">
                     <?php if ($currentPage > 1): ?>
-                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage - 1; ?>#products"><i class="fas fa-angle-left"></i></a>
+                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage - 1; ?>#products"><i class="fas fa-angle-left"></i></a>
                     <?php endif; ?>
                     <?php $startPage = max(1, min($currentPage - 2, $totalPages - 4)); $endPage = min($totalPages, $startPage + 4); ?>
                     <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-                        <a class="p-btn <?php echo $i === $currentPage ? 'active' : ''; ?>" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $i; ?>#products"><?php echo $i; ?></a>
+                        <a class="p-btn <?php echo $i === $currentPage ? 'active' : ''; ?>" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $i; ?>#products"><?php echo $i; ?></a>
                     <?php endfor; ?>
                     <?php if ($currentPage < $totalPages): ?>
-                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage + 1; ?>#products"><i class="fas fa-angle-right"></i></a>
+                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage + 1; ?>#products"><i class="fas fa-angle-right"></i></a>
                     <?php endif; ?>
                 </div>
             </div>
@@ -395,9 +475,9 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
                     <label>Danh mục</label>
                     <select class="modal-select" name="category_id" required>
                         <option value="">-- Chọn danh mục --</option>
-                        <?php if ($categoryResult): while ($cat = $categoryResult->fetch_assoc()): ?>
+                        <?php foreach ($categories as $cat): ?>
                             <option value="<?php echo (int)$cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
-                        <?php endwhile; endif; ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div>
@@ -425,19 +505,88 @@ $categoryResult = $conn->query("SELECT id, name FROM categories ORDER BY name AS
     </div>
 </div>
 
+<div id="editProductModal" class="admin-modal-overlay" onclick="if(event.target===this){closeEditProductModal();}">
+    <div class="admin-modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Chỉnh sửa sản phẩm</h2>
+            <button type="button" class="icon-btn" onclick="closeEditProductModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            <input type="hidden" name="edit_product" value="1">
+            <input type="hidden" name="product_id" id="edit-product-id">
+            <div class="modal-grid">
+                <div>
+                    <label>Tên sản phẩm</label>
+                    <input class="modal-input" type="text" name="name" id="edit-name" required>
+                </div>
+                <div>
+                    <label>Danh mục</label>
+                    <select class="modal-select" name="category_id" id="edit-category-id" required>
+                        <option value="">-- Chọn danh mục --</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo (int)$cat['id']; ?>"><?php echo htmlspecialchars($cat['name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label>Giá (VNĐ)</label>
+                    <input class="modal-input" type="number" min="0" step="1000" name="price" id="edit-price" required>
+                </div>
+                <div>
+                    <label>Ảnh mới (không bắt buộc)</label>
+                    <input class="modal-input" type="file" name="image" accept="image/*">
+                    <small id="edit-current-image" style="display:block;margin-top:6px;color:#7f716a;"></small>
+                </div>
+                <div class="full">
+                    <label>Mô tả ngắn</label>
+                    <input class="modal-input" type="text" name="short_description" id="edit-short-description">
+                </div>
+                <div class="full">
+                    <label>Mô tả chi tiết</label>
+                    <textarea class="modal-textarea" rows="4" name="description" id="edit-description"></textarea>
+                </div>
+                <div>
+                    <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="is_featured" id="edit-is-featured" value="1"> Sản phẩm nổi bật</label>
+                </div>
+                <div>
+                    <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="is_active" id="edit-is-active" value="1"> Hiển thị trên cửa hàng</label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="h-btn" onclick="closeEditProductModal()">Hủy</button>
+                <button type="submit" class="h-btn h-btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function openAddProductModal(){ document.getElementById('addProductModal').style.display='flex'; }
 function closeAddProductModal(){ document.getElementById('addProductModal').style.display='none'; }
+function openEditProductModal(btn){
+    document.getElementById('edit-product-id').value = btn.dataset.id || '';
+    document.getElementById('edit-name').value = btn.dataset.name || '';
+    document.getElementById('edit-category-id').value = btn.dataset.categoryId || '';
+    document.getElementById('edit-price').value = btn.dataset.price || '';
+    document.getElementById('edit-short-description').value = btn.dataset.shortDescription || '';
+    document.getElementById('edit-description').value = btn.dataset.description || '';
+    document.getElementById('edit-is-featured').checked = (btn.dataset.isFeatured === '1');
+    document.getElementById('edit-is-active').checked = (btn.dataset.isActive === '1');
+    document.getElementById('edit-current-image').textContent = btn.dataset.image ? ('Ảnh hiện tại: ' + btn.dataset.image) : 'Ảnh hiện tại: (không có)';
+    document.getElementById('editProductModal').style.display='flex';
+}
+function closeEditProductModal(){ document.getElementById('editProductModal').style.display='none'; }
 function deleteProduct(id) {
-    if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác.')) return;
+    if (!confirm('Xóa sản phẩm này?\n\nNếu sản phẩm đã từng có trong đơn hàng, hệ thống chỉ ẩn khỏi cửa hàng (không xóa vĩnh viễn) để giữ lịch sử đơn.')) return;
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'manage_products.php?delete_id=' + id, true);
+    xhr.open('GET', 'manage_products.php?delete_id=' + encodeURIComponent(id), true);
     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     xhr.onload = function() {
         if (xhr.status !== 200) return alert('Lỗi kết nối server. Vui lòng thử lại.');
         try {
             var response = JSON.parse(xhr.responseText);
             if (!response.success) return alert(response.error || 'Lỗi khi xóa sản phẩm.');
+            if (response.hidden && response.message) alert(response.message);
             var row = document.getElementById('row-' + id);
             if (!row) return location.reload();
             row.style.transition = 'all .25s ease';
