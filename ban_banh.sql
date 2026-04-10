@@ -310,6 +310,18 @@ INSERT INTO `promotions` (`id`, `code`, `title`, `discount_type`, `discount_valu
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `promotion_products`
+-- (Sản phẩm được áp dụng mã; không có dòng nào = áp dụng toàn bộ giỏ)
+--
+
+CREATE TABLE `promotion_products` (
+  `promotion_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `sizes`
 --
 
@@ -422,6 +434,13 @@ ALTER TABLE `promotions`
   ADD UNIQUE KEY `code` (`code`);
 
 --
+-- Indexes for table `promotion_products`
+--
+ALTER TABLE `promotion_products`
+  ADD PRIMARY KEY (`promotion_id`,`product_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
 -- Indexes for table `sizes`
 --
 ALTER TABLE `sizes`
@@ -528,6 +547,13 @@ ALTER TABLE `order_items`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `promotion_products`
+--
+ALTER TABLE `promotion_products`
+  ADD CONSTRAINT `promotion_products_ibfk_1` FOREIGN KEY (`promotion_id`) REFERENCES `promotions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `promotion_products_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

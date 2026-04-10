@@ -2,6 +2,13 @@
 session_start();
 require_once 'connect.php';
 
+$conn->query("CREATE TABLE IF NOT EXISTS promotion_products (
+  promotion_id int(11) NOT NULL,
+  product_id int(11) NOT NULL,
+  PRIMARY KEY (promotion_id, product_id),
+  KEY product_id (product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
 // Yêu cầu đăng nhập
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -80,26 +87,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $minOrder = (float)$promo['min_order_amount'];
             if ($totalAmount >= $minOrder) {
                 $valid = true;
-                if (!empty($promo['valid_from']) && strtotime($promo['valid_from']) > time()) $valid = false;
-                if (!empty($promo['valid_to']) && strtotime($promo['valid_to']) < time()) $valid = false;
+                if (!empty($promo['valid_from']) && strtotime($promo['valid_from']) > time()) {
+                    $valid = false;
+                }
+                if (!empty($promo['valid_to']) && strtotime($promo['valid_to']) < time()) {
+                    $valid = false;
+                }
+                $restrictedIds = [];
+                $stPr = $conn->prepare('SELECT product_id FROM promotion_products WHERE promotion_id = ?');
+                if ($stPr) {
+                    $pid = (int)$promo['id'];
+                    $stPr->bind_param('i', $pid);
+                    $stPr->execute();
+                    $rp = $stPr->get_result();
+                    if ($rp) {
+                        while ($row = $rp->fetch_assoc()) {
+                            $restrictedIds[] = (int)$row['product_id'];
+                        }
+                    }
+                    $stPr->close();
+                } else {
+                    // Khong fallback ve "ap dung toan bo gio" khi doc pham vi ma bi loi
+                    $valid = false;
+                }
+                $hasProductScope = count($restrictedIds) > 0;
+                $eligibleSubtotal = 0;
+                foreach ($_SESSION['cart'] as $item) {
+                    $cartPid = (int)$item['id'];
+                    if (!$hasProductScope || in_array($cartPid, $restrictedIds, true)) {
+                        $eligibleSubtotal += (float)$item['price'] * (int)$item['quantity'];
+                    }
+                }
+                if ($valid && $hasProductScope && $eligibleSubtotal <= 0) {
+                    $valid = false;
+                }
                 if ($valid) {
+                    $discountBase = $hasProductScope ? $eligibleSubtotal : $totalAmount;
                     if ($promo['discount_type'] === 'percent') {
-                        $discountAmount = round($totalAmount * (float)$promo['discount_value'] / 100, 0);
+                        $discountAmount = round($discountBase * (float)$promo['discount_value'] / 100, 0);
                     } else {
-                        $discountAmount = min((float)$promo['discount_value'], $totalAmount);
+                        $discountAmount = min((float)$promo['discount_value'], $discountBase);
                     }
                     $appliedPromo = $promo;
                 }
             }
         }
         if ($promoCodeInput !== '' && !$appliedPromo) {
-            $promoError = 'Mã không hợp lệ, đã hết hạn hoặc chưa đủ điều kiện đơn hàng.';
+            $promoError = 'Mã không hợp lệ, đã hết hạn, chưa đủ điều kiện đơn hàng, hoặc giỏ không có sản phẩm áp dụng mã.';
         }
     }
     $finalAmount = max(0, $totalAmount - $discountAmount);
 
     $error = '';
-    if ($fullName === '' || $phone === '' || $address === '') {
+    if ($promoCodeInput !== '' && !$appliedPromo) {
+        $error = $promoError !== '' ? $promoError : 'Mã khuyến mãi không đủ điều kiện áp dụng.';
+    } elseif ($fullName === '' || $phone === '' || $address === '') {
         $error = 'Vui lòng nhập đầy đủ Họ tên, SĐT và Địa chỉ.';
     } else {
         if ($error === '') {

@@ -17,6 +17,13 @@ $conn->query("CREATE TABLE IF NOT EXISTS promotions (
   UNIQUE KEY code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+$conn->query("CREATE TABLE IF NOT EXISTS promotion_products (
+  promotion_id int(11) NOT NULL,
+  product_id int(11) NOT NULL,
+  PRIMARY KEY (promotion_id, product_id),
+  KEY product_id (product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
 $promos = [];
 $res = $conn->query("SELECT code, title, discount_type, discount_value, min_order_amount, valid_from, valid_to FROM promotions WHERE is_active = 1 AND (valid_from IS NULL OR valid_from <= NOW()) AND (valid_to IS NULL OR valid_to >= NOW()) ORDER BY id");
 if ($res && $res->num_rows > 0) {

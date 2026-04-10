@@ -101,6 +101,7 @@ html, body { margin: 0; min-height: 100%; background: #fbf9f7; font-family: 'Be 
             <li><a class="admin-nav-link <?php echo $currentPage === 'sizes' ? 'active' : ''; ?>" href="admin_dashboard.php?page=sizes"><i class="fas fa-expand-arrows-alt"></i><span>Quản lý cỡ bánh</span></a></li>
             <li><a class="admin-nav-link <?php echo $currentPage === 'flavors' ? 'active' : ''; ?>" href="admin_dashboard.php?page=flavors"><i class="fas fa-palette"></i><span>Quản lý hương vị</span></a></li>
             <li><a class="admin-nav-link <?php echo $currentPage === 'orders' ? 'active' : ''; ?>" href="admin_dashboard.php?page=orders"><i class="fas fa-receipt"></i><span>Đơn hàng</span></a></li>
+            <li><a class="admin-nav-link <?php echo $currentPage === 'promotions' ? 'active' : ''; ?>" href="admin_dashboard.php?page=promotions"><i class="fas fa-tags"></i><span>Khuyến mãi</span></a></li>
             <li><a class="admin-nav-link <?php echo $currentPage === 'customers' ? 'active' : ''; ?>" href="admin_dashboard.php?page=customers"><i class="fas fa-users"></i><span>Khách hàng</span></a></li>
         </ul>
         <div class="admin-sidebar-bottom">

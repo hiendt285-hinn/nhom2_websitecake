@@ -21,6 +21,47 @@ $conn->query("CREATE TABLE IF NOT EXISTS promotions (
   UNIQUE KEY code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+$conn->query("CREATE TABLE IF NOT EXISTS promotion_products (
+  promotion_id int(11) NOT NULL,
+  product_id int(11) NOT NULL,
+  PRIMARY KEY (promotion_id, product_id),
+  KEY product_id (product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+/**
+ * @param int[] $productIds
+ */
+function save_promotion_products(mysqli $conn, int $promotionId, array $productIds, string &$saveError = ''): bool
+{
+    $promotionId = (int)$promotionId;
+    if (!$conn->query('DELETE FROM promotion_products WHERE promotion_id = ' . $promotionId)) {
+        $saveError = 'Không thể cập nhật danh sách sản phẩm áp dụng.';
+        return false;
+    }
+    if ($productIds === []) {
+        return true;
+    }
+    $st = $conn->prepare('INSERT INTO promotion_products (promotion_id, product_id) VALUES (?, ?)');
+    if (!$st) {
+        $saveError = 'Không thể lưu sản phẩm áp dụng cho mã.';
+        return false;
+    }
+    foreach ($productIds as $pid) {
+        $pid = (int)$pid;
+        if ($pid <= 0) {
+            continue;
+        }
+        $st->bind_param('ii', $promotionId, $pid);
+        if (!$st->execute()) {
+            $saveError = 'Không thể lưu một số sản phẩm áp dụng.';
+            $st->close();
+            return false;
+        }
+    }
+    $st->close();
+    return true;
+}
+
 $message = '';
 $error = '';
 
@@ -34,6 +75,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $validFrom = !empty($_POST['valid_from']) ? $_POST['valid_from'] : null;
     $validTo = !empty($_POST['valid_to']) ? $_POST['valid_to'] : null;
     $isActive = isset($_POST['is_active']) ? 1 : 0;
+    $rawProductIds = isset($_POST['promo_product_ids']) ? $_POST['promo_product_ids'] : [];
+    if (!is_array($rawProductIds)) {
+        $rawProductIds = [];
+    }
+    $productIds = [];
+    foreach ($rawProductIds as $x) {
+        $productIds[] = (int)$x;
+    }
+    $productIds = array_values(array_unique(array_filter($productIds, static function ($v) {
+        return $v > 0;
+    })));
 
     if ($code === '') {
         $error = 'Vui lòng nhập mã.';
@@ -42,7 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare("UPDATE promotions SET code=?, title=?, discount_type=?, discount_value=?, min_order_amount=?, valid_from=?, valid_to=?, is_active=? WHERE id=?");
             $stmt->bind_param('sssddsssi', $code, $title, $discountType, $discountValue, $minOrder, $validFrom, $validTo, $isActive, $id);
             if ($stmt->execute()) {
-                $message = 'Cập nhật mã giảm giá thành công.';
+                $saveErr = '';
+                if (save_promotion_products($conn, $id, $productIds, $saveErr)) {
+                    $message = 'Cập nhật mã giảm giá thành công.';
+                } else {
+                    $error = $saveErr !== '' ? $saveErr : 'Lỗi lưu sản phẩm áp dụng.';
+                }
             } else {
                 $error = 'Lỗi cập nhật (có thể trùng mã).';
             }
@@ -51,7 +108,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare("INSERT INTO promotions (code, title, discount_type, discount_value, min_order_amount, valid_from, valid_to, is_active) VALUES (?,?,?,?,?,?,?,?)");
             $stmt->bind_param('sssddssi', $code, $title, $discountType, $discountValue, $minOrder, $validFrom, $validTo, $isActive);
             if ($stmt->execute()) {
-                $message = 'Thêm mã giảm giá thành công.';
+                $newId = (int)$conn->insert_id;
+                $saveErr = '';
+                if (save_promotion_products($conn, $newId, $productIds, $saveErr)) {
+                    $message = 'Thêm mã giảm giá thành công.';
+                } else {
+                    $error = $saveErr !== '' ? $saveErr : 'Lỗi lưu sản phẩm áp dụng.';
+                }
             } else {
                 $error = 'Lỗi thêm (có thể trùng mã).';
             }
@@ -62,12 +125,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['delete_id'])) {
     $did = (int)$_GET['delete_id'];
+    $conn->query('DELETE FROM promotion_products WHERE promotion_id = ' . $did);
     $conn->query("DELETE FROM promotions WHERE id = $did");
     header('Location: admin_dashboard.php?page=promotions');
     exit();
 }
 
-$list = $conn->query("SELECT * FROM promotions ORDER BY id DESC");
+$listRes = $conn->query("SELECT p.*, (SELECT GROUP_CONCAT(pp.product_id ORDER BY pp.product_id) FROM promotion_products pp WHERE pp.promotion_id = p.id) AS promo_product_ids_concat FROM promotions p ORDER BY p.id DESC");
+$promoRows = [];
+if ($listRes) {
+    while ($r = $listRes->fetch_assoc()) {
+        $idsStr = $r['promo_product_ids_concat'] ?? '';
+        unset($r['promo_product_ids_concat']);
+        $r['product_ids'] = ($idsStr !== '' && $idsStr !== null) ? array_map('intval', explode(',', $idsStr)) : [];
+        $promoRows[] = $r;
+    }
+}
+
+$productsForSelect = $conn->query('SELECT id, name FROM products ORDER BY name ASC');
 ?>
 <div class="admin-content">
     <div class="admin-page-header">
@@ -85,20 +160,22 @@ $list = $conn->query("SELECT * FROM promotions ORDER BY id DESC");
                     <th>Loại</th>
                     <th>Giá trị</th>
                     <th>Đơn tối thiểu</th>
+                    <th>Sản phẩm</th>
                     <th>Hiệu lực</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if ($list && $list->num_rows > 0): ?>
-                    <?php while ($r = $list->fetch_assoc()): ?>
+                <?php if (count($promoRows) > 0): ?>
+                    <?php foreach ($promoRows as $r): ?>
                     <tr>
                         <td><strong><?php echo htmlspecialchars($r['code']); ?></strong></td>
                         <td><?php echo htmlspecialchars($r['title'] ?: '—'); ?></td>
                         <td><?php echo $r['discount_type'] === 'percent' ? '%' : '₫'; ?></td>
                         <td><?php echo $r['discount_type'] === 'percent' ? (int)$r['discount_value'] . '%' : number_format((float)$r['discount_value'], 0, ',', '.'); ?></td>
                         <td><?php echo (float)$r['min_order_amount'] > 0 ? number_format((float)$r['min_order_amount'], 0, ',', '.') . '₫' : '—'; ?></td>
+                        <td><?php echo !empty($r['product_ids']) ? count($r['product_ids']) . ' SP' : 'Tất cả'; ?></td>
                         <td><?php echo $r['valid_from'] ? date('d/m/Y', strtotime($r['valid_from'])) : '—'; ?> → <?php echo $r['valid_to'] ? date('d/m/Y', strtotime($r['valid_to'])) : '—'; ?></td>
                         <td><?php echo $r['is_active'] ? 'Bật' : 'Tắt'; ?></td>
                         <td class="admin-action-cell">
@@ -106,9 +183,9 @@ $list = $conn->query("SELECT * FROM promotions ORDER BY id DESC");
                             <a href="admin_dashboard.php?page=promotions&delete_id=<?php echo (int)$r['id']; ?>" class="admin-btn admin-btn-danger admin-icon-btn admin-tooltip" data-tooltip="Xóa" style="text-decoration:none;" onclick="return confirm('Xóa mã này?');"><i class="fas fa-trash-alt"></i></a>
                         </td>
                     </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 <?php else: ?>
-                    <tr><td colspan="8">Chưa có mã giảm giá.</td></tr>
+                    <tr><td colspan="9">Chưa có mã giảm giá.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -116,7 +193,7 @@ $list = $conn->query("SELECT * FROM promotions ORDER BY id DESC");
 </div>
 
 <div id="promoModal" class="edit-modal" style="display:none;">
-    <div class="admin-modal-box" style="max-width:480px;">
+    <div class="admin-modal-box" style="max-width:560px;">
         <div class="admin-modal-header">
             <h2 class="admin-modal-title" id="promoModalTitle">Thêm mã giảm giá</h2>
             <button type="button" class="admin-modal-close" onclick="closeForm()">&times;</button>
@@ -158,6 +235,22 @@ $list = $conn->query("SELECT * FROM promotions ORDER BY id DESC");
                 <div class="admin-form-group">
                     <label><input type="checkbox" name="is_active" id="promo_is_active" value="1" checked> Đang áp dụng</label>
                 </div>
+                <div class="admin-form-group">
+                    <label>Sản phẩm áp dụng</label>
+                    <p style="font-size:12px;color:#666;margin:0 0 8px;">Không chọn sản phẩm nào = giảm trên toàn bộ giỏ hàng. Có chọn = chỉ giảm trên các dòng sản phẩm đó.</p>
+                    <div style="max-height:220px;overflow-y:auto;border:1px solid #ddd;border-radius:8px;padding:8px;background:#fafafa;">
+                        <?php if ($productsForSelect && $productsForSelect->num_rows > 0): ?>
+                            <?php while ($pr = $productsForSelect->fetch_assoc()): ?>
+                                <label style="display:block;margin:6px 0;font-weight:normal;cursor:pointer;">
+                                    <input type="checkbox" class="promo-product-cb" name="promo_product_ids[]" id="promo_product_<?php echo (int)$pr['id']; ?>" value="<?php echo (int)$pr['id']; ?>">
+                                    <?php echo htmlspecialchars($pr['name']); ?>
+                                </label>
+                            <?php endwhile; ?>
+                        <?php else: ?>
+                            <span style="color:#888;">Chưa có sản phẩm trong cửa hàng.</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
                 <div class="admin-modal-actions">
                     <button type="button" class="admin-btn admin-btn-secondary" onclick="closeForm()">Hủy</button>
                     <button type="submit" class="admin-btn admin-btn-primary">Lưu</button>
@@ -167,6 +260,9 @@ $list = $conn->query("SELECT * FROM promotions ORDER BY id DESC");
     </div>
 </div>
 <script>
+function setAllPromoProductsChecked(checked) {
+    document.querySelectorAll('.promo-product-cb').forEach(function(cb) { cb.checked = checked; });
+}
 function openForm() {
     document.getElementById('promoModalTitle').textContent = 'Thêm mã giảm giá';
     document.getElementById('promo_id').value = '';
@@ -178,6 +274,7 @@ function openForm() {
     document.getElementById('promo_valid_from').value = '';
     document.getElementById('promo_valid_to').value = '';
     document.getElementById('promo_is_active').checked = true;
+    setAllPromoProductsChecked(false);
     document.getElementById('promoModal').style.display = 'flex';
 }
 function closeForm() { document.getElementById('promoModal').style.display = 'none'; }
@@ -192,6 +289,12 @@ function editPromo(r) {
     document.getElementById('promo_valid_from').value = r.valid_from ? r.valid_from.replace(' ', 'T').slice(0, 16) : '';
     document.getElementById('promo_valid_to').value = r.valid_to ? r.valid_to.replace(' ', 'T').slice(0, 16) : '';
     document.getElementById('promo_is_active').checked = !!parseInt(r.is_active, 10);
+    setAllPromoProductsChecked(false);
+    var ids = r.product_ids || [];
+    ids.forEach(function(pid) {
+        var cb = document.getElementById('promo_product_' + pid);
+        if (cb) cb.checked = true;
+    });
     document.getElementById('promoModal').style.display = 'flex';
 }
 window.onclick = function(e) { if (e.target.id === 'promoModal') closeForm(); };
