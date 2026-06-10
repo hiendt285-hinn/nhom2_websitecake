@@ -180,10 +180,44 @@ if (isset($_GET['delete_id'])) {
 // Phân trang: 20 sản phẩm / trang (mặc định chỉ SP đang bán; ?show_inactive=1 để xem cả đã ẩn)
 $perPage = 20;
 $showInactive = isset($_GET['show_inactive']) && $_GET['show_inactive'] === '1';
+$searchRaw = isset($_GET['q']) ? (string) $_GET['q'] : '';
+$search = trim($searchRaw);
+if (function_exists('mb_substr')) {
+    $search = mb_substr($search, 0, 200);
+} else {
+    $search = substr($search, 0, 200);
+}
+
 $currentPage = max(1, isset($_GET['pg']) ? (int)$_GET['pg'] : 1);
-$countSql = $showInactive ? 'SELECT COUNT(*) AS total FROM products' : 'SELECT COUNT(*) AS total FROM products WHERE is_active = 1';
-$countResult = $conn->query($countSql);
-$totalProducts = $countResult ? (int)$countResult->fetch_assoc()['total'] : 0;
+
+$whereParts = [];
+if (!$showInactive) {
+    $whereParts[] = 'p.is_active = 1';
+}
+if ($search !== '') {
+    $whereParts[] = '(p.name LIKE ? OR IFNULL(p.short_description, \'\') LIKE ? OR IFNULL(p.description, \'\') LIKE ? OR IFNULL(c.name, \'\') LIKE ?)';
+}
+$listWhereClause = $whereParts ? ' WHERE ' . implode(' AND ', $whereParts) : '';
+
+$countSql = 'SELECT COUNT(DISTINCT p.id) AS total FROM products p LEFT JOIN categories c ON p.category_id = c.id' . $listWhereClause;
+$countStmt = $conn->prepare($countSql);
+$totalProducts = 0;
+if ($countStmt) {
+    if ($search !== '') {
+        $like1 = '%' . $search . '%';
+        $like2 = '%' . $search . '%';
+        $like3 = '%' . $search . '%';
+        $like4 = '%' . $search . '%';
+        $countStmt->bind_param('ssss', $like1, $like2, $like3, $like4);
+    }
+    if ($countStmt->execute()) {
+        $countRes = $countStmt->get_result();
+        $countRow = $countRes ? $countRes->fetch_assoc() : null;
+        $totalProducts = $countRow ? (int) $countRow['total'] : 0;
+    }
+    $countStmt->close();
+}
+
 $totalPages = $totalProducts > 0 ? (int)ceil($totalProducts / $perPage) : 1;
 $currentPage = min(max(1, $currentPage), $totalPages);
 $offset = ($currentPage - 1) * $perPage;
@@ -201,7 +235,7 @@ if ($sort === 'sold_desc') {
 }
 $sortParam = '&sort=' . urlencode($sort);
 $inactiveParam = $showInactive ? '&show_inactive=1' : '';
-$listWhereActive = $showInactive ? '' : ' WHERE p.is_active = 1 ';
+$searchParam = $search !== '' ? '&q=' . urlencode($search) : '';
 
 // Lấy danh sách sản phẩm với tên danh mục và tổng đã bán 
 $sql = "SELECT p.*, c.name AS category_name,
@@ -210,19 +244,46 @@ $sql = "SELECT p.*, c.name AS category_name,
         LEFT JOIN categories c ON p.category_id = c.id
         LEFT JOIN order_items oi ON oi.product_id = p.id
         LEFT JOIN orders o ON o.id = oi.order_id
-        " . $listWhereActive . "
+        " . $listWhereClause . "
         GROUP BY p.id, c.name
         ORDER BY " . $orderBy . "
         LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
-$result = $conn->query($sql);
+$listStmt = $conn->prepare($sql);
+$result = false;
+if ($listStmt) {
+    if ($search !== '') {
+        $l1 = '%' . $search . '%';
+        $l2 = '%' . $search . '%';
+        $l3 = '%' . $search . '%';
+        $l4 = '%' . $search . '%';
+        $listStmt->bind_param('ssss', $l1, $l2, $l3, $l4);
+    }
+    if ($listStmt->execute()) {
+        $result = $listStmt->get_result();
+    }
+    $listStmt->close();
+}
 if ($result === false) {
     $fallbackSql = "SELECT p.*, c.name AS category_name, 0 AS total_sold
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
-            " . ($showInactive ? '' : ' WHERE p.is_active = 1 ') . "
+            " . $listWhereClause . "
             ORDER BY p.id DESC
             LIMIT " . (int)$perPage . " OFFSET " . (int)$offset;
-    $result = $conn->query($fallbackSql);
+    $fbStmt = $conn->prepare($fallbackSql);
+    if ($fbStmt) {
+        if ($search !== '') {
+            $f1 = '%' . $search . '%';
+            $f2 = '%' . $search . '%';
+            $f3 = '%' . $search . '%';
+            $f4 = '%' . $search . '%';
+            $fbStmt->bind_param('ssss', $f1, $f2, $f3, $f4);
+        }
+        if ($fbStmt->execute()) {
+            $result = $fbStmt->get_result();
+        }
+        $fbStmt->close();
+    }
 }
 ?>
 <?php
@@ -351,7 +412,12 @@ if ($categoryResult) {
             <div class="admin-page-subtitle">Danh sách bánh thủ công cao cấp</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <input class="h-input" type="text" placeholder="Tìm kiếm sản phẩm..." />
+            <form method="get" action="admin_dashboard.php" style="display:inline-flex;align-items:center;margin:0;">
+                <input type="hidden" name="page" value="products">
+                <?php if ($showInactive): ?><input type="hidden" name="show_inactive" value="1"><?php endif; ?>
+                <?php if ($sort !== 'newest'): ?><input type="hidden" name="sort" value="<?php echo htmlspecialchars($sort, ENT_QUOTES, 'UTF-8'); ?>"><?php endif; ?>
+                <input class="h-input" type="search" name="q" value="<?php echo htmlspecialchars($search, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Tìm kiếm sản phẩm..." autocomplete="off">
+            </form>
             <button type="button" class="h-btn h-btn-primary" onclick="openAddProductModal()"><i class="fas fa-plus"></i> Thêm sản phẩm mới</button>
         </div>
     </div>
@@ -373,14 +439,14 @@ if ($categoryResult) {
         <div>
             <span style="font-size:12px;color:#7f716a;margin-right:8px;">Sắp xếp:</span>
             <select class="sort-select" onchange="if(this.value){window.location.href=this.value;}">
-                <option value="admin_dashboard.php?page=products&sort=newest<?php echo $inactiveParam; ?>#products" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
-                <option value="admin_dashboard.php?page=products&sort=sold_desc<?php echo $inactiveParam; ?>#products" <?php echo $sort === 'sold_desc' ? 'selected' : ''; ?>>Đã bán nhiều nhất</option>
-                <option value="admin_dashboard.php?page=products&sort=sold_asc<?php echo $inactiveParam; ?>#products" <?php echo $sort === 'sold_asc' ? 'selected' : ''; ?>>Đã bán ít nhất</option>
+                <option value="admin_dashboard.php?page=products&sort=newest<?php echo $inactiveParam . $searchParam; ?>#products" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Mới nhất</option>
+                <option value="admin_dashboard.php?page=products&sort=sold_desc<?php echo $inactiveParam . $searchParam; ?>#products" <?php echo $sort === 'sold_desc' ? 'selected' : ''; ?>>Đã bán nhiều nhất</option>
+                <option value="admin_dashboard.php?page=products&sort=sold_asc<?php echo $inactiveParam . $searchParam; ?>#products" <?php echo $sort === 'sold_asc' ? 'selected' : ''; ?>>Đã bán ít nhất</option>
             </select>
             <?php if ($showInactive): ?>
-                <a class="chip-tab" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?>#products" style="margin-left:8px;">← Chỉ sản phẩm đang bán</a>
+                <a class="chip-tab" href="admin_dashboard.php?page=products<?php echo $sort !== 'newest' ? $sortParam : ''; ?><?php echo $searchParam; ?>#products" style="margin-left:8px;">← Chỉ sản phẩm đang bán</a>
             <?php else: ?>
-                <a class="chip-tab" href="admin_dashboard.php?page=products&show_inactive=1<?php echo $sort !== 'newest' ? $sortParam : ''; ?>#products" style="margin-left:8px;">Xem sản phẩm đã ẩn</a>
+                <a class="chip-tab" href="admin_dashboard.php?page=products&show_inactive=1<?php echo $sort !== 'newest' ? $sortParam : ''; ?><?php echo $searchParam; ?>#products" style="margin-left:8px;">Xem sản phẩm đã ẩn</a>
             <?php endif; ?>
         </div>
     </div>
@@ -443,14 +509,14 @@ if ($categoryResult) {
                 <div>Hiển thị <?php echo $result && $result->num_rows ? (($currentPage - 1) * $perPage + 1) : 0; ?> - <?php echo $result ? min($currentPage * $perPage, $totalProducts) : 0; ?> / <?php echo number_format($totalProducts); ?> sản phẩm</div>
                 <div class="pages">
                     <?php if ($currentPage > 1): ?>
-                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage - 1; ?>#products"><i class="fas fa-angle-left"></i></a>
+                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?><?php echo $searchParam; ?>&pg=<?php echo $currentPage - 1; ?>#products"><i class="fas fa-angle-left"></i></a>
                     <?php endif; ?>
                     <?php $startPage = max(1, min($currentPage - 2, $totalPages - 4)); $endPage = min($totalPages, $startPage + 4); ?>
                     <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
-                        <a class="p-btn <?php echo $i === $currentPage ? 'active' : ''; ?>" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $i; ?>#products"><?php echo $i; ?></a>
+                        <a class="p-btn <?php echo $i === $currentPage ? 'active' : ''; ?>" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?><?php echo $searchParam; ?>&pg=<?php echo $i; ?>#products"><?php echo $i; ?></a>
                     <?php endfor; ?>
                     <?php if ($currentPage < $totalPages): ?>
-                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?>&pg=<?php echo $currentPage + 1; ?>#products"><i class="fas fa-angle-right"></i></a>
+                        <a class="p-btn" href="admin_dashboard.php?page=products<?php echo $inactiveParam; ?><?php echo $sort !== 'newest' ? $sortParam : ''; ?><?php echo $searchParam; ?>&pg=<?php echo $currentPage + 1; ?>#products"><i class="fas fa-angle-right"></i></a>
                     <?php endif; ?>
                 </div>
             </div>

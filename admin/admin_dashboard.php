@@ -101,8 +101,11 @@ html, body { margin: 0; min-height: 100%; background: #fbf9f7; font-family: 'Be 
             <li><a class="admin-nav-link <?php echo $currentPage === 'sizes' ? 'active' : ''; ?>" href="admin_dashboard.php?page=sizes"><i class="fas fa-expand-arrows-alt"></i><span>Quản lý cỡ bánh</span></a></li>
             <li><a class="admin-nav-link <?php echo $currentPage === 'flavors' ? 'active' : ''; ?>" href="admin_dashboard.php?page=flavors"><i class="fas fa-palette"></i><span>Quản lý hương vị</span></a></li>
             <li><a class="admin-nav-link <?php echo $currentPage === 'orders' ? 'active' : ''; ?>" href="admin_dashboard.php?page=orders"><i class="fas fa-receipt"></i><span>Đơn hàng</span></a></li>
+            <li><a class="admin-nav-link <?php echo $currentPage === 'shipping' ? 'active' : ''; ?>" href="admin_dashboard.php?page=shipping"><i class="fas fa-truck"></i><span>Giao hàng</span></a></li>
             <li><a class="admin-nav-link <?php echo $currentPage === 'promotions' ? 'active' : ''; ?>" href="admin_dashboard.php?page=promotions"><i class="fas fa-tags"></i><span>Khuyến mãi</span></a></li>
             <li><a class="admin-nav-link <?php echo $currentPage === 'customers' ? 'active' : ''; ?>" href="admin_dashboard.php?page=customers"><i class="fas fa-users"></i><span>Khách hàng</span></a></li>
+            <li><a class="admin-nav-link <?php echo $currentPage === 'contact' ? 'active' : ''; ?>" href="admin_dashboard.php?page=contact"><i class="fas fa-envelope"></i><span>Liên hệ</span></a></li>
+            <li><a class="admin-nav-link <?php echo $currentPage === 'news' ? 'active' : ''; ?>" href="admin_dashboard.php?page=news"><i class="fas fa-newspaper"></i><span>Tin tức</span></a></li>
         </ul>
         <div class="admin-sidebar-bottom">
             <a class="admin-nav-link" href="logout_admin.php"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a>

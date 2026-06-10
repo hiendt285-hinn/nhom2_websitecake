@@ -121,6 +121,7 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
 
 .admin-modal-body {
     padding: 25px;
+    padding-bottom: 36px;
 }
 
 /* Form Groups */
@@ -166,7 +167,9 @@ $customers = $conn->query("SELECT id, username, full_name, email, phone, is_acti
     gap: 12px;
     justify-content: flex-end;
     margin-top: 25px;
+    margin-bottom: 4px;
     padding-top: 20px;
+    padding-bottom: 4px;
     border-top: 2px solid #f0f0f0;
 }
 
