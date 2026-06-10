@@ -1,15 +1,10 @@
 <?php
-// register.php - Trang đăng ký người dùng với CSS inline
-
-// Bắt đầu session nếu chưa có
 if (!isset($_SESSION)) {
     session_start();
 }
 
-// Kết nối database (sử dụng mysqli từ connect.php)
 require_once 'connect.php';
 
-// Xử lý form đăng ký
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = isset($_POST['username']) ? trim($_POST['username']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -28,7 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif ($password !== $confirm_password) {
         $error = "Mật khẩu xác nhận không khớp!";
     } else {
-        // Kiểm tra username đã tồn tại
         $checkStmt = $conn->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
         if ($checkStmt) {
             $checkStmt->bind_param('s', $username);
@@ -40,10 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($exists) {
                 $error = "Tên đăng nhập đã tồn tại!";
             } else {
-                // Hash mật khẩu
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                // Insert vào DB (full_name, phone, address dùng chung với edit-profile & account)
                 $insStmt = $conn->prepare("INSERT INTO users (username, email, password, full_name, phone, address, role) VALUES (?, ?, ?, ?, ?, ?, 'customer')");
                 if ($insStmt) {
                     $insStmt->bind_param('ssssss', $username, $email, $hashed_password, $full_name, $phone, $address);
@@ -63,144 +55,94 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
+
+$page_title = 'Đăng ký - Sweet Cake';
+include 'header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký - Sweet Cake</title>
-    <style>
-    /* CSS inline cho trang register, dựa trên style.css mới với tông màu pink, green, kem */
+<div class="auth-page">
+    <nav class="auth-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.php">Trang chủ</a>
+        <span>/</span>
+        <a href="account.php">Tài khoản</a>
+        <span>/</span>
+        <span>Đăng ký</span>
+    </nav>
 
-    /* Reset cơ bản */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: 'Open Sans', sans-serif; /* Sử dụng font từ file mới */
-    }
+    <div class="auth-layout">
+        <aside class="auth-side-panel">
+            <h1>Tham gia Sweet Cake</h1>
+            <p>Tạo tài khoản để đặt bánh online, lưu thông tin giao hàng và mua sắm nhanh hơn mỗi lần quay lại.</p>
+            <ul class="auth-benefits">
+                <li><i class="fas fa-user-check"></i> Lưu thông tin nhận hàng, không cần nhập lại</li>
+                <li><i class="fas fa-history"></i> Xem lịch sử đơn hàng mọi lúc</li>
+                <li><i class="fas fa-tags"></i> Nhận thông tin khuyến mãi mới nhất</li>
+            </ul>
+        </aside>
 
-    /* Tông màu chính từ file style.css mới */
-    :root {
-        --primary-color: #8B6F47; /* Màu brown chính cho nút, link */
-        --primary-hover: #A0826D; /* Hover light brown */
-        --accent-color: #F5F1E8; /* Màu beige light cho accent */
-        --accent-hover: #D4C5B5; /* Hover light brown */
-        --background-color: #F5F1E8; /* Nền kem nhạt */
-        --text-color: #333; /* Màu chữ chính */
-        --error-color: #d32f2f; /* Màu lỗi đỏ */
-        --border-color: #e0e0e0; /* Viền nhạt */
-        --white: #FFFFFF;
-    }
+        <div class="auth-card">
+            <div class="auth-card-header">
+                <h2>Đăng ký tài khoản</h2>
+                <p>Điền thông tin bên dưới để tạo tài khoản mới</p>
+            </div>
 
-    /* Body */
-    body {
-        background-color: var(--background-color);
-        color: var(--text-color);
-        line-height: 1.6;
-    }
+            <?php if (isset($error)): ?>
+                <div class="auth-alert"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
 
-    /* Form chung cho register */
-    .register-form {
-        max-width: 400px;
-        margin: 50px auto;
-        padding: 20px;
-        background-color: var(--white); /* Nền trắng cho form để nổi bật */
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
+            <form class="auth-form" action="register.php" method="POST">
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập</label>
+                    <input type="text" id="username" name="username" required autocomplete="username"
+                           value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                </div>
 
-    .register-form h2 {
-        color: var(--primary-color); /* Pink cho tiêu đề */
-        margin-bottom: 20px;
-    }
+                <div class="form-group">
+                    <label for="full_name">Họ và tên</label>
+                    <input type="text" id="full_name" name="full_name" required autocomplete="name"
+                           value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : ''; ?>">
+                </div>
 
-    .register-form label {
-        display: block;
-        text-align: left;
-        margin-bottom: 5px;
-        color: var(--text-color);
-    }
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required autocomplete="email"
+                               value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Số điện thoại</label>
+                        <input type="tel" id="phone" name="phone" required autocomplete="tel"
+                               placeholder="VD: 0901234567"
+                               value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
+                    </div>
+                </div>
 
-    .register-form input {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-    }
+                <div class="form-group">
+                    <label for="address">Địa chỉ</label>
+                    <input type="text" id="address" name="address" required autocomplete="street-address"
+                           placeholder="Số nhà, đường, quận/huyện, tỉnh/thành"
+                           value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>">
+                </div>
 
-    .register-form button {
-        width: 100%;
-        padding: 10px;
-        background-color: var(--primary-color);
-        color: var(--white);
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: background-color 0.3s;
-    }
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Mật khẩu</label>
+                        <input type="password" id="password" name="password" required autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Xác nhận mật khẩu</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password">
+                    </div>
+                </div>
 
-    .register-form button:hover {
-        background-color: var(--primary-hover);
-    }
+                <button type="submit" class="btn-submit">Đăng ký</button>
+            </form>
 
-    .error {
-        color: var(--error-color);
-        margin-bottom: 15px;
-        font-weight: bold;
-    }
-
-    /* Footer (nếu có) */
-    footer {
-        text-align: center;
-        padding: 20px;
-        background-color: var(--primary-color);
-        color: var(--white);
-        margin-top: 50px;
-    }
-    </style>
-</head>
-<body>
-
-<div class="register-form">
-    <h2>Đăng ký tài khoản</h2>
-    <?php if (isset($error)): ?>
-        <p class="error"><?php echo $error; ?></p>
-    <?php endif; ?>
-    <form action="register.php" method="POST">
-        <label for="username">Tên đăng nhập:</label>
-        <input type="text" id="username" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>" required>
-
-        <label for="full_name">Họ và tên:</label>
-        <input type="text" id="full_name" name="full_name" value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : ''; ?>" required>
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
-
-        <label for="phone">Số điện thoại:</label>
-        <input type="tel" id="phone" name="phone" value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>" placeholder="VD: 0901234567" required>
-
-        <label for="address">Địa chỉ:</label>
-        <input type="text" id="address" name="address" value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>" placeholder="Số nhà, đường, quận/huyện, tỉnh/thành" required>
-        
-        <label for="password">Mật khẩu:</label>
-        <input type="password" id="password" name="password" required>
-        
-        <label for="confirm_password">Xác nhận mật khẩu:</label>
-        <input type="password" id="confirm_password" name="confirm_password" required>
-        
-        <button type="submit">Đăng ký</button>
-    </form>
-    <p>Đã có tài khoản? <a href="login.php">Đăng nhập</a></p>
+            <p class="auth-switch">
+                Đã có tài khoản? <a href="login.php">Đăng nhập</a>
+            </p>
+        </div>
+    </div>
 </div>
 
-<footer>
-    <!-- Nội dung footer nếu cần -->
-</footer>
-</body>
-</html>
+<?php include 'footer.php'; ?>
