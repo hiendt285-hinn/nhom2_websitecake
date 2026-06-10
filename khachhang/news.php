@@ -2,7 +2,6 @@
 session_start();
 require_once 'connect.php';
 
-// Tạo bảng news nếu chưa có
 $conn->query("CREATE TABLE IF NOT EXISTS news (
   id int(11) NOT NULL AUTO_INCREMENT,
   title varchar(255) NOT NULL,
@@ -37,71 +36,61 @@ if ($res && $res->num_rows > 0) {
         $list[] = $row;
     }
 }
-?>
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tin tức - Sweet Cake</title>
-    <link rel="stylesheet" href="style.css?v=<?php echo filemtime(__DIR__ . '/style.css'); ?>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        .news-page { max-width: 1100px; margin: 30px auto; padding: 0 20px 40px; font-family: 'Open Sans', sans-serif; }
-        .news-header { text-align: center; margin-bottom: 36px; }
-        .news-title { font-size: 32px; font-weight: 800; color: var(--text-black, #333); }
-        .news-line { width: 120px; height: 4px; background: var(--main-brown, #9a7b5a); margin: 12px auto; border-radius: 4px; }
-        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-        .news-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: transform 0.2s; }
-        .news-card:hover { transform: translateY(-4px); }
-        .news-card a { text-decoration: none; color: inherit; display: block; }
-        .news-card-thumb {
-            width: 100%;
-            aspect-ratio: 16 / 10;
-            overflow: hidden;
-            background: #f0ede8;
-            display: block;
-        }
-        .news-card-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .news-card-thumb.fallback {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 2.5rem;
-        }
-        .news-card-body { padding: 16px; }
-        .news-card-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #333; line-height: 1.4; }
-        .news-card-summary { font-size: 14px; color: #666; line-height: 1.5; margin-bottom: 8px; }
-        .news-card-date { font-size: 13px; color: #888; }
-        .news-empty { text-align: center; padding: 60px 20px; color: #666; }
-        .news-pagination { display: flex; justify-content: center; gap: 8px; margin-top: 32px; flex-wrap: wrap; }
-        .news-pagination a, .news-pagination span { padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #2c2c2c; background: #f0ede8; font-weight: 600; }
-        .news-pagination a:hover { background: var(--main-brown, #9a7b5a); color: #fff; }
-        .news-pagination .current { background: var(--main-brown, #9a7b5a); color: #fff; }
-    </style>
-</head>
-<body>
-<?php include 'header.php'; ?>
 
-<div class="news-page">
-    <div class="news-header">
-        <h1 class="news-title">Tin tức</h1>
-        <div class="news-line"></div>
-        <p style="color:#666;">Cập nhật tin tức, sự kiện và ưu đãi từ Sweet Cake</p>
+$featured = !empty($list) ? array_shift($list) : null;
+
+$page_title = 'Tin tức - Sweet Cake';
+include 'header.php';
+?>
+
+<div class="content-page news-page">
+    <nav class="content-breadcrumb" aria-label="Breadcrumb">
+        <a href="index.php">Trang chủ</a>
+        <span>/</span>
+        <span>Tin tức</span>
+    </nav>
+
+    <div class="content-page-header news-hero">
+        <span class="section-kicker">Sweet Cake Journal</span>
+        <h1>Tin tức & cảm hứng bánh ngọt</h1>
+        <p>Cập nhật câu chuyện tiệm bánh, mẹo chọn bánh, sự kiện và ưu đãi mới nhất từ Sweet Cake</p>
     </div>
 
-    <?php if (empty($list)): ?>
+    <?php if (!$featured): ?>
         <div class="news-empty">
-            <i class="fas fa-newspaper" style="font-size:48px; color:#ddd;"></i>
+            <i class="fas fa-newspaper"></i>
             <p>Chưa có bài viết nào.</p>
         </div>
     <?php else: ?>
+        <article class="news-featured">
+            <a href="news-detail.php?id=<?php echo (int)$featured['id']; ?>">
+                <div class="news-featured-thumb">
+                    <?php if (!empty($featured['image'])): ?>
+                        <img src="<?php echo htmlspecialchars(strpos($featured['image'], 'http') === 0 ? $featured['image'] : '../images/' . $featured['image']); ?>" alt="<?php echo htmlspecialchars($featured['title']); ?>">
+                    <?php else: ?>
+                        <div class="news-card-thumb fallback"><i class="fas fa-image"></i></div>
+                    <?php endif; ?>
+                </div>
+                <div class="news-featured-body">
+                    <span class="news-badge"><i class="fas fa-star"></i> Bài viết mới</span>
+                    <h2><?php echo htmlspecialchars($featured['title']); ?></h2>
+                    <?php if (!empty($featured['summary'])): ?>
+                        <p><?php echo htmlspecialchars($featured['summary']); ?></p>
+                    <?php endif; ?>
+                    <div class="news-featured-meta">
+                        <span><i class="fas fa-calendar-alt"></i> <?php echo date('d/m/Y', strtotime($featured['created_at'])); ?></span>
+                        <strong>Đọc bài viết <i class="fas fa-arrow-right"></i></strong>
+                    </div>
+                </div>
+            </a>
+        </article>
+
+        <?php if (!empty($list)): ?>
+        <div class="news-section-heading">
+            <h2>Bài viết mới nhất</h2>
+            <p>Những cập nhật và gợi ý hữu ích dành cho bạn</p>
+        </div>
+
         <div class="news-grid">
             <?php foreach ($list as $item): ?>
             <article class="news-card">
@@ -124,9 +113,10 @@ if ($res && $res->num_rows > 0) {
             </article>
             <?php endforeach; ?>
         </div>
+        <?php endif; ?>
 
         <?php if ($totalPages > 1): ?>
-        <nav class="news-pagination">
+        <nav class="content-pagination" aria-label="Phân trang tin tức">
             <?php if ($page > 1): ?>
                 <a href="news.php?page=<?php echo $page - 1; ?>">&laquo; Trước</a>
             <?php endif; ?>
@@ -146,5 +136,3 @@ if ($res && $res->num_rows > 0) {
 </div>
 
 <?php include 'footer.php'; ?>
-</body>
-</html>
