@@ -1,8 +1,26 @@
 <?php
 session_start();
 include 'connect.php';
+
+$page_title = 'Sweet Cake - Bánh ngọt tươi mỗi ngày';
 include 'header.php';
 
+$category_icons = [
+    'Bánh kem' => 'fa-birthday-cake',
+    'Bánh ngọt' => 'fa-cookie-bite',
+    'Bánh mousse' => 'fa-ice-cream',
+    'Bánh hộp' => 'fa-box-open',
+    'Bánh sinh nhật' => 'fa-gift',
+    'default' => 'fa-cake-candles',
+];
+
+$categories_quick = [];
+$cat_result = $conn->query("SELECT id, name FROM categories ORDER BY name LIMIT 8");
+if ($cat_result) {
+    while ($row = $cat_result->fetch_assoc()) {
+        $categories_quick[] = $row;
+    }
+}
 
 function getProductsByCategory($conn, $category_id) {
     // Chỉ lấy các trường cần thiết cho card sản phẩm
@@ -37,22 +55,49 @@ $hoatoc_products = getProductsByCategory($conn, $hoatoc_id);
 $mousse_products = getProductsByCategory($conn, $mousse_id);
 
 ?>
-<div class="content-wrapper page-container"> 
-  
+<div class="content-wrapper page-container">
+
 <section class="hero">
   <div class="hero-content">
+    <span class="hero-badge"><i class="fas fa-star"></i> Bánh tươi mỗi ngày</span>
     <h1>Mỗi miếng bánh, một câu chuyện hạnh phúc</h1>
-    <p>BST Bánh Sinh Nhật</p>
-    <a href="products.php" class="btn">Xem BST ngay</a>
+    <p>Khám phá bộ sưu tập bánh kem, mousse và bánh hộp cao cấp — đặt online nhanh chóng, giao tận nơi trong vòng 2 giờ tại Hà Nội.</p>
+    <div class="hero-actions">
+      <a href="products.php" class="btn-primary"><i class="fas fa-shopping-bag"></i> Mua ngay</a>
+      <a href="promotion.php" class="btn-secondary">Xem khuyến mãi</a>
+    </div>
   </div>
   <div class="hero-imgs">
-    <img src="../images/AE2CDC01-6F2C-4BE5-AF72-3C24605224B9.png" alt="Bánh">
+    <img src="../images/AE2CDC01-6F2C-4BE5-AF72-3C24605224B9.png" alt="Bánh Sweet Cake">
   </div>
 </section>
 
+<?php if (!empty($categories_quick)): ?>
+<section class="category-strip">
+  <h2 class="section-heading">Danh mục sản phẩm</h2>
+  <p class="section-subheading">Chọn loại bánh bạn yêu thích</p>
+  <div class="category-grid">
+    <?php foreach ($categories_quick as $cat):
+        $icon = $category_icons['default'];
+        foreach ($category_icons as $key => $fa) {
+            if ($key !== 'default' && stripos($cat['name'], $key) !== false) {
+                $icon = $fa;
+                break;
+            }
+        }
+    ?>
+    <a href="products.php?category=<?php echo (int)$cat['id']; ?>" class="category-card">
+      <span class="category-card-icon"><i class="fas <?php echo $icon; ?>"></i></span>
+      <span><?php echo htmlspecialchars($cat['name']); ?></span>
+    </a>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; ?>
+
 <section class="section-featured product-category-block">
     <div class="product-category-inner">
-        <h2 class="product-category-title">| Sản phẩm nổi bật</h2>
+        <h2 class="product-category-title">Sản phẩm nổi bật</h2>
         <p class="section-featured-desc">Những món bánh được yêu thích nhất tại Sweet Cake</p>
         <div class="products-grid">
             <?php if ($featured_products && $featured_products->num_rows > 0): ?>
@@ -68,7 +113,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
                             </a>
                         </h3>
                         <div class="product-price"><?php echo number_format($row['price'], 0, ',', '.'); ?>₫</div>
-                        <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
+                        <div class="delivery-time"><i class="fas fa-truck"></i> Giao nhanh trong <span>2 giờ</span></div>
                         <div class="product-actions">
                             <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
@@ -125,7 +170,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
 
     <div class="product-category-block">
         <div class="product-category-inner">
-            <h2 class="product-category-title">| Bánh hộp thiếc</h2>
+            <h2 class="product-category-title">Bánh hộp thiếc</h2>
             <div class="products-grid">
                 <?php if ($box_products && $box_products->num_rows > 0): ?>
                     <?php while($row = $box_products->fetch_assoc()): ?>
@@ -140,7 +185,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
                                 </a>
                             </h3>
                             <div class="product-price"><?php echo number_format($row['price'], 0, ',', '.') ?>₫</div>
-                            <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
+                            <div class="delivery-time"><i class="fas fa-truck"></i> Giao nhanh trong <span>2 giờ</span></div>
                             <div class="product-actions">
                                 <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</a>
                             </div>
@@ -171,7 +216,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
 
 <section class="product-category-block">
     <div class="product-category-inner">
-        <h2 class="product-category-title">| Bánh kem hỏa tốc 1H</h2>
+        <h2 class="product-category-title">Bánh kem hỏa tốc 1H</h2>
         <div class="products-grid">
             <?php if ($hoatoc_products && $hoatoc_products->num_rows > 0): ?>
                 <?php while($row = $hoatoc_products->fetch_assoc()): ?>
@@ -186,7 +231,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
                             </a>
                         </h3>
                         <div class="product-price"><?php echo number_format($row['price'], 0, ',', '.') ?>₫</div>
-                        <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
+                        <div class="delivery-time"><i class="fas fa-truck"></i> Giao nhanh trong <span>2 giờ</span></div>
                         <div class="product-actions">
                             <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
@@ -199,28 +244,10 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
         </div>
     </div>
 </section>
-<section class="mousse-section">
-    <div class="mousse-container">
-    <div class="mousse-images">
-      <div class="green-circle"></div>
-      <img src="../images/z7140806120150_8c57454f6c66ebc70683090fb1ada3d2.jpg" alt="Bánh mousse vàng" class="cake cake3">
-    </div>
-
-    <div class="mousse-content">
-      <h2>
-        <span class="title-green">Bộ sưu tập bánh lạnh</span><br>
-        <span class="title-orange">Mousse</span>
-      </h2>
-      <p>
-        Sweet cake ra mắt bộ sưu tập bánh mousse ngọt mềm, thơm lừng vị hoa quả/cà phê...
-      </p>
-    </div>
-  </div>
-</section>
 
 <section class="product-category-block">
     <div class="product-category-inner">
-        <h2 class="product-category-title">| Bánh lạnh Mousse</h2>
+        <h2 class="product-category-title">Bánh lạnh Mousse</h2>
         <div class="products-grid">
             <?php if ($mousse_products && $mousse_products->num_rows > 0): ?>
                 <?php while($row = $mousse_products->fetch_assoc()): ?>
@@ -235,7 +262,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
                             </a>
                         </h3>
                         <div class="product-price"><?php echo number_format($row['price'], 0, ',', '.') ?>₫</div>
-                        <div class="delivery-time">Giao được từ <span>15 giờ 30 hôm nay</span></div>
+                        <div class="delivery-time"><i class="fas fa-truck"></i> Giao nhanh trong <span>2 giờ</span></div>
                         <div class="product-actions">
                             <a href="product-detail.php?id=<?php echo $row['id']; ?>" class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</a>
                         </div>
@@ -285,21 +312,18 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
 
   <div class="fruit-text">
     <p>
-      Nếu trước đây Sweet chỉ có nhân xoài tươi cho cả nhà lựa chọn, thì hiện tại Sweet đã bổ sung thêm các loại nhân hoa quả khác, 
-      đặc biệt phải kể: <strong>NHÂN XOÀI DỨA</strong> – Sự kết hợp hoàn hảo giữa vị chua của dứa cân bằng với vị ngọt của xoài 
-      cùng hương thơm tươi mát, dịu nhẹ
-      <br>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      <br>Chỉ cần thêm một chút phí nho nhỏ tùy theo size bánh
-      <br>Size mini: 10k/60g
-      <br>Size nhỏ: 25k/150g
-      <br>Size vừa: 40k/240g
-      <br>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      <br><em>Lưu ý:</em> Các mẫu bánh Mousse không được áp dụng thêm nhân hoa quả, 
-      cả nhà nhắn Sweet để được tư vấn các mẫu bánh nha 💛
+      Sweet Cake bổ sung thêm các loại nhân hoa quả tươi, đặc biệt <strong>Nhân Xoài Dứa</strong> — 
+      sự kết hợp hoàn hảo giữa vị chua của dứa và vị ngọt của xoài cùng hương thơm tươi mát.
     </p>
+    <ul class="fruit-pricing">
+      <li>Size mini: 10.000₫ / 60g</li>
+      <li>Size nhỏ: 25.000₫ / 150g</li>
+      <li>Size vừa: 40.000₫ / 240g</li>
+    </ul>
+    <p><em>Lưu ý:</em> Các mẫu bánh Mousse không áp dụng thêm nhân hoa quả. Liên hệ Sweet Cake để được tư vấn.</p>
   </div>
 
-  <button class="btn-order">ĐẶT BÁNH NGAY</button>
+  <a href="products.php" class="btn-order">Đặt bánh ngay</a>
 </section>
 
 
@@ -361,7 +385,7 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
     </div>
   </div>
 
-  <button class="order-btn">INBOX ĐẶT BÁNH</button>
+  <a href="contact.php" class="order-btn btn-primary">Liên hệ đặt bánh</a>
 </section>
 
 <section class="policy-section">
@@ -409,11 +433,14 @@ $mousse_products = getProductsByCategory($conn, $mousse_id);
   </div>
 </section>
 
-</div> 
+<section class="cta-banner">
+  <h2>Sẵn sàng đặt bánh cho dịp đặc biệt?</h2>
+  <p>Chọn sản phẩm yêu thích, thêm vào giỏ và thanh toán chỉ vài bước — Sweet Cake giao tận nơi cho bạn.</p>
+  <a href="products.php" class="btn-secondary"><i class="fas fa-arrow-right"></i> Bắt đầu mua sắm</a>
+</section>
 
-<?php
+</div>
 
-?>
 <script>
     function addToCart(productId) { 
         window.location.href = 'product-detail.php?id=' + productId;

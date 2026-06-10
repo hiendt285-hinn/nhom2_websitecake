@@ -1,48 +1,46 @@
 <?php
+$js_file = __DIR__ . '/assets/main.js';
+$js_version = file_exists($js_file) ? filemtime($js_file) : time();
 ?>
-<footer class="site-footer" >
-
+<footer class="site-footer">
     <div class="footer-container">
         <div class="footer-column footer-brand">
-            <h3 class="footer-logo">Sweet Cake</h3> 
+            <h3 class="footer-logo">Sweet Cake</h3>
             <p>Nơi hương vị ngọt ngào bắt đầu. Đặt bánh nhanh, giao hàng siêu tốc trên toàn quốc.</p>
             <div class="footer-socials">
-                <a href="https://www.facebook.com/savor.vn/" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="https://www.tiktok.com/@savor.vn" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                <a href="https://www.facebook.com/savor.vn/" aria-label="Facebook" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://www.tiktok.com/@savor.vn" aria-label="TikTok" target="_blank" rel="noopener"><i class="fab fa-tiktok"></i></a>
             </div>
-            
         </div>
 
         <div class="footer-column">
             <h3>Liên hệ & Hỗ trợ</h3>
-            <p><i class="fas fa-phone-alt"></i> Hotline tư vấn: <a href="tel:1900779907">1900 779 907</a></p>
-            <p><i class="fas fa-headset"></i> Hotline khiếu nại: <a href="tel:0364907773">0364 907 773</a></p>
-            <p><i class="fas fa-envelope"></i> Email: <a href="mailto:support@sweetcake.vn">support@sweetcake.vn</a></p>
-            <p><i class="fas fa-map-marker-alt"></i> Hệ thống: <a href="index.php#store">Xem hệ thống cửa hàng</a></p>
+            <p><i class="fas fa-phone-alt"></i> Hotline: <a href="tel:1900636302">1900 636 302</a></p>
+            <p><i class="fas fa-envelope"></i> Email: <a href="mailto:sweetcake05@gmail.com">sweetcake05@gmail.com</a></p>
+            <p><i class="fas fa-map-marker-alt"></i> Hệ thống: <a href="index.php#store">Xem cửa hàng</a></p>
         </div>
 
         <div class="footer-column footer-links">
             <h3>Đường dẫn nhanh</h3>
             <ul>
                 <li><a href="products.php">Sản phẩm</a></li>
+                <li><a href="promotion.php">Khuyến mãi</a></li>
                 <li><a href="policy.php">Chính sách đổi trả</a></li>
                 <li><a href="contact.php">Liên hệ</a></li>
             </ul>
         </div>
-        
+
         <div class="footer-column footer-certification">
             <h3>Chứng nhận</h3>
             <img src="../images/bo-cong-thuong.webp" alt="Đã thông báo Bộ Công Thương" class="gov-logo">
         </div>
     </div>
-    
+
     <div class="footer-bottom">
-        <p>&copy; <?php echo date("Y"); ?> Sweet Cake. Bảo lưu mọi quyền. | Thiết kế bởi Sweet Cake.</p>
+        <p>&copy; <?php echo date('Y'); ?> Sweet Cake. Bảo lưu mọi quyền.</p>
     </div>
 </footer>
 
-
-<script src="assets/script.js"></script>
-
+<script src="assets/main.js?v=<?php echo $js_version; ?>"></script>
 </body>
 </html>
